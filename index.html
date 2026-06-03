@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>烤漆部粉體系統</title>
+    <style>
+        :root {
+            --primary: #4A90E2; --danger: #E74C3C; --success: #2ECC71; --warning: #F39C12;
+            --bg-color: #F4F7F6; --card-bg: #FFFFFF; --text-main: #333333;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); }
+        
+        /* Typography & Header */
+        header { background: linear-gradient(135deg, #4A90E2, #357ABD); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { font-size: 26px; margin: 0; font-weight: bold; letter-spacing: 2px; }
+        
+        /* Layout & Cards */
+        .container { padding: 15px; max-width: 800px; margin: 0 auto; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-red-bold { color: var(--danger); font-weight: bold; }
+        .text-18 { font-size: 18px; }
+        .red-bg-white-text { background-color: var(--danger); color: white; padding: 2px 6px; border-radius: 4px; }
+        
+        /* Menu */
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        @media(min-width: 600px) { .menu-grid { grid-template-columns: 1fr 1fr; } }
+        .menu-btn { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 15px; font-size: 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .menu-btn:hover { background: var(--primary); color: white; }
+        .back-btn { background: #95a5a6; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 15px; }
+        
+        /* Forms & Inputs */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; background-color: #fcfcfc; }
+        input:read-only { background-color: #eee; color: #777; }
+        .btn { padding: 12px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 10px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        
+        /* File Import UI */
+        .import-group { border: 2px dashed #ccc; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; background: #fafafa; }
+        .import-group input[type="file"] { display: none; }
+        .import-label { display: inline-block; background: #6c757d; color: white; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .file-name-display { font-size: 13px; color: #666; margin-top: 5px; display: block; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
+        .modal input { text-align: center; letter-spacing: 5px; margin-bottom: 15px; }
+        
+        /* Data Tables */
+        .table-responsive { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f4f4f4; }
+        
+        /* Inline actions style */
+        .btn-inline-edit { background-color: var(--warning); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; margin-right: 4px; }
+        .btn-inline-edit:hover { background-color: #d35400; }
+        .btn-inline-del { background-color: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-inline-del:hover { background-color: #c0392b; }
+
+        /* Circular Chart */
+        .chart-container { display: flex; justify-content: center; margin: 20px 0; flex-direction: column; align-items: center; }
+        .circle-chart { width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(var(--primary) 0%, #eee 0%); display: flex; justify-content: center; align-items: center; position: relative; }
+        .circle-chart::after { content: ""; position: absolute; width: 120px; height: 120px; background: white; border-radius: 50%; }
+        .chart-value { position: relative; z-index: 1; font-size: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>烤漆部粉體系統</h1>
+</header>
+
+<div class="container" id="main-container">
+    <div id="home-view" class="menu-grid">
+        <button class="menu-btn" onclick="requestAuth(1)">1. 烤漆粉號清冊</button>
+        <button class="menu-btn" onclick="requestAuth(2)">2. 庫存監控</button>
+        <button class="menu-btn" onclick="requestAuth(3)">3. 採購入庫</button>
+        <button class="menu-btn" onclick="requestAuth(4)">4. 用量紀錄</button>
+        <button class="menu-btn" onclick="requestAuth(5, true)">5. 用量紀錄查詢</button>
+        <button class="menu-btn" onclick="requestAuth(6, true)">6. 庫存查詢</button>
+        <button class="menu-btn" onclick="requestAuth(7, true)">7. 廢粉統計</button>
+        <button class="menu-btn" onclick="requestAuth(8)">8. 系統數據清理</button>
+    </div>
+
+    <div id="page-view" class="hidden">
+        <button class="back-btn" onclick="goHome()">⬅ 返回首頁</button>
+        <h2 id="page-title" class="text-center" style="margin-top:0;"></h2>
+        <div id="page-content"></div>
+    </div>
+</div>
+
+<div id="auth-modal" class="modal-overlay hidden">
+    <div class="modal">
+        <h3>系統權限驗證</h3>
+        <p>請輸入管理密碼以繼續</p>
+        <input type="password" id="auth-pwd" placeholder="密碼">
+        <button class="btn btn-primary" onclick="verifyPwd()">確認進入</button>
+        <button id="auth-skip-btn" class="btn btn-success hidden" onclick="skipPwd()">忽略 (僅檢視)</button>
+        <button class="btn" style="background:#eee" onclick="closeAuth()">取消</button>
+    </div>
+</div>
+
+<script>
+/* ================= DB (LocalStorage) ================= */
+const DB = {
+    get: (key) => JSON.parse(localStorage.getItem(key)) || [],
+    set: (key, data) => localStorage.setItem(key, JSON.stringify(data)),
+    clear: (key) => localStorage.removeItem(key)
+};
+
+/* ================= 狀態管理 ================= */
+let currentViewId = null;
+let isReadOnly = false;
+let currentTargetPage = null;
+const SYSTEM_PWD = 'M0282'; // 預設密碼
+let isShowHiddenPowders = false;
+
+// 紀錄目前正在編輯的流水帳索引 (null 代表新增模式)
+let p3_editIdx = null;
+let p4_editIdx = null;
+let p7_editIdx = null;
+
+/* ================= 密碼驗證邏輯 ================= */
+function requestAuth(pageId, allowSkip = false) {
+    currentTargetPage = pageId;
+    document.getElementById('auth-pwd').value = '';
+    document.getElementById('auth-modal').classList.remove('hidden');
+    
+    const skipBtn = document.getElementById('auth-skip-btn');
+    if (allowSkip) {
+        skipBtn.classList.remove('hidden');
+    } else {
+        skipBtn.classList.add('hidden');
+    }
+}
+
+document.getElementById('auth-pwd').addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') verifyPwd();
+});
+
+function verifyPwd() {
+    const pwd = document.getElementById('auth-pwd').value;
+    if (pwd === SYSTEM_PWD) {
+        isReadOnly = false;
+        document.getElementById('auth-modal').classList.add('hidden');
+        renderPage(currentTargetPage);
+    } else {
+        alert("密碼錯誤！請重新輸入。");
+        document.getElementById('auth-pwd').value = ''; 
+    }
+}
+
+function skipPwd() {
+    isReadOnly = true;
+    document.getElementById('auth-modal').classList.add('hidden');
+    renderPage(currentTargetPage);
+}
+
+function closeAuth() {
+    document.getElementById('auth-modal').classList.add('hidden');
+}
+
+function goHome() {
+    document.getElementById('page-view').classList.add('hidden');
+    document.getElementById('home-view').classList.remove('hidden');
+    currentTargetPage = null;
+}
+
+/* ================= CSV 處理工具 ================= */
+function exportCSV(filename, rows) {
+    let processRow = (row) => row.map(v => `"${(v||'').toString().replace(/"/g, '""')}"`).join(',');
+    let csvFile = '\uFEFF' + rows.map(processRow).join('\n'); 
+    let blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename + ".csv";
+    link.click();
+}
+
+function parseCSV(text) {
+    let lines = text.split(/\r\n|\n/);
+    return lines.map(line => {
+        if (!line.trim()) return null;
+        return line.split(',').map(cell => cell.replace(/^"(.*)"$/, '$1').trim());
+    }).filter(row => row !== null);
+}
+
+function handleFileInputChange(inputEl, displayId) {
+    if(inputEl.files && inputEl.files[0]) {
+        document.getElementById(displayId).innerText = "已選擇檔案: " + inputEl.files[0].name;
+    }
+}
+
+/* ================= 頁面渲染邏輯 ================= */
+function renderPage(pageId) {
+    document.getElementById('home-view').classList.add('hidden');
+    document.getElementById('page-view').classList.remove('hidden');
+    const content = document.getElementById('page-content');
+    content.innerHTML = '';
+    
+    // 切換功能時重置編輯狀態
+    p3_editIdx = null;
+    p4_editIdx = null;
+    p7_editIdx = null;
+
+    switch(pageId) {
+        case 1: renderPage1(content); break;
+        case 2: renderPage2(content); break;
+        case 3: renderPage3(content); break;
+        case 4: renderPage4(content); break;
+        case 5: renderPage5(content); break;
+        case 6: renderPage6(content); break;
+        case 7: renderPage7(content); break;
+        case 8: renderPage8(content); break;
+    }
+}
+
+/* --- 1. 烤漆粉號清冊 --- */
+function renderPage1(container) {
+    document.getElementById('page-title').innerText = "1. 烤漆粉號清冊";
+    let html = `
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <div class="form-group"><label>粉號</label><input type="text" id="p1-no"></div>
+            <div class="form-group"><label>代號</label><input type="text" id="p1-code"></div>
+            <div class="form-group"><label>色系</label><input type="text" id="p1-color"></div>
+            <div class="form-group"><label>淨重 (kg)</label>
+                <select id="p1-weight"><option value="20">20</option><option value="25">25</option></select>
+            </div>
+            <div class="form-group"><label>廠商</label>
+                <select id="p1-vendor">
+                    <option value="老虎">老虎</option><option value="國麗">國麗</option><option value="國邦">國邦</option>
+                    <option value="台粉">台粉</option><option value="長誠">長誠</option><option value="高頻">高頻</option><option value="南寶">南寶</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="p1_add()">新增紀錄</button>
+        </div>
+
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <h3>匯入清冊 CSV</h3>
+            <div class="import-group">
+                <label class="import-label" for="p1-csv-file">選擇檔案</label>
+                <input type="file" id="p1-csv-file" accept=".csv" onchange="handleFileInputChange(this, 'p1-file-name')">
+                <span class="file-name-display" id="p1-file-name">尚未選擇任何檔案</span>
+            </div>
+            <button class="btn btn-success" onclick="p1_import()">執行匯入紀錄 CSV</button>
+        </div>
+
+        <div class="card">
+            <button class="btn btn-success" onclick="p1_toggleHidden()">${isShowHiddenPowders ? '顯示全部' : '可隱藏已下架紀錄'}</button>
+            <button class="btn" style="background:#f1c40f; color:#fff;" onclick="p1_export()">匯出紀錄 CSV</button>
+            <div class="table-responsive" id="p1-table"></div>
+        </div>
+    `;
+    container.innerHTML = html;
+    p1_renderTable();
+}
+
+function p1_add() {
+    let powders = DB.get('powders');
+    let no = document.getElementById('p1-no').value;
+    if(!no) return alert('請填寫粉號');
+    if(powders.find(p => p.no === no)) return alert('粉號已存在');
+    
+    powders.push({
+        no: no, code: document.getElementById('p1-code').value, color: document.getElementById('p1-color').value,
+        weight: parseInt(document.getElementById('p1-weight').value), vendor: document.getElementById('p1-vendor').value,
+        hidden: false
+    });
+    DB.set('powders', powders);
+    alert('新增成功');
+    renderPage(1);
+}
+
+function p1_import() {
+    let fileInput = document.getElementById('p1-csv-file');
+    if(!fileInput.files.length) return alert('請先選擇要匯入的 CSV 檔案！');
+    
+    let file = fileInput.files[0];
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        let rows = parseCSV(e.target.result);
+        if(rows.length <= 1) return alert('檔案無有效數據或格式不符');
+        
+        let powders = DB.get('powders');
+        let successCount = 0;
+        
+        for(let i = 1; i < rows.length; i++) {
+            let row = rows[i];
+            if(row.length < 5) continue;
+            
+            let no = row[0];
+            let code = row[1];
+            let color = row[2];
+            let weight = parseInt(row[3]) || 25;
+            let vendor = row[4];
+            let isHidden = row[5] === '是' ? true : false;
+            
+            if(!no) continue;
+            
+            let existingIdx = powders.findIndex(p => p.no === no);
+            if(existingIdx > -1) {
+                powders[existingIdx] = { no, code, color, weight, vendor, hidden: isHidden };
+            } else {
+                powders.push({ no, code, color, weight, vendor, hidden: isHidden });
+            }
+            successCount++;
+        }
+        DB.set('powders', powders);
+        alert(`匯入完成！成功處理 ${successCount} 筆資料。`);
+        renderPage(1);
+    };
+    reader.readAsText(file);
+}
+
+function p1_delete(no) {
+    if(confirm('確定刪除或下架此粉號？')) {
+        let powders = DB.get('powders');
+        let idx = powders.findIndex(p => p.no === no);
+        if(idx > -1) { powders[idx].hidden = true; DB.set('powders', powders); p1_renderTable(); }
+    }
+}
+
+function p1_toggleHidden() { isShowHiddenPowders = !isShowHiddenPowders; p1_renderTable(); }
+
+function p1_renderTable() {
+    let powders = DB.get('powders');
+    if(!isShowHiddenPowders) powders = powders.filter(p => !p.hidden);
+    
+    let html = `<table><tr><th>粉號</th><th>代號</th><th>色系</th><th>淨重</th><th>廠商</th>${!isReadOnly?'<th>操作</th>':''}</tr>`;
+    powders.forEach(p => {
+        html += `<tr><td>${p.no}</td><td>${p.code}</td><td>${p.color}</td><td>${p.weight}</td><td>${p.vendor}</td>
+        ${!isReadOnly ? `<td><button onclick="p1_delete('${p.no}')">下架</button></td>` : ''}</tr>`;
+    });
+    html += `</table>`;
+    document.getElementById('p1-table').innerHTML = html;
+}
+
+function p1_export() {
+    let data = [['粉號','代號','色系','淨重','廠商','是否下架']];
+    DB.get('powders').forEach(p => data.push([p.no, p.code, p.color, p.weight, p.vendor, p.hidden?'是':'否']));
+    exportCSV('烤漆粉號清冊', data);
+}
+
+
+/* --- 2. 庫存監控 --- */
+function renderPage2(container) {
+    document.getElementById('page-title').innerText = "2. 庫存監控";
+    let powders = DB.get('powders').filter(p=>!p.hidden);
+    let options = '<option value="">請選擇...</option>' + powders.map(p => `<option value="${p.no}">${p.no}</option>`).join('');
+    
+    let html = `
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <div class="form-group"><label>粉號 (盤點庫存)</label><select id="p2-no" onchange="p2_onSelectPowder()">${options}</select></div>
+            <div class="form-group"><label>代號</label><input type="text" id="p2-code" readonly></div>
+            <div class="form-group"><label>淨重</label><input type="number" id="p2-weight" readonly></div>
+            <div class="form-group"><label>箱數 (手動盤點)</label><input type="number" id="p2-boxes" value="0" oninput="p2_calc()"></div>
+            <div class="form-group"><label>散粉 (手動盤點 kg)</label><input type="number" step="0.1" id="p2-loose" value="0" oninput="p2_calc()"></div>
+            <div class="form-group"><label>總數量 (kg)</label><input type="number" step="0.1" id="p2-total" readonly></div>
+            <button class="btn btn-primary" onclick="p2_update()">更新盤點寫入庫存</button>
+        </div>
+
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <h3>匯入庫存監控 CSV (直接覆蓋庫存)</h3>
+            <div class="import-group">
+                <label class="import-label" for="p2-csv-file">選擇檔案</label>
+                <input type="file" id="p2-csv-file" accept=".csv" onchange="handleFileInputChange(this, 'p2-file-name')">
+                <span class="file-name-display" id="p2-file-name">尚未選擇任何檔案</span>
+            </div>
+            <button class="btn btn-success" onclick="p2_import()">執行匯入紀錄 CSV</button>
+        </div>
+
+        <div class="card">
+            <button class="btn" style="background:#f1c40f; color:#fff;" onclick="p2_export()">匯出庫存 CSV</button>
+            <div class="table-responsive" id="p2-table"></div>
+        </div>
+    `;
+    container.innerHTML = html;
+    p2_renderTable();
+}
+
+function p2_onSelectPowder() {
+    let no = document.getElementById('p2-no').value;
+    let p = DB.get('powders').find(x => x.no === no);
+    if(p) {
+        document.getElementById('p2-code').value = p.code;
+        document.getElementById('p2-weight').value = p.weight;
+        let inv = DB.get('inventory').find(x => x.no === no) || {boxes:0, loose:0};
+        document.getElementById('p2-boxes').value = inv.boxes;
+        document.getElementById('p2-loose').value = inv.loose;
+        p2_calc();
+    }
+}
+
+ function p2_calc() {
+    let w = parseFloat(document.getElementById('p2-weight').value || 0);
+    let b = parseFloat(document.getElementById('p2-boxes').value || 0);
+    let l = parseFloat(document.getElementById('p2-loose').value || 0);
+    document.getElementById('p2-total').value = (w * b + l).toFixed(2);
+}
+
+function p2_update() {
+    let no = document.getElementById('p2-no').value;
+    if(!no) return alert('請選擇粉號');
+    let inventory = DB.get('inventory');
+    let idx = inventory.findIndex(x => x.no === no);
+    let data = {
+        no: no, 
+        boxes: parseFloat(document.getElementById('p2-boxes').value||0), 
+        loose: parseFloat(document.getElementById('p2-loose').value||0)
+    };
+    if(idx > -1) inventory[idx] = data; else inventory.push(data);
+    DB.set('inventory', inventory);
+    alert('庫存更新成功');
+    p2_renderTable();
+}
+
+function p2_import() {
+    let fileInput = document.getElementById('p2-csv-file');
+    if(!fileInput.files.length) return alert('請先選擇要匯入的 CSV 檔案！');
+    
+    let file = fileInput.files[0];
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        let rows = parseCSV(e.target.result);
+        if(rows.length <= 1) return alert('檔案無有效數據或格式不符');
+        
+        let inventory = DB.get('inventory');
+        let successCount = 0;
+        
+        for(let i = 1; i < rows.length; i++) {
+            let row = rows[i];
+            if(row.length < 3) continue;
+            
+            let no = row[0];
+            let boxes = parseFloat(row[1]) || 0;
+            let loose = parseFloat(row[2]) || 0;
+            
+            if(!no) continue;
+            
+            let existingIdx = inventory.findIndex(x => x.no === no);
+            if(existingIdx > -1) {
+                inventory[existingIdx] = { no, boxes, loose };
+            } else {
+                inventory.push({ no, boxes, loose });
+            }
+            successCount++;
+        }
+        DB.set('inventory', inventory);
+        alert(`庫存更新完成！成功處理 ${successCount} 筆資料。`);
+        renderPage(2);
+    };
+    reader.readAsText(file);
+}
+
+function p2_renderTable() {
+    let inventory = DB.get('inventory');
+    let powders = DB.get('powders');
+    let html = `<table><tr><th>粉號</th><th>箱數</th><th>散粉(kg)</th><th>總數量(kg)</th></tr>`;
+    
+    inventory.forEach(inv => {
+        let p = powders.find(x => x.no === inv.no);
+        if(!p) return;
+        let total = (p.weight * inv.boxes) + inv.loose;
+        let totalClass = total < 50 ? 'red-bg-white-text' : '';
+        html += `<tr><td>${inv.no}</td><td>${inv.boxes}</td><td>${inv.loose}</td><td class="${totalClass}">${total.toFixed(2)}</td></tr>`;
+    });
+    html += `</table><p style="font-size:12px; color:#777;">*註：總重量低於 50kg 會以紅底白字標示(安全庫存)</p>`;
+    document.getElementById('p2-table').innerHTML = html;
+}
+
+function p2_export() {
+    let data = [['粉號','箱數','散粉(kg)','總數量(kg)']];
+    let inventory = DB.get('inventory');
+    let powders = DB.get('powders');
+    inventory.forEach(inv => {
+        let p = powders.find(x => x.no === inv.no);
+        if(p) data.push([inv.no, inv.boxes, inv.loose, ((p.weight * inv.boxes) + inv.loose).toFixed(2)]);
+    });
+    exportCSV('庫存監控', data);
+}
+
+
+/* --- 3. 採購入庫 --- */
+function renderPage3(container) {
+    document.getElementById('page-title').innerText = "3. 採購入庫";
+    let powders = DB.get('powders').filter(p=>!p.hidden);
+    let options = '<option value="">請選擇...</option>' + powders.map(p => `<option value="${p.no}">${p.no}</option>`).join('');
+    let today = new Date().toISOString().split('T')[0];
+
+    let html = `
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <div class="form-group"><label>日期</label><input type="date" id="p3-date" value="${today}"></div>
+            <div class="form-group"><label>粉號</label><select id="p3-no" onchange="p3_onSelect()">${options}</select></div>
+            <div class="form-group"><label>代號</label><input type="text" id="p3-code" readonly></div>
+            <div class="form-group"><label>色系</label><input type="text" id="p3-color" readonly></div>
+            <div class="form-group"><label>淨重 (kg)</label><input type="number" id="p3-weight" readonly></div>
+            <div class="form-group"><label>入庫箱數</label><input type="number" id="p3-boxes" value="0" oninput="p3_calc()"></div>
+            <div class="form-group"><label>入庫散粉 (kg)</label><input type="number" step="0.1" id="p3-loose" value="0" oninput="p3_calc()"></div>
+            <div class="form-group"><label>入庫總數 (kg)</label><input type="number" step="0.1" id="p3-total" readonly></div>
+            
+            <div id="p3-btn-container">
+                <button class="btn btn-primary" onclick="p3_save()">新增入庫紀錄</button>
+            </div>
+        </div>
+
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <h3>匯入採購入庫流水帳 CSV (追加紀錄)</h3>
+            <div class="import-group">
+                <label class="import-label" for="p3-csv-file">選擇檔案</label>
+                <input type="file" id="p3-csv-file" accept=".csv" onchange="handleFileInputChange(this, 'p3-file-name')">
+                <span class="file-name-display" id="p3-file-name">尚未選擇任何檔案</span>
+            </div>
+            <button class="btn btn-success" onclick="p3_import()">執行匯入紀錄 CSV</button>
+        </div>
+
+        <div class="card">
+            <h3>入庫流水帳</h3>
+            <button class="btn" style="background:#f1c40f; color:#fff;" onclick="p3_export()">匯出流水帳 CSV</button>
+            <div class="table-responsive" id="p3-table"></div>
+        </div>
+    `;
+    container.innerHTML = html;
+    p3_renderTable();
+}
+
+function p3_onSelect() {
+    let no = document.getElementById('p3-no').value;
+    let p = DB.get('powders').find(x => x.no === no);
+    if(p) {
+        document.getElementById('p3-code').value = p.code;
+        document.getElementById('p3-color').value = p.color;
+        document.getElementById('p3-weight').value = p.weight;
+        p3_calc();
+    }
+}
+function p3_calc() {
+    let w = parseFloat(document.getElementById('p3-weight').value || 0);
+    let b = parseFloat(document.getElementById('p3-boxes').value || 0);
+    let l = parseFloat(document.getElementById('p3-loose').value || 0);
+    document.getElementById('p3-total').value = (w * b + l).toFixed(2);
+}
+
+function p3_save() {
+    let no = document.getElementById('p3-no').value;
+    if(!no) return alert('請選擇粉號');
+    
+    let date = document.getElementById('p3-date').value;
+    let b = parseFloat(document.getElementById('p3-boxes').value||0);
+    let l = parseFloat(document.getElementById('p3-loose').value||0);
+    let total = parseFloat(document.getElementById('p3-total').value||0);
+
+    let logs = DB.get('inboundLogs');
+    let inventory = DB.get('inventory');
+
+    if (p3_editIdx !== null) {
+        // 【修改模式】先反回沖：扣除舊紀錄的庫存
+        let oldLog = logs[p3_editIdx];
+        let oldInv = inventory.find(x => x.no === oldLog.no);
+        if(oldInv) {
+            oldInv.boxes -= oldLog.boxes;
+            oldInv.loose -= oldLog.loose;
+        }
+        
+        // 再加入新紀錄的庫存
+        let inv = inventory.find(x => x.no === no);
+        if(inv) { inv.boxes += b; inv.loose += l; } 
+        else { inventory.push({ no, boxes: b, loose: l }); }
+
+        // 更新流水帳陣列
+        logs[p3_editIdx] = { date, no, boxes: b, loose: l, total };
+        alert('修改成功，已重新計算並更新庫存！');
+        p3_editIdx = null; // 釋放編輯狀態
+    } else {
+        // 【新增模式】
+        logs.push({ date, no, boxes: b, loose: l, total });
+        let inv = inventory.find(x => x.no === no);
+        if(inv) { inv.boxes += b; inv.loose += l; } 
+        else { inventory.push({ no, boxes: b, loose: l }); }
+        alert('入庫成功，已同步更新庫存！');
+    }
+
+    DB.set('inboundLogs', logs);
+    DB.set('inventory', inventory);
+    renderPage(3); // 重新整理頁面
+}
+
+function p3_editSingle(index) {
+    let logs = DB.get('inboundLogs');
+    let log = logs[index];
+    if(!log) return;
+
+    p3_editIdx = index; // 標記目前正在編輯的索引
+
+    // 填寫表單欄位
+    document.getElementById('p3-date').value = log.date;
+    document.getElementById('p3-no').value = log.no;
+    p3_onSelect();
+    document.getElementById('p3-boxes').value = log.boxes;
+    document.getElementById('p3-loose').value = log.loose;
+    document.getElementById('p3-total').value = log.total;
+
+    // 動態變更按鈕為「儲存修改」與「取消」
+    document.getElementById('p3-btn-container').innerHTML = `
+        <button class="btn btn-warning" onclick="p3_save()">💾 儲存變更修改</button>
+        <button class="btn" style="background:#95a5a6; color:white;" onclick="renderPage(3)">❌ 取消修改</button>
+    `;
+
+    // 畫面平滑置頂以便操作
+    document.getElementById('page-title').scrollIntoView({ behavior: 'smooth' });
+}
+
+function p3_import() {
+    let fileInput = document.getElementById('p3-csv-file');
+    if(!fileInput.files.length) return alert('請先選擇要匯入的 CSV 檔案！');
+    
+    let file = fileInput.files[0];
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        let rows = parseCSV(e.target.result);
+        if(rows.length <= 1) return alert('檔案無有效數據或格式不符');
+        
+        let logs = DB.get('inboundLogs');
+        let inventory = DB.get('inventory');
+        let successCount = 0;
+        
+        for(let i = 1; i < rows.length; i++) {
+            let row = rows[i];
+            if(row.length < 5) continue;
+            
+            let date = row[0];
+            let no = row[1];
+            let boxes = parseFloat(row[2]) || 0;
+            let loose = parseFloat(row[3]) || 0;
+            let total = parseFloat(row[4]) || 0;
+            
+            if(!date || !no) continue;
+            
+            logs.push({ date, no, boxes, loose, total });
+            
+            let inv = inventory.find(x => x.no === no);
+            if(inv) {
+                inv.boxes += boxes;
+                inv.loose += loose;
+            } else {
+                inventory.push({ no, boxes, loose });
+            }
+            successCount++;
+        }
+        DB.set('inboundLogs', logs);
+        DB.set('inventory', inventory);
+        alert(`入庫流水帳追加成功！共更新 ${successCount} 筆入庫紀錄並同步至庫存。`);
+        renderPage(3);
+    };
+    reader.readAsText(file);
+}
+
+function p3_renderTable() {
+    let logs = DB.get('inboundLogs').slice().reverse(); 
+    let html = `<table><tr><th>日期</th><th>粉號</th><th>箱數</th><th>散粉</th><th>總量</th>${!isReadOnly ? '<th>操作</th>' : ''}</tr>`;
+    logs.forEach((l, idx) => { 
+        let originalIdx = logs.length - 1 - idx;
+        html += `<tr><td>${l.date}</td><td>${l.no}</td><td>${l.boxes}</td><td>${l.loose}</td><td>${l.total}</td>
+        ${!isReadOnly ? `<td>
+            <button class="btn-inline-edit" onclick="p3_editSingle(${originalIdx})">修改</button>
+            <button class="btn-inline-del" onclick="p3_deleteSingle(${originalIdx})">刪除</button>
+        </td>` : ''}</tr>`; 
+    });
+    html += `</table>`;
+    document.getElementById('p3-table').innerHTML = html;
+}
+
+function p3_deleteSingle(index) {
+    let logs = DB.get('inboundLogs');
+    let log = logs[index];
+    if(!log) return;
+
+    if(confirm(`確定要刪除這筆入庫紀錄嗎？\n系統會將此粉號(${log.no}) 的庫存扣除 [箱數: ${log.boxes}, 散粉: ${log.loose}]`)) {
+        let inventory = DB.get('inventory');
+        let inv = inventory.find(x => x.no === log.no);
+        if(inv) {
+            inv.boxes -= log.boxes;
+            inv.loose -= log.loose;
+            DB.set('inventory', inventory);
+        }
+        
+        logs.splice(index, 1);
+        DB.set('inboundLogs', logs);
+        alert('刪除完成，庫存已同步扣回。');
+        p3_renderTable();
+    }
+}
+
+function p3_export() {
+    let data = [['日期','粉號','箱數','散粉(kg)','入庫總量(kg)']];
+    DB.get('inboundLogs').forEach(l => data.push([l.date, l.no, l.boxes, l.loose, l.total]));
+    exportCSV('採購入庫流水帳', data);
+}
+
+
+/* --- 4. 用量紀錄 --- */
+function renderPage4(container) {
+    document.getElementById('page-title').innerText = "4. 用量紀錄";
+    let powders = DB.get('powders').filter(p=>!p.hidden);
+    let options = '<option value="">請選擇...</option>' + powders.map(p => `<option value="${p.no}">${p.no}</option>`).join('');
+    let today = new Date().toISOString().split('T')[0];
+
+    let html = `
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <div class="form-group"><label>日期</label><input type="date" id="p4-date" value="${today}"></div>
+            <div class="form-group"><label>粉號</label><select id="p4-no" onchange="p4_onSelect()">${options}</select></div>
+            <div class="form-group"><label>代號</label><input type="text" id="p4-code" readonly></div>
+            <div class="form-group"><label>色系</label><input type="text" id="p4-color" readonly></div>
+            <div class="form-group"><label>淨重 (kg)</label><input type="number" id="p4-weight" readonly></div>
+            <div class="form-group"><label>目前總庫存 (kg)</label><input type="text" id="p4-inv-current" readonly></div>
+            
+            <div class="form-group"><label>領出箱數</label><input type="number" id="p4-out-boxes" value="0" oninput="p4_calc()"></div>
+            <div class="form-group"><label>領出散粉 (kg)</label><input type="number" step="0.1" id="p4-out-loose" value="0" oninput="p4_calc()"></div>
+            <div class="form-group"><label>領出總重量 (kg)</label><input type="number" step="0.1" id="p4-out-weight" readonly></div>
+            <div class="form-group"><label>回庫散粉 (未用完 kg)</label><input type="number" step="0.1" id="p4-return" value="0" oninput="p4_calc()"></div>
+            
+            <div class="form-group"><label>實際用量 (kg)</label><input type="text" id="p4-actual-usage" readonly class="text-red-bold" style="font-size:20px;"></div>
+            
+            <div id="p4-btn-container">
+                <button class="btn btn-primary" onclick="p4_save()">紀錄用量並扣除庫存</button>
+            </div>
+        </div>
+
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <h3>匯入用量紀錄流水帳 CSV (追加紀錄)</h3>
+            <div class="import-group">
+                <label class="import-label" for="p4-csv-file">選擇檔案</label>
+                <input type="file" id="p4-csv-file" accept=".csv" onchange="handleFileInputChange(this, 'p4-file-name')">
+                <span class="file-name-display" id="p4-file-name">尚未選擇任何檔案</span>
+            </div>
+            <button class="btn btn-success" onclick="p4_import()">執行匯入紀錄 CSV</button>
+        </div>
+
+        <div class="card">
+            <h3>用量流水帳</h3>
+            <button class="btn" style="background:#f1c40f; color:#fff;" onclick="p4_export()">匯出流水帳 CSV</button>
+            <div class="table-responsive" id="p4-table"></div>
+        </div>
+    `;
+    container.innerHTML = html;
+    p4_renderTable();
+}
+
+function p4_onSelect() {
+    let no = document.getElementById('p4-no').value;
+    let p = DB.get('powders').find(x => x.no === no);
+    if(p) {
+        document.getElementById('p4-code').value = p.code;
+        document.getElementById('p4-color').value = p.color;
+        document.getElementById('p4-weight').value = p.weight;
+        
+        let inv = DB.get('inventory').find(x => x.no === no) || {boxes:0, loose:0};
+        let totalInv = (p.weight * inv.boxes) + inv.loose;
+        document.getElementById('p4-inv-current').value = `${totalInv.toFixed(2)} (箱:${inv.boxes}, 散:${inv.loose})`;
+        p4_calc();
+    }
+}
+function p4_calc() {
+    let w = parseFloat(document.getElementById('p4-weight').value || 0);
+    let ob = parseFloat(document.getElementById('p4-out-boxes').value || 0);
+    let ol = parseFloat(document.getElementById('p4-out-loose').value || 0);
+    let ret = parseFloat(document.getElementById('p4-return').value || 0);
+    
+    let totalOut = (w * ob) + ol;
+    document.getElementById('p4-out-weight').value = totalOut.toFixed(2);
+    
+    let actual = totalOut - ret;
+    document.getElementById('p4-actual-usage').value = actual.toFixed(2);
+}
+
+function p4_save() {
+    let no = document.getElementById('p4-no').value;
+    if(!no) return alert('請選擇粉號');
+    
+    let date = document.getElementById('p4-date').value;
+    let b = parseFloat(document.getElementById('p4-out-boxes').value||0);
+    let l = parseFloat(document.getElementById('p4-out-loose').value||0);
+    let ret = parseFloat(document.getElementById('p4-return').value||0);
+    let actual = parseFloat(document.getElementById('p4-actual-usage').value||0);
+
+    let logs = DB.get('usageLogs');
+    let inventory = DB.get('inventory');
+
+    if (p4_editIdx !== null) {
+        // 【修改模式】先反回沖：加回先前舊資料扣除的庫存
+        let oldLog = logs[p4_editIdx];
+        let oldInv = inventory.find(x => x.no === oldLog.no);
+        if(oldInv) {
+            oldInv.boxes += oldLog.outBoxes;
+            oldInv.loose = oldInv.loose + oldLog.outLoose - oldLog.returnLoose;
+        }
+
+        // 再扣除新修改的庫存數量
+        let inv = inventory.find(x => x.no === no);
+        if(inv) {
+            inv.boxes -= b;
+            inv.loose = inv.loose - l + ret;
+        } else {
+            inventory.push({ no, boxes: -b, loose: -l + ret });
+        }
+
+        // 更新流水帳紀錄
+        logs[p4_editIdx] = { date, no, outBoxes: b, outLoose: l, returnLoose: ret, usage: actual };
+        alert('修改成功，庫存已重新沖銷計算！');
+        p4_editIdx = null; // 釋放狀態
+    } else {
+        // 【新增模式】
+        logs.push({ date, no, outBoxes: b, outLoose: l, returnLoose: ret, usage: actual });
+        let inv = inventory.find(x => x.no === no);
+        if(inv) { 
+            inv.boxes -= b; 
+            inv.loose = inv.loose - l + ret; 
+        } else {
+            inventory.push({ no, boxes: -b, loose: -l + ret });
+        }
+        alert('用量紀錄成功，庫存已扣除！');
+    }
+
+    DB.set('usageLogs', logs);
+    DB.set('inventory', inventory);
+    renderPage(4);
+}
+
+function p4_editSingle(index) {
+    let logs = DB.get('usageLogs');
+    let log = logs[index];
+    if(!log) return;
+
+    p4_editIdx = index;
+
+    // 將資料填回輸入欄位中
+    document.getElementById('p4-date').value = log.date;
+    document.getElementById('p4-no').value = log.no;
+    p4_onSelect();
+    document.getElementById('p4-out-boxes').value = log.outBoxes;
+    document.getElementById('p4-out-loose').value = log.outLoose;
+    document.getElementById('p4-return').value = log.returnLoose;
+    document.getElementById('p4-actual-usage').value = log.usage;
+
+    // 變更表單動作按鈕
+    document.getElementById('p4-btn-container').innerHTML = `
+        <button class="btn btn-warning" onclick="p4_save()">💾 儲存變更修改</button>
+        <button class="btn" style="background:#95a5a6; color:white;" onclick="renderPage(4)">❌ 取消修改</button>
+    `;
+
+    document.getElementById('page-title').scrollIntoView({ behavior: 'smooth' });
+}
+
+function p4_import() {
+    let fileInput = document.getElementById('p4-csv-file');
+    if(!fileInput.files.length) return alert('請先選擇要匯入的 CSV 檔案！');
+    
+    let file = fileInput.files[0];
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        let rows = parseCSV(e.target.result);
+        if(rows.length <= 1) return alert('檔案無有效數據或格式不符');
+        
+        let logs = DB.get('usageLogs');
+        let inventory = DB.get('inventory');
+        let successCount = 0;
+        
+        for(let i = 1; i < rows.length; i++) {
+            let row = rows[i];
+            if(row.length < 6) continue;
+            
+            let date = row[0];
+            let no = row[1];
+            let outBoxes = parseFloat(row[2]) || 0;
+            let outLoose = parseFloat(row[3]) || 0;
+            let returnLoose = parseFloat(row[4]) || 0;
+            let usage = parseFloat(row[5]) || 0;
+            
+            if(!date || !no) continue;
+            
+            logs.push({ date, no, outBoxes, outLoose, returnLoose, usage });
+            
+            let inv = inventory.find(x => x.no === no);
+            if(inv) {
+                inv.boxes -= outBoxes;
+                inv.loose = inv.loose - outLoose + returnLoose;
+            } else {
+                inventory.push({ no, boxes: -outBoxes, loose: -outLoose + returnLoose });
+            }
+            successCount++;
+        }
+        DB.set('usageLogs', logs);
+        DB.set('inventory', inventory);
+        alert(`用量流水帳追加成功！共更新 ${successCount} 筆用量紀錄並扣除在庫庫存。`);
+        renderPage(4);
+    };
+    reader.readAsText(file);
+}
+
+function p4_renderTable() {
+    let logs = DB.get('usageLogs').slice().reverse();
+    let html = `<table><tr><th>日期</th><th>粉號</th><th>領出重量</th><th>回庫散粉</th><th>實際用量</th>${!isReadOnly ? '<th>操作</th>' : ''}</tr>`;
+    logs.forEach((l, idx) => {
+        let originalIdx = logs.length - 1 - idx;
+        let powders = DB.get('powders');
+        let p = powders.find(x => x.no === l.no) || {weight:0};
+        let outW = (p.weight * l.outBoxes) + l.outLoose;
+        html += `<tr><td>${l.date}</td><td>${l.no}</td><td>${outW}</td><td>${l.returnLoose}</td><td class="text-red-bold">${l.usage}</td>
+        ${!isReadOnly ? `<td>
+            <button class="btn-inline-edit" onclick="p4_editSingle(${originalIdx})">修改</button>
+            <button class="btn-inline-del" onclick="p4_deleteSingle(${originalIdx})">刪除</button>
+        </td>` : ''}</tr>`; 
+    });
+    html += `</table>`;
+    document.getElementById('p4-table').innerHTML = html;
+}
+
+function p4_deleteSingle(index) {
+    let logs = DB.get('usageLogs');
+    let log = logs[index];
+    if(!log) return;
+
+    if(confirm(`確定要刪除這筆用量紀錄嗎？\n系統會自動把扣除的庫存加回 [領出箱數: ${log.outBoxes}, 領出散粉: ${log.outLoose},扣除回庫: ${log.returnLoose}]`)) {
+        let inventory = DB.get('inventory');
+        let inv = inventory.find(x => x.no === log.no);
+        if(inv) {
+            inv.boxes += log.outBoxes;
+            inv.loose = inv.loose + log.outLoose - log.returnLoose;
+            DB.set('inventory', inventory);
+        }
+        
+        logs.splice(index, 1);
+        DB.set('usageLogs', logs);
+        alert('刪除完成，用量庫存已返還回補。');
+        p4_renderTable();
+    }
+}
+
+function p4_export() {
+    let data = [['日期','粉號','領出箱數','領出散粉','回庫散粉','實際用量(kg)']];
+    DB.get('usageLogs').forEach(l => data.push([l.date, l.no, l.outBoxes, l.outLoose, l.returnLoose, l.usage]));
+    exportCSV('用量紀錄流水帳', data);
+}
+
+/* --- 5. 用量紀錄查詢 --- */
+function renderPage5(container) {
+    document.getElementById('page-title').innerText = "5. 用量紀錄查詢";
+    let logs = DB.get('usageLogs');
+    let dates = [...new Set(logs.map(l => l.date))].sort().reverse();
+    let options = '<option value="">所有日期...</option>' + dates.map(d => `<option value="${d}">${d}</option>`).join('');
+    
+    let html = `
+        <div class="card">
+            <div class="form-group"><label>選擇日期過濾</label><select id="p5-date" onchange="p5_search()">${options}</select></div>
+            <div class="table-responsive" id="p5-table"></div>
+        </div>
+    `;
+    container.innerHTML = html;
+    p5_search();
+}
+function p5_search() {
+    let filterDate = document.getElementById('p5-date').value;
+    let logs = DB.get('usageLogs').slice().reverse();
+    if(filterDate) logs = logs.filter(l => l.date === filterDate);
+    
+    let html = `<table><tr><th>日期</th><th>粉號</th><th>代號</th><th>色系</th><th>實際用量(kg)</th></tr>`;
+    let powders = DB.get('powders');
+    
+    logs.forEach(l => {
+        let p = powders.find(x => x.no === l.no) || {code:'', color:''};
+        html += `<tr><td>${l.date}</td><td>${l.no}</td><td>${p.code}</td><td>${p.color}</td><td class="text-red-bold">${l.usage}</td></tr>`; 
+    });
+    html += `</table>`;
+    document.getElementById('p5-table').innerHTML = html;
+}
+
+/* --- 6. 庫存查詢 --- */
+function renderPage6(container) {
+    document.getElementById('page-title').innerText = "6. 庫存查詢";
+    let powders = DB.get('powders');
+    let options = '<option value="">請選擇查詢粉號/代號...</option>' + powders.map(p => `<option value="${p.no}">${p.no} - ${p.code}</option>`).join('');
+
+    let html = `
+        <div class="card">
+            <div class="form-group"><label>粉號＆代號</label><select id="p6-search" onchange="p6_search()">${options}</select></div>
+            <div id="p6-result" class="text-center" style="margin-top:20px;">
+                <p>請於上方選擇粉號查詢庫存</p>
+            </div>
+        </div>
+    `;
+    container.innerHTML = html;
+}
+function p6_search() {
+    let no = document.getElementById('p6-search').value;
+    if(!no) { document.getElementById('p6-result').innerHTML = ''; return; }
+    
+    let p = DB.get('powders').find(x => x.no === no);
+    let inv = DB.get('inventory').find(x => x.no === no) || {boxes:0, loose:0};
+    
+    if(p) {
+        let total = (p.weight * inv.boxes) + inv.loose;
+        document.getElementById('p6-result').innerHTML = `
+            <div style="background:#f9f9f9; padding:20px; border-radius:8px; border:1px solid #ddd;">
+                <h3>${p.no} (${p.code})</h3>
+                <p class="text-18">色系: <strong>${p.color}</strong> | 廠商: <strong>${p.vendor}</strong></p>
+                <p class="text-18">庫存箱數: ${inv.boxes} | 散粉: ${inv.loose} kg</p>
+                <div style="font-size:24px; margin-top:15px;">總重量庫存：<span class="text-red-bold">${total.toFixed(2)} kg</span></div>
+            </div>
+        `;
+    }
+}
+
+/* --- 7. 廢粉統計 --- */
+function renderPage7(container) {
+    document.getElementById('page-title').innerText = "7. 廢粉統計";
+    let today = new Date().toISOString().split('T')[0];
+    
+    let html = `
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <div class="form-group"><label>日期</label><input type="date" id="p7-date" value="${today}"></div>
+            <div class="form-group"><label>數量 (包/箱)</label><input type="number" id="p7-count" value="1" oninput="p7_calc()"></div>
+            <div class="form-group"><label>固定淨重 (kg)</label><input type="number" id="p7-weight" value="25" readonly></div>
+            <div class="form-group"><label>總重 (kg)</label><input type="number" id="p7-total" readonly></div>
+            
+            <div id="p7-btn-container">
+                <button class="btn btn-primary" onclick="p7_save()">新增廢粉紀錄</button>
+            </div>
+        </div>
+        
+        <div class="card text-center">
+            <h3>動態廢粉回收指數</h3>
+            <div class="chart-container">
+                <div class="circle-chart" id="waste-chart">
+                    <span class="chart-value" id="waste-val">0%</span>
+                </div>
+                <p id="waste-desc" style="margin-top:15px; font-size:18px;"></p>
+                <button class="btn" style="background:#95a5a6; color:white; width:auto; margin-top:10px; ${isReadOnly?'display:none;':''}" onclick="p7_reset()">重置指數歸零</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>歷史廢粉紀錄流水帳</h3>
+            <div class="table-responsive" id="p7-table"></div>
+        </div>
+
+        <div class="card">
+            <h3>平均統計資訊</h3>
+            <div id="p7-stats" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:center;"></div>
+        </div>
+    `;
+    container.innerHTML = html;
+    p7_calc();
+    p7_renderDashboard();
+}
+
+function p7_calc() {
+    let c = parseFloat(document.getElementById('p7-count').value||0);
+    document.getElementById('p7-total').value = (c * 25).toFixed(2);
+}
+
+function p7_save() {
+    let date = document.getElementById('p7-date').value;
+    let count = parseFloat(document.getElementById('p7-count').value||0);
+    let total = count * 25;
+    
+    let logs = DB.get('wasteLogs');
+    
+    if (p7_editIdx !== null) {
+        // 【修改模式】
+        let oldLog = logs[p7_editIdx];
+        logs[p7_editIdx] = { date, count, total, timestamp: oldLog.timestamp || new Date().getTime() };
+        alert('修改成功！');
+        p7_editIdx = null;
+    } else {
+        // 【新增模式】
+        logs.push({ date, count, total, timestamp: new Date().getTime() });
+        alert('廢粉紀錄成功！');
+    }
+    
+    DB.set('wasteLogs', logs);
+    renderPage(7);
+}
+
+function p7_editSingle(index) {
+    let logs = DB.get('wasteLogs');
+    let log = logs[index];
+    if(!log) return;
+
+    p7_editIdx = index;
+
+    document.getElementById('p7-date').value = log.date;
+    document.getElementById('p7-count').value = log.count;
+    document.getElementById('p7-total').value = log.total;
+
+    document.getElementById('p7-btn-container').innerHTML = `
+        <button class="btn btn-warning" onclick="p7_save()">💾 儲存變更修改</button>
+        <button class="btn" style="background:#95a5a6; color:white;" onclick="renderPage(7)">❌ 取消修改</button>
+    `;
+
+    document.getElementById('page-title').scrollIntoView({ behavior: 'smooth' });
+}
+
+function p7_deleteSingle(index) {
+    let logs = DB.get('wasteLogs');
+    if(confirm('確定要刪除這筆廢粉紀錄嗎？')) {
+        logs.splice(index, 1);
+        DB.set('wasteLogs', logs);
+        alert('已刪除該筆廢粉紀錄。');
+        p7_renderDashboard();
+    }
+}
+
+function p7_reset() {
+    if(confirm('確定要將廢粉回收指數歸零？(不影響歷史資料，僅重設計算起始點)')) {
+        DB.set('wasteResetTime', new Date().getTime());
+        p7_renderDashboard();
+    }
+}
+
+function p7_renderDashboard() {
+    let logs = DB.get('wasteLogs');
+    let resetTime = DB.get('wasteResetTime') || 0;
+    
+    let activeLogs = logs.filter(l => l.timestamp >= resetTime);
+    let currentTotalKg = activeLogs.reduce((sum, l) => sum + l.total, 0);
+    let currentTons = currentTotalKg / 1000;
+    
+    let percentage = Math.min((currentTotalKg / 10000) * 100, 100);
+    let chartColor = currentTotalKg >= 10000 ? 'var(--danger)' : 'var(--primary)';
+    
+    let chart = document.getElementById('waste-chart');
+    if(chart) {
+        chart.style.background = `conic-gradient(${chartColor} ${percentage}%, #eee ${percentage}%)`;
+        document.getElementById('waste-val').innerText = `${percentage.toFixed(1)}%`;
+        document.getElementById('waste-val').style.color = currentTotalKg >= 10000 ? 'var(--danger)' : '#333';
+    }
+    
+    let desc = document.getElementById('waste-desc');
+    if(desc) {
+        desc.innerHTML = `目前累積: <strong>${currentTons.toFixed(2)} 噸</strong>`;
+        if(currentTotalKg >= 10000) {
+            desc.innerHTML += `<br><span class="text-red-bold">⚠ 廢粉量已達 10 噸！</span>`;
+        }
+    }
+
+    // 渲染廢粉歷史清單（包含單筆刪除、單筆修改）
+    let logView = DB.get('wasteLogs').slice().reverse();
+    let tableHtml = `<table><tr><th>日期</th><th>數量(箱/包)</th><th>總重(kg)</th>${!isReadOnly ? '<th>操作</th>' : ''}</tr>`;
+    logView.forEach((l, idx) => {
+        let originalIdx = logView.length - 1 - idx;
+        tableHtml += `<tr><td>${l.date}</td><td>${l.count}</td><td>${l.total}</td>
+        ${!isReadOnly ? `<td>
+            <button class="btn-inline-edit" onclick="p7_editSingle(${originalIdx})">修改</button>
+            <button class="btn-inline-del" onclick="p7_deleteSingle(${originalIdx})">刪除</button>
+        </td>` : ''}</tr>`;
+    });
+    tableHtml += `</table>`;
+    let p7Table = document.getElementById('p7-table');
+    if(p7Table) p7Table.innerHTML = tableHtml;
+
+    if(logs.length === 0) {
+         let statsEl = document.getElementById('p7-stats');
+         if(statsEl) statsEl.innerHTML = '<p style="grid-column:1/3;">無數據</p>';
+        return;
+    }
+    
+    let totalAllKg = logs.reduce((sum, l) => sum + l.total, 0);
+    let dates = [...new Set(logs.map(l => l.date))];
+    let days = dates.length || 1;
+    let avgDay = totalAllKg / days;
+    let avgWeek = avgDay * 7;
+    let avgMonth = avgDay * 30;
+    let avgYear = avgDay * 365;
+    
+    let statsEl = document.getElementById('p7-stats');
+    if(statsEl) {
+        statsEl.innerHTML = `
+            <div style="background:#f4f4f4; padding:10px; border-radius:6px;">日均: <strong>${avgDay.toFixed(1)} kg</strong></div>
+            <div style="background:#f4f4f4; padding:10px; border-radius:6px;">週均: <strong>${avgWeek.toFixed(1)} kg</strong></div>
+            <div style="background:#f4f4f4; padding:10px; border-radius:6px;">月均: <strong>${avgMonth.toFixed(1)} kg</strong></div>
+            <div style="background:#f4f4f4; padding:10px; border-radius:6px;">年均: <strong>${avgYear.toFixed(1)} kg</strong></div>
+        `;
+    }
+}
+
+
+/* --- 8. 系統數據清理 --- */
+function renderPage8(container) {
+    document.getElementById('page-title').innerText = "8. 系統數據清理";
+    let html = `
+        <div class="card ${isReadOnly ? 'hidden' : ''}">
+            <h3 style="color:var(--danger); margin-top:0;">⚠ 危險操作區域</h3>
+            <p class="text-red-bold" style="background:#fff3f3; padding:12px; border-radius:6px; border:1px solid #ffa3a3; line-height:1.5;">
+                警告：清除後的數據將從本網頁中永久抹除，無法還原！<br>
+                在執行任何清理前，請務必確認已利用各功能分頁內的「匯出 CSV」按鈕做好本地端資料備份。
+            </p>
+            
+            <div style="margin-top:25px;">
+                <p style="font-weight:bold; color:#555; margin-bottom:10px;">📌 選擇性分類清理：</p>
+                <button class="btn btn-danger" onclick="p8_clearKey('inventory', '2. 庫存監控資料')">僅清空「在庫庫存資料」</button>
+                <button class="btn btn-danger" onclick="p8_clearKey('inboundLogs', '3. 採購入庫流水帳')">僅清空「入庫歷史紀錄」</button>
+                <button class="btn btn-danger" onclick="p8_clearKey('usageLogs', '4. 用量紀錄流水帳')">僅清空「領用歷史紀錄」</button>
+                <button class="btn btn-danger" onclick="p8_clearKey('wasteLogs', '7. 廢粉統計紀錄')">僅清空「廢粉回收紀錄」</button>
+                <button class="btn btn-danger" onclick="p8_clearKey('powders', '1. 烤漆粉號清冊')">僅清空「基本粉號清冊」</button>
+            </div>
+            
+            <hr style="border:0; border-top:1px dashed #ccc; margin:30px 0;">
+            
+            <div>
+                <p style="font-weight:bold; color:#555; margin-bottom:10px;">🔥 全系統重置（回到初始狀態）：</p>
+                <button class="btn" style="background-color: #c0392b; color: white;" onclick="p8_clearAll()">徹底重置全系統所有數據</button>
+            </div>
+        </div>
+    `;
+    container.innerHTML = html;
+}
+
+function p8_clearKey(key, name) {
+    if(confirm(`確定要永久刪除「${name}」嗎？\n此操作無法撤銷，請確認已做好備份！`)) {
+        DB.clear(key);
+        alert(`「${name}」已清空完成。`);
+        renderPage(8);
+    }
+}
+
+function p8_clearAll() {
+    if(confirm('【重大警告】這將會一次性永久抹除本系統所有的：\n1. 粉號清冊\n2. 目前庫存\n3. 採購入庫流水帳\n4. 用量領用流水帳\n5. 廢粉統計紀錄\n\n您確定要將全系統徹底重置嗎？')) {
+        if(confirm('【最後安全驗證】請再次確認：您真的打算清空全站數據？此動作無法回溯！')) {
+            DB.clear('powders');
+            DB.clear('inventory');
+            DB.clear('inboundLogs');
+            DB.clear('usageLogs');
+            DB.clear('wasteLogs');
+            DB.clear('wasteResetTime');
+            alert('全系統數據已完全清除，系統已恢復至最初始的乾淨狀態！');
+            goHome();
+        }
+    }
+}
+</script>
+</body>
+</html>
