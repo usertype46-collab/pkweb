@@ -349,18 +349,86 @@
         applyPermissions();
     }
 
-    // --- CSV 匯出/匯入 ---
-    function exportCSV(node) {
-        let data = localDB[node]; if(!data) return;
-        let csv = "\uFEFF";
-        let keys = Object.keys(data); if(keys.length === 0) return alert("無資料可匯出");
-        let headers = Object.keys(data[keys[0]]);
-        csv += "ID," + headers.join(",") + "\n";
-        for(let k in data) { csv += `"${k}",` + headers.map(h => `"${data[k][h]}"`).join(",") + "\n"; }
-        let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${node}_export.csv`; link.click();
+// --- CSV 匯出/匯入 (批次處理優化版) ---
+function exportCSV(node) {
+    let data = localDB[node]; if(!data) return;
+    let csv = "\uFEFF";
+    let keys = Object.keys(data); if(keys.length === 0) return alert("無資料可匯出");
+    let headers = Object.keys(data[keys[0]]);
+    csv += "ID," + headers.join(",") + "\n";
+    for(let k in data) { csv += `"${k}",` + headers.map(h => `"${data[k][h]}"`).join(",") + "\n"; }
+    let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${node}_export.csv`; link.click();
+}
+
+function importCSV(node) {
+    // 建立每個區塊對應的 input 檔案欄位 ID
+    const fileMap = { 
+        powder: 'file_p1', 
+        inventory: 'file_p2', 
+        purchase: 'file_p3', 
+        usage: 'file_p4', 
+        waste: 'file_p7' 
+    };
+    
+    const fileInput = document.getElementById(fileMap[node]);
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        return alert("請先選取 CSV 檔案！");
     }
-    function importCSV(node) { alert("CSV匯入功能需確保格式與匯出檔完全一致，系統將覆蓋現有節點資料。建議先進行匯出備份！"); }
+
+    if (!confirm(`⚠️ 警告：匯入 CSV 將會「完全覆蓋」雲端上的【${node}】資料庫節點。\n建議您先點擊「匯出 CSV」做好備份。\n\n確定要繼續匯入嗎？`)) {
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const text = e.target.result;
+        // 分割行數並過濾空白行
+        const lines = text.split("\n").filter(line => line.trim() !== "");
+        if (lines.length <= 1) return alert("檔案為空或格式錯誤！");
+
+        // 抓取表頭 (移除引號)
+        const headers = lines[0].split(",").map(h => h.replace(/^"|"$/g, '').trim());
+        const batchData = {}; // 準備要一次性上傳的大包裹
+
+        // 解析每一行資料
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(",").map(v => v.replace(/^"|"$/g, '').trim());
+            const id = values[0]; // 預設第一欄是 ID 或 粉號
+            if (!id) continue;
+
+            let rowData = {};
+            for (let j = 1; j < headers.length; j++) {
+                let val = values[j];
+                // 如果是純數字字串，轉換為數字格式以確保資料庫型別正確
+                if (!isNaN(val) && val !== "") {
+                    val = Number(val);
+                } else if (val === "true") {
+                    val = true;
+                } else if (val === "false") {
+                    val = false;
+                }
+                rowData[headers[j]] = val;
+            }
+            batchData[id] = rowData;
+        }
+
+        // 關鍵：使用 dbSet 一次性覆蓋整個節點，避免迴圈連續呼叫造成伺服器警告
+        window.dbSet(window.dbRef(window.fbDB, node), batchData)
+            .then(() => {
+                alert("✅ 批次匯入成功！雲端資料庫已同步更新。");
+                fileInput.value = ""; // 清空檔案選擇器
+            })
+            .catch((error) => {
+                alert("❌ 匯入失敗，請檢查網路狀態：" + error.message);
+            });
+    };
+
+    reader.readAsText(file, "UTF-8");
+}
+
 </script>
 </body>
 </html>
