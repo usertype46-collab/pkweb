@@ -3,13 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專業庫存管理系統 v3.0 (Firebase 雲端版)</title>
-    <script type="module">
-        import { initializeApp } from "firebase/app";
-        import { getDatabase, ref, onValue, set, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <title>烤漆部粉體管理系統 v3.0 (雲端專業版)</title>
+    <style>
+        :root {
+            --primary-color: #1e293b; --accent-color: #3b82f6; --danger-color: #ef4444;
+            --success-color: #10b981; --warning-color: #f59e0b;
+            --bg-gradient: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Roboto, "Noto Sans TC", sans-serif; }
+        body { background: var(--bg-gradient); min-height: 100vh; color: #333; padding: 15px; }
+        .container { max-width: 600px; margin: 0 auto; background: rgba(255, 255, 255, 0.98); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 20px; min-height: 90vh; position: relative; }
+        
+        /* 登入畫面 */
+        #loginOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        #loginOverlay h2 { color: var(--primary-color); margin-bottom: 20px; }
+        .login-box { background: #f1f5f9; padding: 20px; border-radius: 12px; width: 100%; max-width: 300px; }
+        .login-box input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        
+        /* 選單與介面 */
+        .header-status { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        .menu-list { display: flex; flex-direction: column; gap: 10px; }
+        .menu-item { background: #fff; padding: 15px; border-radius: 8px; border-left: 5px solid var(--accent-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; }
+        .menu-item:hover { background: #f8fafc; }
+        
+        .page { display: none; }
+        .page-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-color); padding-bottom: 10px; }
+        .card-form { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 10px; display: flex; align-items: center; }
+        .form-group label { width: 30%; font-weight: bold; font-size: 14px; }
+        .form-group input, .form-group select { width: 70%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; }
+        .form-group input[readonly] { background: #e2e8f0; }
+        
+        .btn { padding: 10px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; text-align: center; }
+        .btn-primary { background: var(--accent-color); width: 100%; margin-bottom: 8px; }
+        .btn-success { background: var(--success-color); width: 100%; }
+        .btn-danger { background: var(--danger-color); width: 100%; }
+        .btn-secondary { background: #94a3b8; }
+        
+        .file-ops { display: flex; gap: 10px; margin: 10px 0; padding: 10px; background: #e2e8f0; border-radius: 8px; }
+        .file-ops input { width: 60%; font-size: 12px; }
+        .file-ops button { width: 20%; font-size: 12px; padding: 5px; }
 
-        // ⚠️【重要】請在這裡貼上你的 Firebase 設定碼 ⚠️
-        const firebaseConfig = {
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        .data-table th, .data-table td { padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        .data-table th { background: #f1f5f9; position: sticky; top: 0; }
+        .action-btn { padding: 3px 6px; font-size: 12px; cursor: pointer; margin-right: 2px; border: none; border-radius: 4px; }
+        .act-del { background: #fee2e2; color: #b91c1c; }
+        
+        /* 權限控制 Class */
+        .admin-only { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loginOverlay">
+        <h2>🔒 系統權限登入</h2>
+        <div class="login-box">
+            <input type="password" id="admin_pwd" placeholder="請輸入管理員密碼">
+            <button class="btn btn-primary" onclick="login('admin')">管理員登入</button>
+            <div style="margin: 15px 0; color: #94a3b8;">— 或 —</div>
+            <button class="btn btn-secondary" style="width: 100%;" onclick="login('viewer')">唯讀訪客進入 (不可修改)</button>
+        </div>
+    </div>
+
+    <div id="homePage" class="page" style="display: block;">
+        <div class="header-status">
+            <span>👤 當前身份：<strong id="roleDisplay">未登入</strong></span>
+            <span id="syncStatus" style="color:var(--success-color)">● 雲端連線中</span>
+        </div>
+        <h2 style="margin-bottom: 20px; color: var(--primary-color);">⚙️ 雲端粉體管理系統 v3.0</h2>
+        <div class="menu-list">
+            <div class="menu-item" onclick="goPage(1)">1. 烤漆粉號清冊 ➔</div>
+            <div class="menu-item" onclick="goPage(2)">2. 庫存監控 ➔</div>
+            <div class="menu-item" onclick="goPage(3)">3. 採購入庫流水帳 ➔</div>
+            <div class="menu-item" onclick="goPage(4)">4. 出庫用量紀錄 ➔</div>
+            <div class="menu-item" onclick="goPage(5)">5. 用量紀錄查詢 ➔</div>
+            <div class="menu-item" onclick="goPage(6)">6. 庫存快速查詢 ➔</div>
+            <div class="menu-item" onclick="goPage(7)">7. 廢粉流水帳紀錄 ➔</div>
+            <div class="menu-item" onclick="goPage(8)">8. 廢粉回收統計查詢 ➔</div>
+        </div>
+    </div>
+
+    <div id="page1" class="page">
+        <div class="page-title"><span>1. 粉號清冊</span><button class="btn btn-secondary" onclick="goHome()">返回</button></div>
+        <div class="card-form admin-only">
+            <div class="form-group"><label>粉號：</label><input type="text" id="p1_id"></div>
+            <div class="form-group"><label>代號：</label><input type="text" id="p1_code"></div>
+            <div class="form-group"><label>色系：</label><input type="text" id="p1_color"></div>
+            <div class="form-group"><label>淨重：</label><select id="p1_weight"><option value="20">20</option><option value="25" selected>25</option></select></div>
+            <button class="btn btn-success" onclick="saveP1()">儲存粉號</button>
+        </div>
+        <div class="file-ops admin-only">
+            <input type="file" id="p1_csv">
+            <button class="btn btn-primary" onclick="importCSV('powder', 'p1_csv')">匯入</button>
+            <button class="btn btn-secondary" onclick="exportCSV('powder')">匯出</button>
+        </div>
+        <table class="data-table" id="t_p1"><thead><tr><th>粉號</th><th>代號</th><th>規格</th><th class="admin-only">操作</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div id="page2" class="page">
+        <div class="page-title"><span>2. 庫存監控</span><button class="btn btn-secondary" onclick="goHome()">返回</button></div>
+        <div class="card-form admin-only">
+            <div class="form-group"><label>粉號：</label><select id="p2_id" onchange="linkP2()"></select></div>
+            <div class="form-group"><label>淨重：</label><input type="number" id="p2_weight" readonly></div>
+            <div class="form-group"><label>箱數：</label><input type="number" id="p2_box"></div>
+            <div class="form-group"><label>散粉(kg)：</label><input type="number" id="p2_loose"></div>
+            <button class="btn btn-success" onclick="saveP2()">直接更新庫存 (盤點)</button>
+        </div>
+        <div class="file-ops admin-only">
+            <input type="file" id="p2_csv">
+            <button class="btn btn-primary" onclick="importCSV('inventory', 'p2_csv')">匯入</button>
+            <button class="btn btn-secondary" onclick="exportCSV('inventory')">匯出</button>
+        </div>
+        <table class="data-table" id="t_p2"><thead><tr><th>粉號</th><th>總庫存(kg)</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div id="page3" class="page">
+        <div class="page-title"><span>3. 採購入庫</span><button class="btn btn-secondary" onclick="goHome()">返回</button></div>
+        <div class="card-form admin-only">
+            <div class="form-group"><label>日期：</label><input type="date" id="p3_date"></div>
+            <div class="form-group"><label>粉號：</label><select id="p3_id"></select></div>
+            <div class="form-group"><label>入庫箱數：</label><input type="number" id="p3_box" value="0"></div>
+            <div class="form-group"><label>入庫散粉：</label><input type="number" id="p3_loose" value="0"></div>
+            <button class="btn btn-success" onclick="saveP3()">確認入庫</button>
+        </div>
+        <div class="file-ops admin-only">
+            <input type="file" id="p3_csv">
+            <button class="btn btn-primary" onclick="importCSV('purchase', 'p3_csv')">匯入</button>
+            <button class="btn btn-secondary" onclick="exportCSV('purchase')">匯出</button>
+        </div>
+        <table class="data-table" id="t_p3"><thead><tr><th>日期</th><th>粉號</th><th>箱/散</th><th class="admin-only">操作</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div id="page4" class="page">
+        <div class="page-title"><span>4. 出庫紀錄</span><button class="btn btn-secondary" onclick="goHome()">返回</button></div>
+        <div class="card-form admin-only">
+            <div class="form-group"><label>日期：</label><input type="date" id="p4_date"></div>
+            <div class="form-group"><label>粉號：</label><select id="p4_id" onchange="fetchCurrentStockP4()"></select></div>
+            <div class="form-group"><label style="color:#3b82f6">當前庫存：</label><input type="text" id="p4_current_stock" readonly style="color:#3b82f6; font-weight:bold;"></div>
+            <div class="form-group"><label>領出箱數：</label><input type="number" id="p4_box" value="0"></div>
+            <div class="form-group"><label>領出散粉：</label><input type="number" id="p4_loose" value="0"></div>
+            <div class="form-group"><label>退回散粉：</label><input type="number" id="p4_ret" value="0"></div>
+            <button class="btn btn-success" onclick="saveP4()">確認出庫扣帳</button>
+        </div>
+        <div class="file-ops admin-only">
+            <input type="file" id="p4_csv">
+            <button class="btn btn-primary" onclick="importCSV('usage', 'p4_csv')">匯入</button>
+            <button class="btn btn-secondary" onclick="exportCSV('usage')">匯出</button>
+        </div>
+        <table class="data-table" id="t_p4"><thead><tr><th>日期</th><th>粉號</th><th>實際用量(kg)</th><th class="admin-only">操作</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div id="page5" class="page">
+        <div class="page-title"><span>5. 用量查詢</span><button class="btn btn-secondary" onclick="goHome()">返回</button></div>
+        <div class="card-form"><div class="form-group"><label>選日期：</label><select id="p5_date" onchange="queryP5()"></select></div></div>
+        <table class="data-table" id="t_p5"><thead><tr><th>粉號</th><th>代號</th><th>用量(kg)</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div id="page6" class="page">
+        <div class="page-title"><span>6. 庫存查詢</span><button class="btn btn-secondary" onclick="goHome()">返回</button></div>
+        <div class="card-form"><div class="form-group"><label>選粉號：</label><select id="p6_id" onchange="queryP6()"></select></div></div>
+        <div id="p6_result" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ccc; display:none;"></div>
+    </div>
+
+    <div id="page7" class="page">
+        <div class="page-title"><span>7. 廢粉流水帳</span><button class="btn btn-secondary" onclick="goHome()">返回</button></div>
+        <div class="card-form admin-only">
+            <div class="form-group"><label>日期：</label><input type="date" id="p7_date"></div>
+            <div class="form-group"><label>桶數：</label><input type="number" id="p7_qty" placeholder="以 25kg/桶 計算"></div>
+            <button class="btn btn-danger" onclick="saveP7()">新增廢粉紀錄</button>
+        </div>
+        <div class="file-ops admin-only">
+            <input type="file" id="p7_csv">
+            <button class="btn btn-primary" onclick="importCSV('waste', 'p7_csv')">匯入</button>
+            <button class="btn btn-secondary" onclick="exportCSV('waste')">匯出</button>
+        </div>
+        <table class="data-table" id="t_p7"><thead><tr><th>日期</th><th>桶數</th><th>重量(kg)</th><th class="admin-only">操作</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div id="page8" class="page">
+        <div class="page-title"><span>8. 廢粉統計</span><button class="btn btn-secondary" onclick="goHome()">返回</button></div>
+        <div class="card-form" style="background:#fffbeb; border-color:#fde68a;">
+            <h3 style="color:#b45309; text-align:center; margin-bottom:10px;">目前累計廢粉</h3>
+            <div style="font-size:32px; text-align:center; font-weight:bold; color:#d97706;" id="p8_total_tons">0.00 噸</div>
+            <p style="text-align:center; font-size:14px; margin-top:10px; color:#92400e;" id="p8_alert"></p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "firebase/app";
+    import { getDatabase, ref, onValue, set, push, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // ⚠️⚠️⚠️ 步驟：請將下方的 firebaseConfig 替換成你專案的設定碼 ⚠️⚠️⚠️
+            const firebaseConfig = {
             apiKey: "AIzaSyDTIMGBYqAqOpFcCqEMjWWUwC_nPAfQ9ko",
             authDomain: "paint-system-21867.firebaseapp.com",
             databaseURL: "https://paint-system-21867-default-rtdb.firebaseio.com",
@@ -19,415 +207,282 @@
             appId: "1:855614444799:web:db649669302532ea4aa8ca"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const fbDB = getDatabase(app);
-        window.fbDB = fbDB;
-        window.dbRef = ref;
-        window.dbSet = set;
-        window.dbOnValue = onValue;
-        window.dbUpdate = update;
-        window.dbRemove = remove;
-        window.dbGet = get;
-    </script>
-    <style>
-        :root { --primary: #1e3a8a; --accent: #3b82f6; --danger: #ef4444; --success: #10b981; --bg: #f3f4f6; }
-        * { box-sizing: border-box; font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-        body { background: var(--bg); margin: 0; padding: 15px; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; min-height: 90vh; }
-        
-        /* 登入畫面 */
-        #loginOverlay { position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; width: 90%; max-width: 400px; }
-        .login-box input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 6px; }
-        
-        /* 選單與介面 */
-        .page { display: none; }
-        .active-page { display: block; }
-        .menu-item { background: #f8fafc; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid var(--accent); cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .menu-item:hover { background: #e2e8f0; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #eee; }
-        
-        /* 表單與按鈕 */
-        .form-group { display: flex; align-items: center; margin-bottom: 10px; }
-        .form-group label { width: 35%; font-weight: bold; color: #555; }
-        .form-group input, .form-group select { width: 65%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
-        .form-group input[readonly] { background: #eee; }
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; width: 100%; margin-top: 5px; }
-        .btn-primary { background: var(--primary); }
-        .btn-success { background: var(--success); }
-        .btn-danger { background: var(--danger); }
-        .btn-secondary { background: #6b7280; width: auto; }
-        .admin-only { display: block; } /* 權限控管用 */
-        
-        /* 表格與列表 */
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        .data-table th, .data-table td { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; }
-        .data-table th { background: #f8fafc; position: sticky; top: 0; }
-        .file-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; padding: 10px; background: #f1f5f9; border-radius: 8px; }
-        .sys-status { font-size: 12px; color: var(--success); text-align: center; margin-top: 10px; }
-    </style>
-</head>
-<body>
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-<div id="loginOverlay">
-    <div class="login-box">
-        <h2>🔒 系統存取驗證</h2>
-        <input type="password" id="adminPwd" placeholder="管理員請輸入密碼 (預設: M0282)">
-        <button class="btn btn-primary" onclick="login('admin')">管理員登入 (可編輯)</button>
-        <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="login('viewer')">檢視者登入 (唯讀模式)</button>
-    </div>
-</div>
+    // 全域變數
+    window.dbData = { powder: {}, inventory: {}, purchase: {}, usage: {}, waste: {} };
+    window.userRole = 'guest';
 
-<div class="container">
-    <div id="page_home" class="page active-page">
-        <h2 style="color: var(--primary); text-align: center;">📦 烤漆部庫存管理系統</h2>
-        <div class="sys-status" id="syncStatus">🟡 連線中...</div>
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-        <div class="menu-item" onclick="nav('page1')">1. 烤漆粉號清冊 <span>➔</span></div>
-        <div class="menu-item" onclick="nav('page2')">2. 庫存監控 <span>➔</span></div>
-        <div class="menu-item" onclick="nav('page3')">3. 採購入庫流水帳 <span>➔</span></div>
-        <div class="menu-item" onclick="nav('page4')">4. 出庫用量紀錄 <span>➔</span></div>
-        <div class="menu-item" onclick="nav('page5')">5. 庫存/用量快速查詢 <span>➔</span></div>
-        <div class="menu-item" onclick="nav('page7')">6. 廢粉紀錄流水帳 <span>➔</span></div>
-        <div class="menu-item" onclick="nav('page8')">7. 廢粉回收統計查詢 <span>➔</span></div>
-    </div>
-
-    <div id="page1" class="page">
-        <div class="header-bar"><h3>1. 烤漆粉號清冊</h3><button class="btn btn-secondary" onclick="nav('page_home')">返回首頁</button></div>
-        <div class="admin-only" style="background:#f8fafc; padding:15px; border-radius:8px;">
-            <div class="form-group"><label>粉號：</label><input type="text" id="p1_id"></div>
-            <div class="form-group"><label>代號：</label><input type="text" id="p1_code"></div>
-            <div class="form-group"><label>色系：</label><input type="text" id="p1_color"></div>
-            <div class="form-group"><label>淨重：</label><select id="p1_weight"><option value="20">20</option><option value="25" selected>25</option></select></div>
-            <div class="form-group"><label>廠商：</label><input type="text" id="p1_vendor" placeholder="例如: 老虎, 國麗"></div>
-            <button class="btn btn-success" onclick="saveP1()">儲存粉號資料</button>
-        </div>
-        <div class="file-ops admin-only"><input type="file" id="file_p1" accept=".csv" style="grid-column: span 2;"><button class="btn btn-primary" onclick="importCSV('powder')">匯入 CSV</button><button class="btn btn-secondary" style="width:100%" onclick="exportCSV('powder')">匯出 CSV</button></div>
-        <div style="max-height: 400px; overflow-y: auto;">
-            <table class="data-table" id="tb_p1"><thead><tr><th>粉號</th><th>代號</th><th>淨重</th><th class="admin-only">操作</th></tr></thead><tbody></tbody></table>
-        </div>
-    </div>
-
-    <div id="page2" class="page">
-        <div class="header-bar"><h3>2. 庫存監控</h3><button class="btn btn-secondary" onclick="nav('page_home')">返回首頁</button></div>
-        <div class="admin-only" style="background:#f8fafc; padding:15px; border-radius:8px;">
-            <div class="form-group"><label>粉號：</label><select id="p2_id" class="powder-select" onchange="linkP2()"></select></div>
-            <div class="form-group"><label>箱數：</label><input type="number" id="p2_box" value="0"></div>
-            <div class="form-group"><label>散粉(kg)：</label><input type="number" id="p2_loose" value="0"></div>
-            <div class="form-group"><label>安全庫存：</label><input type="number" id="p2_safe" value="100"></div>
-            <button class="btn btn-success" onclick="saveP2()">直接更新庫存盤點</button>
-        </div>
-        <div class="file-ops admin-only"><input type="file" id="file_p2" accept=".csv" style="grid-column: span 2;"><button class="btn btn-primary" onclick="importCSV('inventory')">匯入 CSV</button><button class="btn btn-secondary" style="width:100%" onclick="exportCSV('inventory')">匯出 CSV</button></div>
-        <div style="max-height: 400px; overflow-y: auto;">
-            <table class="data-table" id="tb_p2"><thead><tr><th>粉號</th><th>箱數/散粉</th><th>總量(kg)</th><th>安全值</th></tr></thead><tbody></tbody></table>
-        </div>
-    </div>
-
-    <div id="page3" class="page">
-        <div class="header-bar"><h3>3. 採購入庫流水帳</h3><button class="btn btn-secondary" onclick="nav('page_home')">返回首頁</button></div>
-        <div class="admin-only" style="background:#f8fafc; padding:15px; border-radius:8px;">
-            <div class="form-group"><label>日期：</label><input type="date" id="p3_date"></div>
-            <div class="form-group"><label>粉號：</label><select id="p3_id" class="powder-select"></select></div>
-            <div class="form-group"><label>進貨箱數：</label><input type="number" id="p3_box" value="0"></div>
-            <div class="form-group"><label>進貨散粉：</label><input type="number" id="p3_loose" value="0"></div>
-            <button class="btn btn-success" onclick="saveP3()">確認入庫 (自動加總庫存)</button>
-        </div>
-        <div class="file-ops admin-only"><input type="file" id="file_p3" accept=".csv" style="grid-column: span 2;"><button class="btn btn-primary" onclick="importCSV('purchase')">匯入 CSV</button><button class="btn btn-secondary" style="width:100%" onclick="exportCSV('purchase')">匯出 CSV</button></div>
-        <div style="max-height: 400px; overflow-y: auto;">
-            <table class="data-table" id="tb_p3"><thead><tr><th>日期</th><th>粉號</th><th>箱/散</th><th class="admin-only">操作</th></tr></thead><tbody></tbody></table>
-        </div>
-    </div>
-
-    <div id="page4" class="page">
-        <div class="header-bar"><h3>4. 出庫用量紀錄</h3><button class="btn btn-secondary" onclick="nav('page_home')">返回首頁</button></div>
-        <div class="admin-only" style="background:#f8fafc; padding:15px; border-radius:8px;">
-            <div class="form-group"><label>日期：</label><input type="date" id="p4_date"></div>
-            <div class="form-group"><label>粉號：</label><select id="p4_id" class="powder-select" onchange="linkP4()"></select></div>
-            <div class="form-group"><label>當前庫存：</label><input type="text" id="p4_current_stock" readonly style="color:var(--primary); font-weight:bold;"></div>
-            <div class="form-group"><label>領出箱數：</label><input type="number" id="p4_box" value="0"></div>
-            <div class="form-group"><label>領出散粉：</label><input type="number" id="p4_loose" value="0"></div>
-            <div class="form-group"><label>退回散粉：</label><input type="number" id="p4_return" value="0"></div>
-            <button class="btn btn-danger" onclick="saveP4()">確認出庫 (自動扣除庫存)</button>
-        </div>
-        <div class="file-ops admin-only"><input type="file" id="file_p4" accept=".csv" style="grid-column: span 2;"><button class="btn btn-primary" onclick="importCSV('usage')">匯入 CSV</button><button class="btn btn-secondary" style="width:100%" onclick="exportCSV('usage')">匯出 CSV</button></div>
-        <div style="max-height: 400px; overflow-y: auto;">
-            <table class="data-table" id="tb_p4"><thead><tr><th>日期</th><th>粉號</th><th>實際用量(kg)</th><th class="admin-only">操作</th></tr></thead><tbody></tbody></table>
-        </div>
-    </div>
-
-    <div id="page5" class="page">
-        <div class="header-bar"><h3>5. 快速查詢</h3><button class="btn btn-secondary" onclick="nav('page_home')">返回首頁</button></div>
-        <div class="form-group"><label>選擇粉號：</label><select id="p5_id" class="powder-select" onchange="queryP5()"></select></div>
-        <div id="p5_result" style="background:#e0f2fe; padding:15px; border-radius:8px; display:none; margin-top:10px;"></div>
-    </div>
-
-    <div id="page7" class="page">
-        <div class="header-bar"><h3>6. 廢粉紀錄流水帳</h3><button class="btn btn-secondary" onclick="nav('page_home')">返回首頁</button></div>
-        <div class="admin-only" style="background:#f8fafc; padding:15px; border-radius:8px;">
-            <div class="form-group"><label>日期：</label><input type="date" id="p7_date"></div>
-            <div class="form-group"><label>數量(桶)：</label><input type="number" id="p7_qty" placeholder="每桶預設 25kg"></div>
-            <button class="btn btn-success" onclick="saveP7()">新增廢粉紀錄</button>
-        </div>
-        <div class="file-ops admin-only"><input type="file" id="file_p7" accept=".csv" style="grid-column: span 2;"><button class="btn btn-primary" onclick="importCSV('waste')">匯入 CSV</button><button class="btn btn-secondary" style="width:100%" onclick="exportCSV('waste')">匯出 CSV</button></div>
-        <div style="max-height: 400px; overflow-y: auto;">
-            <table class="data-table" id="tb_p7"><thead><tr><th>日期</th><th>數量(桶)</th><th>總重(kg)</th><th class="admin-only">操作</th></tr></thead><tbody></tbody></table>
-        </div>
-    </div>
-
-    <div id="page8" class="page">
-        <div class="header-bar"><h3>7. 廢粉回收統計查詢</h3><button class="btn btn-secondary" onclick="nav('page_home')">返回首頁</button></div>
-        <div style="background:#fffdf0; padding:15px; border-radius:8px; border:1px solid #fef3c7; margin-bottom:15px;">
-            <h4 style="margin:0 0 10px 0; color:#78350f;">📊 廢粉重量分析</h4>
-            <p>累計總量: <strong id="waste_total_ton" style="font-size:18px; color:var(--danger)">0</strong> 噸</p>
-            <p>日平均: <span id="waste_avg_day">0</span> kg / 周平均: <span id="waste_avg_week">0</span> kg</p>
-        </div>
-        <button class="btn btn-secondary admin-only" onclick="exportCSV('waste')">匯出廢粉資料 (CSV)</button>
-    </div>
-</div>
-
-<script>
-    const ADMIN_PWD = "M0282";
-    let role = "viewer"; 
-    let localDB = { powder: {}, inventory: {}, purchase: {}, usage: {}, waste: {} };
-
-    // 取得今日日期
+    // 日期預設為今日
     const today = new Date().toISOString().split('T')[0];
-    document.querySelectorAll('input[type="date"]').forEach(el => el.value = today);
+    ['p3_date', 'p4_date', 'p7_date'].forEach(id => document.getElementById(id).value = today);
 
-    // --- 權限與 UI 控制 ---
-    function login(selectedRole) {
-        if (selectedRole === 'admin') {
-            const pwd = document.getElementById('adminPwd').value;
-            if (pwd !== ADMIN_PWD) return alert("密碼錯誤！");
+    // 監聽 Firebase 資料變化
+    onValue(ref(db), (snapshot) => {
+        if(snapshot.exists()) {
+            window.dbData = snapshot.val();
+            // 確保物件結構存在，避免 null 錯誤
+            ['powder','inventory','purchase','usage','waste'].forEach(k => { if(!window.dbData[k]) window.dbData[k] = {}; });
+            refreshUI();
+        } else {
+            // 第一次使用，初始化空結構
+            update(ref(db), { powder: {}, inventory: {}, purchase: {}, usage: {}, waste: {} });
         }
-        role = selectedRole;
+    });
+
+    // --- 登入與權限管理 ---
+    window.login = function(role) {
+        if(role === 'admin') {
+            if(document.getElementById('admin_pwd').value !== 'M0282') return alert('密碼錯誤！');
+            window.userRole = 'admin';
+        } else {
+            window.userRole = 'viewer';
+        }
         document.getElementById('loginOverlay').style.display = 'none';
-        applyPermissions();
-        initFirebaseSync();
-    }
-
-    function applyPermissions() {
-        const adminElements = document.querySelectorAll('.admin-only');
-        adminElements.forEach(el => { el.style.display = (role === 'admin') ? (el.tagName === 'TH' || el.tagName === 'TD' ? 'table-cell' : 'block') : 'none'; });
-        if(role === 'viewer') { document.querySelectorAll('.file-ops').forEach(el => el.style.display = 'none'); }
-    }
-
-    function nav(pageId) {
-        document.querySelectorAll('.page').forEach(el => el.classList.remove('active-page'));
-        document.getElementById(pageId).classList.add('active-page');
-    }
-
-    // --- 核心：Firebase 即時同步與渲染 ---
-    function initFirebaseSync() {
-        const dbRoot = window.dbRef(window.fbDB, '/');
-        window.dbOnValue(dbRoot, (snapshot) => {
-            const data = snapshot.val() || {};
-            localDB.powder = data.powder || {}; localDB.inventory = data.inventory || {};
-            localDB.purchase = data.purchase || {}; localDB.usage = data.usage || {}; localDB.waste = data.waste || {};
-            
-            document.getElementById('syncStatus').innerHTML = "🟢 雲端資料已同步";
-            updateDropdowns(); renderAllTables(); calcWasteStats();
-        });
-    }
-
-    function updateDropdowns() {
-        let html = '<option value="">請選擇粉號...</option>';
-        for(let id in localDB.powder) { html += `<option value="${id}">${id} (${localDB.powder[id].code})</option>`; }
-        document.querySelectorAll('.powder-select').forEach(el => { let currentVal = el.value; el.innerHTML = html; el.value = currentVal; });
-    }
-
-    function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
-
-    // --- 區塊 1: 粉號 ---
-    function saveP1() {
-        const id = document.getElementById("p1_id").value.trim(); const code = document.getElementById("p1_code").value.trim();
-        if(!id || !code) return alert("粉號與代號必填！");
-        window.dbSet(window.dbRef(window.fbDB, 'powder/' + id), {
-            code, color: document.getElementById("p1_color").value, weight: parseInt(document.getElementById("p1_weight").value), vendor: document.getElementById("p1_vendor").value
-        });
-        if(!localDB.inventory[id]) window.dbSet(window.dbRef(window.fbDB, 'inventory/' + id), { box: 0, loose: 0, safe: 100 });
-        alert("粉號已儲存至雲端！"); document.getElementById("p1_id").value = "";
-    }
-    function deleteData(path) { if(confirm("確定刪除此資料嗎？")) window.dbRemove(window.dbRef(window.fbDB, path)); }
-
-    // --- 區塊 2: 庫存監控 ---
-    function linkP2() { 
-        const id = document.getElementById("p2_id").value; 
-        if(id && localDB.inventory[id]) { 
-            document.getElementById("p2_box").value = localDB.inventory[id].box; 
-            document.getElementById("p2_loose").value = localDB.inventory[id].loose; 
-            document.getElementById("p2_safe").value = localDB.inventory[id].safe; 
-        } 
-    }
-    function saveP2() {
-        const id = document.getElementById("p2_id").value; if(!id) return alert("請選粉號");
-        window.dbSet(window.dbRef(window.fbDB, 'inventory/' + id), {
-            box: parseFloat(document.getElementById("p2_box").value)||0, loose: parseFloat(document.getElementById("p2_loose").value)||0, safe: parseFloat(document.getElementById("p2_safe").value)||0
-        });
-        alert("庫存盤點已更新！");
-    }
-
-    // --- 區塊 3 & 4: 入庫與出庫 ---
-    function linkP4() { // 自動抓取雲端當前庫存
-        const id = document.getElementById("p4_id").value;
-        if(id && localDB.inventory[id]) { document.getElementById("p4_current_stock").value = `${localDB.inventory[id].box} 箱 + ${localDB.inventory[id].loose} kg`; } 
-        else { document.getElementById("p4_current_stock").value = "無資料"; }
-    }
-    function saveP3() {
-        const date = document.getElementById("p3_date").value; const id = document.getElementById("p3_id").value;
-        const box = parseFloat(document.getElementById("p3_box").value)||0; const loose = parseFloat(document.getElementById("p3_loose").value)||0;
-        if(!id) return alert("請選粉號");
-        const uid = generateId();
-        window.dbSet(window.dbRef(window.fbDB, 'purchase/' + uid), { date, id, box, loose });
-        // 更新庫存
-        let inv = localDB.inventory[id] || {box:0, loose:0, safe:100};
-        window.dbUpdate(window.dbRef(window.fbDB, 'inventory/' + id), { box: inv.box + box, loose: inv.loose + loose });
-        alert("入庫成功！"); document.getElementById("p3_box").value=0; document.getElementById("p3_loose").value=0;
-    }
-    function saveP4() {
-        const date = document.getElementById("p4_date").value; const id = document.getElementById("p4_id").value;
-        const box = parseFloat(document.getElementById("p4_box").value)||0; const loose = parseFloat(document.getElementById("p4_loose").value)||0; const ret = parseFloat(document.getElementById("p4_return").value)||0;
-        if(!id) return alert("請選粉號");
-        const weight = localDB.powder[id] ? localDB.powder[id].weight : 25;
-        const usageAmount = (box * weight) + loose - ret;
-        const uid = generateId();
-        window.dbSet(window.dbRef(window.fbDB, 'usage/' + uid), { date, id, box, loose, return: ret, usage: usageAmount });
-        // 扣除庫存
-        let inv = localDB.inventory[id] || {box:0, loose:0, safe:100};
-        let newLoose = inv.loose - loose + ret;
-        window.dbUpdate(window.dbRef(window.fbDB, 'inventory/' + id), { box: Math.max(0, inv.box - box), loose: Math.max(0, newLoose) });
-        alert(`出庫成功！實際用量：${usageAmount}kg`); linkP4();
-    }
-
-    // --- 區塊 6 & 7: 廢粉 ---
-    function saveP7() {
-        const date = document.getElementById("p7_date").value; const qty = parseFloat(document.getElementById("p7_qty").value)||0;
-        if(qty <= 0) return alert("請輸入數量");
-        window.dbSet(window.dbRef(window.fbDB, 'waste/' + generateId()), { date, qty, total: qty * 25 });
-        alert("廢粉紀錄成功！"); document.getElementById("p7_qty").value = "";
-    }
-    function calcWasteStats() {
-        let total = 0; let count = 0;
-        for(let k in localDB.waste) { total += localDB.waste[k].total; count++; }
-        document.getElementById("waste_total_ton").innerText = (total / 1000).toFixed(3);
-        document.getElementById("waste_avg_day").innerText = count > 0 ? (total / count).toFixed(1) : 0;
-        document.getElementById("waste_avg_week").innerText = count > 0 ? ((total / count)*7).toFixed(1) : 0;
-    }
-
-    // --- 區塊 5: 查詢 ---
-    function queryP5() {
-        const id = document.getElementById("p5_id").value; const res = document.getElementById("p5_result");
-        if(!id) { res.style.display="none"; return; }
-        const p = localDB.powder[id]; const i = localDB.inventory[id] || {box:0, loose:0};
-        const totalKg = (p.weight * i.box) + i.loose;
-        res.style.display="block";
-        res.innerHTML = `<strong>代號:</strong> ${p.code} | <strong>廠商:</strong> ${p.vendor}<br><strong>當前總庫存:</strong> <span style="color:red;font-size:18px;font-weight:bold;">${totalKg.toFixed(2)} kg</span> (${i.box}箱 + ${i.loose}kg散粉)`;
-    }
-
-    // --- 表格渲染 ---
-    function renderAllTables() {
-        // P1
-        const t1 = document.querySelector("#tb_p1 tbody"); t1.innerHTML = "";
-        for(let id in localDB.powder) { let p = localDB.powder[id]; t1.innerHTML += `<tr><td>${id}</td><td>${p.code}</td><td>${p.weight}kg</td><td class="admin-only"><button class="btn btn-danger" style="padding:2px 5px;" onclick="deleteData('powder/${id}')">刪</button></td></tr>`; }
-        // P2
-        const t2 = document.querySelector("#tb_p2 tbody"); t2.innerHTML = "";
-        for(let id in localDB.inventory) { 
-            let p = localDB.powder[id]; if(!p) continue; let i = localDB.inventory[id]; let tot = p.weight * i.box + i.loose;
-            let style = tot < i.safe ? 'color:red;font-weight:bold;' : '';
-            t2.innerHTML += `<tr style="${style}"><td>${id}</td><td>${i.box}箱+${i.loose}kg</td><td>${tot}</td><td>${i.safe}</td></tr>`; 
-        }
-        // P3
-        const t3 = document.querySelector("#tb_p3 tbody"); t3.innerHTML = "";
-        for(let key in localDB.purchase) { let r = localDB.purchase[key]; t3.innerHTML += `<tr><td>${r.date}</td><td>${r.id}</td><td>${r.box}箱+${r.loose}kg</td><td class="admin-only"><button class="btn btn-danger" style="padding:2px 5px;" onclick="deleteData('purchase/${key}')">刪</button></td></tr>`; }
-        // P4
-        const t4 = document.querySelector("#tb_p4 tbody"); t4.innerHTML = "";
-        for(let key in localDB.usage) { let r = localDB.usage[key]; t4.innerHTML += `<tr><td>${r.date}</td><td>${r.id}</td><td style="color:var(--danger);font-weight:bold;">${r.usage}</td><td class="admin-only"><button class="btn btn-danger" style="padding:2px 5px;" onclick="deleteData('usage/${key}')">刪</button></td></tr>`; }
-        // P7
-        const t7 = document.querySelector("#tb_p7 tbody"); t7.innerHTML = "";
-        for(let key in localDB.waste) { let r = localDB.waste[key]; t7.innerHTML += `<tr><td>${r.date}</td><td>${r.qty}</td><td>${r.total}</td><td class="admin-only"><button class="btn btn-danger" style="padding:2px 5px;" onclick="deleteData('waste/${key}')">刪</button></td></tr>`; }
+        document.getElementById('homePage').style.display = 'block';
+        document.getElementById('roleDisplay').innerHTML = role === 'admin' ? '<span style="color:#ef4444">系統管理員</span>' : '<span style="color:#3b82f6">唯讀訪客</span>';
         
-        applyPermissions();
-    }
-
-// --- CSV 匯出/匯入 (批次處理優化版) ---
-function exportCSV(node) {
-    let data = localDB[node]; if(!data) return;
-    let csv = "\uFEFF";
-    let keys = Object.keys(data); if(keys.length === 0) return alert("無資料可匯出");
-    let headers = Object.keys(data[keys[0]]);
-    csv += "ID," + headers.join(",") + "\n";
-    for(let k in data) { csv += `"${k}",` + headers.map(h => `"${data[k][h]}"`).join(",") + "\n"; }
-    let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${node}_export.csv`; link.click();
-}
-
-function importCSV(node) {
-    // 建立每個區塊對應的 input 檔案欄位 ID
-    const fileMap = { 
-        powder: 'file_p1', 
-        inventory: 'file_p2', 
-        purchase: 'file_p3', 
-        usage: 'file_p4', 
-        waste: 'file_p7' 
-    };
-    
-    const fileInput = document.getElementById(fileMap[node]);
-    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-        return alert("請先選取 CSV 檔案！");
-    }
-
-    if (!confirm(`⚠️ 警告：匯入 CSV 將會「完全覆蓋」雲端上的【${node}】資料庫節點。\n建議您先點擊「匯出 CSV」做好備份。\n\n確定要繼續匯入嗎？`)) {
-        return;
-    }
-
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-        const text = e.target.result;
-        // 分割行數並過濾空白行
-        const lines = text.split("\n").filter(line => line.trim() !== "");
-        if (lines.length <= 1) return alert("檔案為空或格式錯誤！");
-
-        // 抓取表頭 (移除引號)
-        const headers = lines[0].split(",").map(h => h.replace(/^"|"$/g, '').trim());
-        const batchData = {}; // 準備要一次性上傳的大包裹
-
-        // 解析每一行資料
-        for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(",").map(v => v.replace(/^"|"$/g, '').trim());
-            const id = values[0]; // 預設第一欄是 ID 或 粉號
-            if (!id) continue;
-
-            let rowData = {};
-            for (let j = 1; j < headers.length; j++) {
-                let val = values[j];
-                // 如果是純數字字串，轉換為數字格式以確保資料庫型別正確
-                if (!isNaN(val) && val !== "") {
-                    val = Number(val);
-                } else if (val === "true") {
-                    val = true;
-                } else if (val === "false") {
-                    val = false;
-                }
-                rowData[headers[j]] = val;
-            }
-            batchData[id] = rowData;
+        // 切換按鈕與輸入框顯示
+        const adminEls = document.querySelectorAll('.admin-only');
+        adminEls.forEach(el => el.style.display = (window.userRole === 'admin') ? (el.tagName === 'TH' || el.tagName === 'TD' ? 'table-cell' : 'block') : 'none');
+        if(window.userRole === 'admin') {
+            document.querySelectorAll('.file-ops.admin-only').forEach(el => el.style.display = 'flex');
         }
+    }
 
-        // 關鍵：使用 dbSet 一次性覆蓋整個節點，避免迴圈連續呼叫造成伺服器警告
-        window.dbSet(window.dbRef(window.fbDB, node), batchData)
-            .then(() => {
-                alert("✅ 批次匯入成功！雲端資料庫已同步更新。");
-                fileInput.value = ""; // 清空檔案選擇器
-            })
-            .catch((error) => {
-                alert("❌ 匯入失敗，請檢查網路狀態：" + error.message);
-            });
-    };
+    // --- 頁面切換 ---
+    window.goPage = (p) => { document.querySelectorAll('.page').forEach(el => el.style.display='none'); document.getElementById('page'+p).style.display='block'; }
+    window.goHome = () => { document.querySelectorAll('.page').forEach(el => el.style.display='none'); document.getElementById('homePage').style.display='block'; }
 
-    reader.readAsText(file, "UTF-8");
-}
+    // --- 刷新介面 ---
+    function refreshUI() {
+        // 更新下拉選單
+        let optStr = '<option value="">請選擇...</option>';
+        for(let id in window.dbData.powder) { optStr += `<option value="${id}">${id} (${window.dbData.powder[id].code})</option>`; }
+        ['p2_id','p3_id','p4_id','p6_id'].forEach(elId => document.getElementById(elId).innerHTML = optStr);
+        
+        renderP1(); renderP2(); renderP3(); renderP4(); renderP7(); updateP8();
+        
+        // P5 日期選單
+        let dates = [...new Set(Object.values(window.dbData.usage).map(r => r.date))].sort().reverse();
+        document.getElementById('p5_date').innerHTML = '<option value="">請選擇日期</option>' + dates.map(d => `<option value="${d}">${d}</option>`).join('');
+    }
+
+    // --- P1 粉號 ---
+    window.saveP1 = function() {
+        let id = document.getElementById('p1_id').value.trim();
+        if(!id) return alert('需填寫粉號');
+        let payload = {
+            code: document.getElementById('p1_code').value,
+            color: document.getElementById('p1_color').value,
+            weight: Number(document.getElementById('p1_weight').value)
+        };
+        update(ref(db, `powder/${id}`), payload);
+        if(!window.dbData.inventory[id]) update(ref(db, `inventory/${id}`), { box: 0, loose: 0 }); // 初始化庫存
+        alert('儲存成功');
+    }
+    function renderP1() {
+        let h = '';
+        for(let id in window.dbData.powder) {
+            let p = window.dbData.powder[id];
+            h += `<tr><td>${id}</td><td>${p.code}</td><td>${p.weight}kg</td>
+                  <td class="admin-only"><button class="action-btn act-del" onclick="deleteNode('powder/${id}')">刪</button></td></tr>`;
+        }
+        document.querySelector('#t_p1 tbody').innerHTML = h;
+    }
+
+    // --- P2 庫存 ---
+    window.linkP2 = function() {
+        let id = document.getElementById('p2_id').value;
+        if(!id) return;
+        document.getElementById('p2_weight').value = window.dbData.powder[id].weight;
+        let inv = window.dbData.inventory[id] || {box:0, loose:0};
+        document.getElementById('p2_box').value = inv.box; document.getElementById('p2_loose').value = inv.loose;
+    }
+    window.saveP2 = function() {
+        let id = document.getElementById('p2_id').value;
+        if(!id) return alert('選擇粉號');
+        let payload = { box: Number(document.getElementById('p2_box').value), loose: Number(document.getElementById('p2_loose').value) };
+        update(ref(db, `inventory/${id}`), payload).then(() => alert('庫存更新成功'));
+    }
+    function renderP2() {
+        let h = '';
+        for(let id in window.dbData.inventory) {
+            if(!window.dbData.powder[id]) continue;
+            let w = window.dbData.powder[id].weight; let inv = window.dbData.inventory[id];
+            let total = (w * inv.box) + inv.loose;
+            h += `<tr><td>${id}</td><td style="font-weight:bold; color:#1e293b;">${total.toFixed(2)}</td></tr>`;
+        }
+        document.querySelector('#t_p2 tbody').innerHTML = h;
+    }
+
+    // --- P3 入庫 ---
+    window.saveP3 = function() {
+        let id = document.getElementById('p3_id').value; if(!id) return alert('選擇粉號');
+        let b = Number(document.getElementById('p3_box').value); let l = Number(document.getElementById('p3_loose').value);
+        let date = document.getElementById('p3_date').value;
+        
+        let updates = {};
+        let newKey = push(ref(db, 'purchase')).key;
+        updates[`purchase/${newKey}`] = { date, id, box: b, loose: l };
+        
+        let inv = window.dbData.inventory[id] || {box:0, loose:0};
+        updates[`inventory/${id}`] = { box: inv.box + b, loose: inv.loose + l };
+        
+        update(ref(db), updates).then(() => { alert('入庫成功'); document.getElementById('p3_box').value=0; document.getElementById('p3_loose').value=0; });
+    }
+    function renderP3() {
+        let h = '';
+        Object.entries(window.dbData.purchase).reverse().forEach(([k, r]) => {
+            h += `<tr><td>${r.date}</td><td>${r.id}</td><td>${r.box}箱 / ${r.loose}kg</td>
+                  <td class="admin-only"><button class="action-btn act-del" onclick="deleteNode('purchase/${k}')">撤</button></td></tr>`;
+        });
+        document.querySelector('#t_p3 tbody').innerHTML = h;
+    }
+
+    // --- P4 出庫 (包含即時抓取庫存) ---
+    window.fetchCurrentStockP4 = function() {
+        let id = document.getElementById('p4_id').value;
+        let stockField = document.getElementById('p4_current_stock');
+        if(!id) { stockField.value = ""; return; }
+        
+        // 抓取雲端已同步在本地端的最新庫存
+        let inv = window.dbData.inventory[id];
+        if(inv) {
+            stockField.value = `${inv.box} 箱 + ${inv.loose} kg (散粉)`;
+        } else {
+            stockField.value = "無庫存紀錄";
+        }
+    }
+    window.saveP4 = function() {
+        let id = document.getElementById('p4_id').value; if(!id) return alert('選擇粉號');
+        let b = Number(document.getElementById('p4_box').value); let l = Number(document.getElementById('p4_loose').value); let r = Number(document.getElementById('p4_ret').value);
+        let date = document.getElementById('p4_date').value;
+        let w = window.dbData.powder[id].weight;
+        let actualUsage = (b * w) + l - r;
+        
+        let updates = {};
+        let newKey = push(ref(db, 'usage')).key;
+        updates[`usage/${newKey}`] = { date, id, box: b, loose: l, ret: r, usage: actualUsage };
+        
+        let inv = window.dbData.inventory[id] || {box:0, loose:0};
+        let newLoose = inv.loose - l + r;
+        updates[`inventory/${id}`] = { box: inv.box - b, loose: newLoose < 0 ? 0 : newLoose };
+        
+        update(ref(db), updates).then(() => { 
+            alert(`出庫成功！實際扣減用量為 ${actualUsage} kg`); 
+            ['p4_box','p4_loose','p4_ret'].forEach(eid=>document.getElementById(eid).value=0);
+            fetchCurrentStockP4(); // 更新顯示
+        });
+    }
+    function renderP4() {
+        let h = '';
+        Object.entries(window.dbData.usage).reverse().forEach(([k, r]) => {
+            h += `<tr><td>${r.date}</td><td>${r.id}</td><td style="color:#ef4444;font-weight:bold;">${r.usage.toFixed(2)}</td>
+                  <td class="admin-only"><button class="action-btn act-del" onclick="deleteNode('usage/${k}')">刪</button></td></tr>`;
+        });
+        document.querySelector('#t_p4 tbody').innerHTML = h;
+    }
+
+    // --- P5 & P6 查詢 ---
+    window.queryP5 = function() {
+        let d = document.getElementById('p5_date').value; let h = '';
+        Object.values(window.dbData.usage).filter(r => r.date === d).forEach(r => {
+            let code = window.dbData.powder[r.id]?.code || '';
+            h += `<tr><td>${r.id}</td><td>${code}</td><td style="color:#ef4444;font-weight:bold;">${r.usage.toFixed(2)}</td></tr>`;
+        });
+        document.querySelector('#t_p5 tbody').innerHTML = h;
+    }
+    window.queryP6 = function() {
+        let id = document.getElementById('p6_id').value; let res = document.getElementById('p6_result');
+        if(!id) { res.style.display = 'none'; return; }
+        let p = window.dbData.powder[id]; let inv = window.dbData.inventory[id] || {box:0, loose:0};
+        let total = p.weight * inv.box + inv.loose;
+        res.innerHTML = `<strong>代號：</strong>${p.code} <br><strong>目前規格：</strong>${inv.box} 箱 + ${inv.loose} kg<br><span style="font-size:20px;color:#ef4444;font-weight:bold;display:block;margin-top:10px;">總計庫存: ${total.toFixed(2)} kg</span>`;
+        res.style.display = 'block';
+    }
+
+    // --- P7 & P8 廢粉 ---
+    window.saveP7 = function() {
+        let d = document.getElementById('p7_date').value; let q = Number(document.getElementById('p7_qty').value);
+        if(!q) return alert('填寫數量');
+        let newKey = push(ref(db, 'waste')).key;
+        update(ref(db, `waste/${newKey}`), { date: d, qty: q, weight: q * 25 });
+        document.getElementById('p7_qty').value = '';
+    }
+    function renderP7() {
+        let h = '';
+        Object.entries(window.dbData.waste).reverse().forEach(([k, r]) => {
+            h += `<tr><td>${r.date}</td><td>${r.qty} 桶</td><td>${r.weight}</td>
+                  <td class="admin-only"><button class="action-btn act-del" onclick="deleteNode('waste/${k}')">刪</button></td></tr>`;
+        });
+        document.querySelector('#t_p7 tbody').innerHTML = h;
+    }
+    function updateP8() {
+        let total = Object.values(window.dbData.waste).reduce((sum, r) => sum + r.weight, 0);
+        let ton = (total / 1000).toFixed(2);
+        document.getElementById('p8_total_tons').innerText = ton + " 噸";
+        let alertEl = document.getElementById('p8_alert');
+        if(ton >= 10) alertEl.innerHTML = "⚠️ 已達到或超過 10 噸回收標準，請聯絡清運！";
+        else alertEl.innerHTML = `距離 10 噸目標還差 ${(10 - ton).toFixed(2)} 噸`;
+    }
+
+    // --- 共用刪除 ---
+    window.deleteNode = function(path) {
+        if(confirm('確定刪除此紀錄？\n注意：出入庫刪除不會自動回補庫存數，如有需要請手動至「2.庫存監控」盤點修改。')) {
+            remove(ref(db, path));
+        }
+    }
+
+    // --- CSV 匯出 / 匯入 (批次處理優化版) ---
+    window.exportCSV = function(node) {
+        let data = window.dbData[node]; if(!data || Object.keys(data).length===0) return alert('無資料');
+        let csv = '\uFEFF'; // BOM
+        let keys = Object.keys(data); let headers = ['DB_KEY', ...Object.keys(data[keys[0]])];
+        csv += headers.join(',') + '\n';
+        for(let k in data) { csv += `"${k}",` + Object.keys(data[keys[0]]).map(h => `"${data[k][h]}"`).join(',') + '\n'; }
+        let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+        a.download = `${node}_export.csv`; a.click();
+    }
+
+    window.importCSV = function(node, inputId) {
+        const file = document.getElementById(inputId).files[0];
+        if(!file) return alert('請先選擇 CSV 檔案');
+        if(!confirm(`⚠️ 匯入將「覆蓋更新」雲端 ${node} 節點內對應的資料！確定嗎？`)) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            let lines = e.target.result.split("\n").filter(l => l.trim() !== "");
+            if(lines.length < 2) return alert('格式錯誤或空檔');
+            
+            let headers = lines[0].split(",").map(h => h.replace(/"/g, '').trim());
+            let batchUpdates = {}; // ★★★ 關鍵：宣告一個更新物件準備一次性上傳
+
+            for(let i=1; i<lines.length; i++) {
+                let cols = lines[i].split(",").map(c => c.replace(/"/g, '').trim());
+                let key = cols[0]; // 第一欄預設為 DB_KEY
+                if(!key) continue;
+                
+                let rowData = {};
+                for(let j=1; j<headers.length; j++) {
+                    let val = cols[j];
+                    if(!isNaN(val) && val !== "") val = Number(val); // 轉數字
+                    rowData[headers[j]] = val;
+                }
+                // 寫入批次包
+                batchUpdates[`${node}/${key}`] = rowData;
+            }
+
+            // ★★★ 關鍵：使用 update 執行 Firebase 一次性寫入 (Atomic Write)
+            // 這樣不會觸發連續寫入導致的「警告或漏單」！
+            update(ref(db), batchUpdates).then(() => {
+                alert(`✅ 批次匯入成功！共更新 ${Object.keys(batchUpdates).length} 筆資料`);
+                document.getElementById(inputId).value = "";
+            }).catch(err => alert("匯入失敗: " + err));
+        }
+        reader.readAsText(file, "UTF-8");
+    }
 
 </script>
 </body>
