@@ -475,29 +475,67 @@
     }
 
     function importCSV(node, inputId) {
-        const file = document.getElementById(inputId).files[0];
-        if(!file) return alert("請先選擇要匯入的 CSV 檔案");
-        const reader = new FileReader();
-        reader.onload = function(e) {
+    const file = document.getElementById(inputId).files[0];
+    if(!file) return alert("請先選擇要匯入的 CSV 檔案");
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        // 加入 try...catch 捕捉所有意外錯誤，避免畫面死機
+        try {
             let lines = e.target.result.split('\n').filter(l => l.trim().length > 0);
-            
-            // 修正點：使用 updates 打包所有變更，單次請求寫入 (解決 Firebase 阻擋警告)
             let updates = {}; 
             
             for(let i = 1; i < lines.length; i++) {
                 let cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
-                if(node === 'powder' && cols.length>=3) updates[`/${node}/${cols[0]}`] = { code: cols[1], weight: Number(cols[2]) };
-                if(node === 'inventory' && cols.length>=3) updates[`/${node}/${cols[0]}`] = { box: Number(cols[1]), loose: Number(cols[2]) };
-                if((node === 'purchase' || node === 'usage') && cols.length>=4) updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], id: cols[1], box: Number(cols[2]), loose: Number(cols[3]) };
-                if(node === 'waste' && cols.length>=2) updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], qty: Number(cols[1]) };
+                
+                if(node === 'powder' && cols.length >= 3) {
+                    let weight = Number(cols[2]);
+                    // isNaN 防呆：如果不是數字，預設給 0 或 25，防止 Firebase 崩潰
+                    updates[`/${node}/${cols[0]}`] = { code: cols[1], weight: isNaN(weight) ? 0 : weight };
+                }
+                else if(node === 'inventory' && cols.length >= 3) {
+                    let box = Number(cols[1]);
+                    let loose = Number(cols[2]);
+                    updates[`/${node}/${cols[0]}`] = { box: isNaN(box) ? 0 : box, loose: isNaN(loose) ? 0 : loose };
+                }
+                else if((node === 'purchase' || node === 'usage') && cols.length >= 4) {
+                    let box = Number(cols[2]);
+                    let loose = Number(cols[3]);
+                    updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], id: cols[1], box: isNaN(box) ? 0 : box, loose: isNaN(loose) ? 0 : loose };
+                }
+                else if(node === 'waste' && cols.length >= 2) {
+                    let qty = Number(cols[1]);
+                    updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], qty: isNaN(qty) ? 0 : qty };
+                }
+            }
+            
+            // 核心修復：防止空物件上傳導致 Firebase 拋出同步錯誤
+            if(Object.keys(updates).length === 0) {
+                return alert("❌ 沒有找到可以匯入的資料！\n請檢查 CSV 格式是否正確，或檔案是否只有標題列。");
             }
             
             db.ref().update(updates)
-                .then(() => { alert("✅ CSV 批次匯入成功！"); document.getElementById(inputId).value = ''; })
-                .catch(error => { alert("❌ 匯入失敗: " + error.message); });
-        };
-        reader.readAsText(file);
-    }
+                .then(() => { 
+                    alert("✅ CSV 批次匯入成功！"); 
+                    document.getElementById(inputId).value = ''; 
+                })
+                .catch(error => { 
+                    alert("❌ 匯入失敗: " + error.message); 
+                });
+
+        } catch (err) {
+            // 讓錯誤以視窗顯示，不再默默卡死
+            alert("❌ 處理檔案時發生錯誤: " + err.message);
+            console.error("CSV 解析錯誤詳情:", err);
+        }
+    };
+    
+    // 💡 台灣地區常見問題補充：
+    // 如果您用 Excel 存 CSV 並匯入，發現第一行的中文字變成亂碼（導致解析失敗）
+    // 請將下一行改為：reader.readAsText(file, 'Big5');
+    reader.readAsText(file);
+}
+
 </script>
 </body>
 </html>
