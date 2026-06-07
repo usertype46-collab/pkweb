@@ -338,40 +338,84 @@
     </div>
 
 <script>
-    /* ==========================================
-       1. 系統與 Firebase 核心設定
-       ========================================== */
-    // 【重要說明】：請在此處填入您 Firebase 專案的 Config。
-    // 如果您尚未建立，請至 Firebase Console (console.firebase.google.com) 建立專案並啟用 Realtime Database。
-    const firebaseConfig = {
-        apiKey: "AIzaSyDTIMGBYqAqOpFcCqEMjWWUwC_nPAfQ9ko",
+    /* /* ==========================================
+   1. 系統與 Firebase 核心設定
+   ========================================== */
+const firebaseConfig = {
+    // 請填入您實際的 Firebase Config
+    apiKey: "AIzaSyDTIMGBYqAqOpFcCqEMjWWUwC_nPAfQ9ko",
         authDomain: "paint-system-21867.firebaseapp.com",
         databaseURL: "https://paint-system-21867-default-rtdb.firebaseio.com",
         projectId: "paint-system-21867",
         storageBucket: "paint-system-21867.firebasestorage.app",
         messagingSenderId: "855614444799",
         appId: "1:855614444799:web:db649669302532ea4aa8ca"
-    };
+};
 
-    // 判斷是否設定了 Firebase (為了防止未填寫時報錯，加入防呆)
-    let dbRef = null;
-    if (firebaseConfig.apiKey !== "AIzaSyDTIMGBYqAqOpFcCqEMjWWUwC_nPAfQ9ko") {
-        firebase.initializeApp(firebaseConfig);
-        dbRef = firebase.database().ref("PaintSystem");
-    } else {
-        console.warn("尚未設定 Firebase Config！系統將使用瀏覽器記憶體進行模擬，重整後資料會消失。請填入 Config 以啟用雲端儲存。");
-        // 模擬的本地 Reference 物件 (僅供介面測試)
-        dbRef = createMockDbRef();
+// 初始化
+if (firebaseConfig.apiKey !== "AIzaSyDTIMGBYqAqOpFcCqEMjWWUwC_nPAfQ9ko") {
+    firebase.initializeApp(firebaseConfig);
+    dbRef = firebase.database().ref("PaintSystem");
+} else {
+    dbRef = createMockDbRef(); // 測試模式
+}
+
+let appState = { role: 'viewer', db: { powder: {}, inventory: {}, purchase: {}, usage: {}, waste: {}, settings: { wasteResetTime: 0 } } };
+let editState = { p1: null, p3: null, p4: null, p7: null };
+
+/* ==========================================
+   2. CSV 匯入匯出功能 (補齊全區塊)
+   ========================================== */
+function exportCSV(mod) {
+    let csv = "\uFEFF";
+    let filename = mod + "_data.csv";
+    if(mod === 'p1') { 
+        csv += "粉號,代號,色系,淨重,廠商\n"; 
+        for(let id in appState.db.powder){ let p=appState.db.powder[id]; csv+=`"${id}","${p.code}","${p.color}","${p.weight}","${p.vendor}"\n`;} 
+    } else if(mod === 'p3') {
+        csv += "日期,粉號,代號,箱數,散粉,總重\n";
+        for(let id in appState.db.purchase){ let r=appState.db.purchase[id]; csv+=`"${r.date}","${r.id}","${r.code}","${r.box}","${r.loose}","${r.total}"\n`; }
+    } else if(mod === 'p4') {
+        csv += "日期,粉號,代號,箱數,散粉,退回,消耗\n";
+        for(let id in appState.db.usage){ let r=appState.db.usage[id]; csv+=`"${r.date}","${r.id}","${r.code}","${r.box}","${r.loose}","${r.returned}","${r.usage}"\n`; }
+    } else if(mod === 'p7') {
+        csv += "日期,數量,總重\n";
+        for(let id in appState.db.waste){ let r=appState.db.waste[id]; csv+=`"${r.date}","${r.qty}","${r.total}"\n`; }
     }
+    
+    let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.setAttribute("download", filename);
+    link.click();
+}
 
-    // 系統狀態
-    let appState = {
-        role: 'viewer', // 'admin' 或 'viewer'
-        db: { powder: {}, inventory: {}, purchase: {}, usage: {}, waste: {}, settings: { wasteResetTime: 0 } }
+function importCSV(mod) {
+    if(appState.role !== 'admin') return;
+    const fileInput = document.getElementById(`csv_${mod}`);
+    if(!fileInput.files.length) return alert("請選擇檔案");
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        let lines = e.target.result.split("\n").slice(1); // 跳過標題
+        lines.forEach(line => {
+            let cols = line.split(",").map(c => c.replace(/^"|"$/g, ''));
+            if(cols.length < 2) return;
+            if(mod === 'p1') dbRef.child("powder").child(cols[0]).set({code:cols[1], color:cols[2], weight:parseInt(cols[3]), vendor:cols[4]});
+            if(mod === 'p3') dbRef.child("purchase").push({date:cols[0], id:cols[1], code:cols[2], box:parseFloat(cols[3]), loose:parseFloat(cols[4]), total:parseFloat(cols[5])});
+        });
+        showToast("✅ 匯入完成");
     };
+    reader.readAsText(fileInput.files[0], "UTF-8");
+}
 
-    // 編輯狀態紀錄
-    let editState = { p1: null, p3: null, p4: null, p7: null };
+/* ==========================================
+   3. 刪除與單筆操作 (確保資料庫聯動)
+   ========================================== */
+function deleteRecord(mod, id) {
+    if(appState.role !== 'admin' || !confirm("確定刪除此紀錄？")) return;
+    dbRef.child(mod).child(id).remove().then(() => showToast("🗑️ 紀錄已移除"));
+}
+
+// 其餘所有原本的 CRUD 函數 (saveP1, saveP3, saveP4, etc.) 
+// 請維持原樣，確保它們都指向 dbRef.child(mod).child(id).set(...)
 
     // 預設日期
     const today = new Date().toISOString().split('T')[0];
