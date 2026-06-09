@@ -427,8 +427,8 @@
 
 <div class="container">
     <div class="header-bar">
-        <div>即時狀態 STATUS: <span class="status-badge" id="syncStatus">● 連線中 CONNECTING...</span></div>
-        <div>當前權限 AUTH: <span class="role-badge" id="roleDisplay">未登入 OFFLINE</span></div>
+        <div>即時狀態 : <span class="status-badge" id="syncStatus">● 連線中 ...</span></div>
+        <div>當前權限 : <span class="role-badge" id="roleDisplay">未登入 </span></div>
     </div>
 
     <div id="homePage" class="page" style="display: block;">
@@ -448,67 +448,67 @@
     <div id="page1" class="page">
         <div class="page-title"><span>📝 1. 烤漆粉號清冊 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>粉號 ID：</label><input type="text" id="p1_id" placeholder="例如：P-101"></div>
-            <div class="form-group"><label>代號 CODE：</label><input type="text" id="p1_code" placeholder="廠商辨識代號"></div>
-            <div class="form-group"><label>色系 COLOR：</label><input type="text" id="p1_color" placeholder="例如：黑色/白色/陽極發色"></div>
-            <div class="form-group"><label>淨重 WEIGHT (KG)：</label><input type="number" id="p1_weight" value="25"></div>
-            <div class="form-group"><label>廠商 SUPPLIER：</label><input type="text" id="p1_supplier"></div>
+            <div class="form-group"><label>粉號 ：</label><input type="text" id="p1_id" placeholder="例如：P-101"></div>
+            <div class="form-group"><label>代號 ：</label><input type="text" id="p1_code" placeholder="廠商辨識代號"></div>
+            <div class="form-group"><label>色系 ：</label><input type="text" id="p1_color" placeholder="例如：黑色/白色/陽極發色"></div>
+            <div class="form-group"><label>淨重  (KG)：</label><input type="number" id="p1_weight" value="25"></div>
+            <div class="form-group"><label>廠商 ：</label><input type="text" id="p1_supplier"></div>
             <button class="btn btn-success" id="btn_saveP1" onclick="saveP1()">新增 / 更新粉號資料 </button>
         </div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p1" accept=".csv">
             <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('powder', 'file_p1')">匯入 IMPORT</button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('powder')">匯出 EXPORT</button>
+                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('powder', 'file_p1')">匯入 </button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('powder')">匯出 </button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p1"><thead><tr><th>粉號 ID</th><th>代號 CODE</th><th>色系 COLOR</th><th>淨重 N.W.</th><th>廠商 SUPPLIER</th><th class="admin-only">操作 ACTION</th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p1"><thead><tr><th>粉號 </th><th>代號 </th><th>色系 </th><th>淨重 </th><th>廠商 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page2" class="page">
         <div class="page-title"><span>📦 2. 庫存盤點監控 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>粉號 ID：</label><select id="p2_id"></select></div>
-            <div class="form-group"><label>現存箱數 BOX：</label><input type="number" id="p2_box"></div>
-            <div class="form-group"><label>現存散粉 LOOSE (KG)：</label><input type="number" id="p2_loose"></div>
+            <div class="form-group"><label>粉號 ：</label><select id="p2_id"></select></div>
+            <div class="form-group"><label>現存箱數 ：</label><input type="number" id="p2_box"></div>
+            <div class="form-group"><label>現存散粉  (KG)：</label><input type="number" id="p2_loose"></div>
             <button class="btn btn-success" onclick="saveP2()">強制覆寫盤點庫存 </button>
         </div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p2" accept=".csv">
             <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('inventory', 'file_p2')">匯入 IMPORT</button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('inventory')">匯出 EXPORT</button>
+                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('inventory', 'file_p2')">匯入 </button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('inventory')">匯出 </button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p2"><thead><tr><th>粉號 ID</th><th>箱數 BOX</th><th>散粉 LOOSE (KG)</th><th>總重 TOTAL (KG)</th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p2"><thead><tr><th>粉號 </th><th>箱數 </th><th>散粉  (KG)</th><th>總重  (KG)</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page3" class="page">
         <div class="page-title"><span>📥 3. 採購入庫流水帳 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>日期 DATE：</label><input type="date" id="p3_date"></div>
-            <div class="form-group"><label>粉號 ID：</label><select id="p3_id"></select></div>
-            <div class="form-group"><label>進貨箱數 BOX：</label><input type="number" id="p3_box" value="0"></div>
-            <div class="form-group"><label>進貨散粉 LOOSE (KG)：</label><input type="number" id="p3_loose" value="0"></div>
-            <button class="btn btn-success" id="btn_saveP3" onclick="saveP3()">確認入庫 COMMIT INBOUND</button>
+            <div class="form-group"><label>日期 ：</label><input type="date" id="p3_date"></div>
+            <div class="form-group"><label>粉號 ：</label><select id="p3_id"></select></div>
+            <div class="form-group"><label>進貨箱數 ：</label><input type="number" id="p3_box" value="0"></div>
+            <div class="form-group"><label>進貨散粉  (KG)：</label><input type="number" id="p3_loose" value="0"></div>
+            <button class="btn btn-success" id="btn_saveP3" onclick="saveP3()">確認入庫 </button>
         </div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p3" accept=".csv">
             <div style="display: flex; gap: 8px;">
                 <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('purchase', 'file_p3')">匯入 IMPORT</button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('purchase')">匯出 EXPORT</button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('purchase')">匯出 </button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p3"><thead><tr><th>日期 DATE</th><th>粉號 ID</th><th>入箱數 BOX</th><th>入散粉 LOOSE</th><th class="admin-only">操作 ACTION</th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p3"><thead><tr><th>日期 </th><th>粉號 </th><th>入箱數 </th><th>入散粉 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page4" class="page">
         <div class="page-title"><span>📤 4. 出庫用量紀錄 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>日期 DATE：</label><input type="date" id="p4_date"></div>
-            <div class="form-group"><label>選擇粉號 SELECT ID：</label><select id="p4_id" onchange="fetchCurrentStock()"></select></div>
-            <div class="form-group"><label>當前剩餘庫存 STOCK：</label><input type="text" id="p4_stock" readonly placeholder="請先選擇上方粉號"></div>
-            <div class="form-group"><label>領出箱數 OUT BOX：</label><input type="number" id="p4_box" value="0" oninput="calcP4Usage()"></div>
+            <div class="form-group"><label>日期 ：</label><input type="date" id="p4_date"></div>
+            <div class="form-group"><label>選擇粉號 ：</label><select id="p4_id" onchange="fetchCurrentStock()"></select></div>
+            <div class="form-group"><label>當前剩餘庫存 ：</label><input type="text" id="p4_stock" readonly placeholder="請先選擇上方粉號"></div>
+            <div class="form-group"><label>領出箱數 ：</label><input type="number" id="p4_box" value="0" oninput="calcP4Usage()"></div>
             <div class="form-group"><label>領出散粉 (KG)：</label><input type="number" id="p4_loose" value="0" oninput="calcP4Usage()"></div>
             <div class="form-group"><label>回庫散粉 (KG)：</label><input type="number" id="p4_return" value="0" oninput="calcP4Usage()"></div>
             <div class="form-group"><label>🔥 實際用量 (KG)：</label><input type="text" id="p4_usage" readonly placeholder="自動動態計算 (領出-回庫)"></div>
@@ -517,17 +517,17 @@
         <div class="file-ops admin-only">
             <input type="file" id="file_p4" accept=".csv">
             <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('usage', 'file_p4')">匯入 IMPORT</button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('usage')">匯出 EXPORT</button>
+                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('usage', 'file_p4')">匯入 </button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('usage')">匯出 </button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p4"><thead><tr><th>日期 DATE</th><th>粉號 ID</th><th>領箱數 BOX</th><th>領散粉 LOOSE</th><th>回庫 RTN</th><th>用量 USAGE</th><th class="admin-only">操作 ACTION</th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p4"><thead><tr><th>日期 </th><th>粉號 </th><th>領箱數 </th><th>領散粉 </th><th>回庫 </th><th>用量 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page5" class="page">
         <div class="page-title"><span>📅 5. 用量紀錄查詢 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
-        <div class="card-form"><div class="form-group"><label>選擇日期 DATE：</label><select id="p5_date" onchange="renderP5()"></select></div></div>
-        <div class="data-container"><table class="data-table" id="tb_p5"><thead><tr><th>粉號 ID</th><th>領箱數 BOX</th><th>領散粉 LOOSE</th><th>回庫 RTN</th><th>總用量 TOTAL</th></tr></thead><tbody></tbody></table></div>
+        <div class="card-form"><div class="form-group"><label>選擇日期 ：</label><select id="p5_date" onchange="renderP5()"></select></div></div>
+        <div class="data-container"><table class="data-table" id="tb_p5"><thead><tr><th>粉號 </th><th>領箱數 </th><th>領散粉 </th><th>回庫 </th><th>總用量 </th></tr></thead><tbody></tbody></table></div>
     </div>
     
     <div id="page6" class="page">
@@ -545,18 +545,18 @@
     <div id="page7" class="page">
         <div class="page-title"><span>♻️ 7. 廢粉回收紀錄 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>日期 DATE：</label><input type="date" id="p7_date"></div>
-            <div class="form-group"><label>回收桶數 QTY：</label><input type="number" id="p7_qty" placeholder="每桶預設為 25 KG"></div>
+            <div class="form-group"><label>日期 ：</label><input type="date" id="p7_date"></div>
+            <div class="form-group"><label>回收桶數 ：</label><input type="number" id="p7_qty" placeholder="每桶預設為 25 KG"></div>
             <button class="btn btn-success" id="btn_saveP7" onclick="saveP7()">新增 / 更新廢粉紀錄 </button>
         </div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p7" accept=".csv">
             <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('waste', 'file_p7')">匯入 IMPORT</button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('waste')">匯出 EXPORT</button>
+                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('waste', 'file_p7')">匯入 </button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('waste')">匯出 </button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p7"><thead><tr><th>日期 DATE</th><th>桶數 QTY</th><th>估算重量 EST.WT</th><th class="admin-only">操作 ACTION</th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p7"><thead><tr><th>日期 </th><th>桶數 </th><th>估算重量 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page8" class="page">
@@ -620,8 +620,8 @@
         
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('roleDisplay').innerHTML = role === 'admin' 
-            ? '<span style="color:var(--danger-color); font-weight:bold; text-shadow:0 0 10px rgba(255,51,102,0.5);">管理員 ADMIN</span>' 
-            : '<span style="color:var(--text-muted)">檢視者 VIEWER</span>';
+            ? '<span style="color:var(--danger-color); font-weight:bold; text-shadow:0 0 10px rgba(255,51,102,0.5);">管理員 </span>' 
+            : '<span style="color:var(--text-muted)">檢視者 </span>';
         
         applyPermissions();
     }
@@ -659,7 +659,7 @@
             ['powder','inventory','purchase','usage','waste'].forEach(k => { if(!dbData[k]) dbData[k] = {}; });
             
             const statusEl = document.getElementById('syncStatus');
-            statusEl.innerText = "● 已連線 LIVE SYNC";
+            statusEl.innerText = "● 已連線 ";
             statusEl.style.borderColor = "rgba(0, 255, 204, 0.4)";
             statusEl.style.color = "var(--success-color)";
             
@@ -672,7 +672,7 @@
     setTimeout(() => {
         if(document.getElementById('syncStatus').innerText.includes("連線中")) {
             const statusEl = document.getElementById('syncStatus');
-            statusEl.innerText = "✖ 連線失敗 ERROR";
+            statusEl.innerText = "✖ 連線失敗 ";
             statusEl.style.background = "rgba(255, 51, 102, 0.1)";
             statusEl.style.borderColor = "rgba(255, 51, 102, 0.4)";
             statusEl.style.color = "var(--danger-color)";
@@ -680,7 +680,7 @@
     }, 5000);
 
     function refreshAllUI() {
-        let optHtml = '<option value="">請點擊下拉選擇粉號或代號 SELECT ID...</option>';
+        let optHtml = '<option value="">請點擊下拉選擇粉號或代號 ...</option>';
         for (let id in dbData.powder) { 
             let code = dbData.powder[id].code ? ` [${dbData.powder[id].code}]` : '';
             optHtml += `<option value="${id}">${id}${code}</option>`; 
@@ -701,7 +701,7 @@
         let htmlP1 = '';
         for(let id in dbData.powder) {
             let d = dbData.powder[id];
-            htmlP1 += `<tr><td><strong>${id}</strong></td><td>${d.code || '-'}</td><td>${d.color_system || '-'}</td><td>${d.weight || 25} KG</td><td>${d.supplier || '-'}</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP1('${id}')">修改 EDIT</button><button class="action-btn" onclick="delData('powder', '${id}')">刪除 DEL</button></td></tr>`;
+            htmlP1 += `<tr><td><strong>${id}</strong></td><td>${d.code || '-'}</td><td>${d.color_system || '-'}</td><td>${d.weight || 25} KG</td><td>${d.supplier || '-'}</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP1('${id}')">修改 </button><button class="action-btn" onclick="delData('powder', '${id}')">刪除 </button></td></tr>`;
         }
         document.querySelector('#tb_p1 tbody').innerHTML = htmlP1;
 
@@ -718,21 +718,21 @@
         // P3 入庫流水帳
         let htmlP3 = '';
         Object.entries(dbData.purchase || {}).reverse().forEach(([key, r]) => {
-            htmlP3 += `<tr><td>${r.date}</td><td><strong>${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP3('${key}')">修改 EDIT</button><button class="action-btn" onclick="delData('purchase', '${key}')">刪除 DEL</button></td></tr>`;
+            htmlP3 += `<tr><td>${r.date}</td><td><strong>${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP3('${key}')">修改 </button><button class="action-btn" onclick="delData('purchase', '${key}')">刪除 </button></td></tr>`;
         });
         document.querySelector('#tb_p3 tbody').innerHTML = htmlP3;
 
         // P4 出庫用量紀錄
         let htmlP4 = '';
         Object.entries(dbData.usage || {}).reverse().forEach(([key, r]) => {
-            htmlP4 += `<tr><td>${r.date}</td><td><strong>${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td><td style="font-weight:900; color:var(--warning-color); font-size:15px;">${r.usage_qty || 0} COMPLETED</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP4('${key}')">修改 EDIT</button><button class="action-btn" onclick="delData('usage', '${key}')">刪除 DEL</button></td></tr>`;
+            htmlP4 += `<tr><td>${r.date}</td><td><strong>${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td><td style="font-weight:900; color:var(--warning-color); font-size:15px;">${r.usage_qty || 0} COMPLETED</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP4('${key}')">修改 </button><button class="action-btn" onclick="delData('usage', '${key}')">刪除 </button></td></tr>`;
         });
         document.querySelector('#tb_p4 tbody').innerHTML = htmlP4;
 
         // P7 廢粉紀錄
         let htmlP7 = '';
         Object.entries(dbData.waste || {}).reverse().forEach(([key, r]) => {
-            htmlP7 += `<tr><td>${r.date}</td><td><strong>${r.qty}</strong></td><td>${r.qty * 25} KG</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP7('${key}')">修改 EDIT</button><button class="action-btn" onclick="delData('waste', '${key}')">刪除 DEL</button></td></tr>`;
+            htmlP7 += `<tr><td>${r.date}</td><td><strong>${r.qty}</strong></td><td>${r.qty * 25} KG</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP7('${key}')">修改 </button><button class="action-btn" onclick="delData('waste', '${key}')">刪除 </button></td></tr>`;
         });
         document.querySelector('#tb_p7 tbody').innerHTML = htmlP7;
 
@@ -758,8 +758,8 @@
         document.getElementById('p1_id').value = ''; document.getElementById('p1_code').value = ''; 
         document.getElementById('p1_color').value = ''; document.getElementById('p1_supplier').value = '';
         document.getElementById('p1_id').readOnly = false;
-        document.getElementById('btn_saveP1').innerText = "新增 / 更新粉號資料 SAVE POWDER";
-        alert('✅ 資料儲存成功！ DATA SAVED');
+        document.getElementById('btn_saveP1').innerText = "新增 / 更新粉號資料 ";
+        alert('✅ 資料儲存成功！ ');
     }
 
     function editP1(id) {
@@ -771,14 +771,14 @@
         document.getElementById('p1_color').value = d.color_system || '';
         document.getElementById('p1_weight').value = d.weight || 25;
         document.getElementById('p1_supplier').value = d.supplier || '';
-        document.getElementById('btn_saveP1').innerText = "儲存修改資料 UPDATE POWDER";
+        document.getElementById('btn_saveP1').innerText = "儲存修改資料 ";
         document.getElementById('p1_id').scrollIntoView({ behavior: 'smooth' });
     }
 
     function saveP2() {
-        const id = document.getElementById('p2_id').value; if(!id) return alert('請選擇粉號 SELECT ID');
+        const id = document.getElementById('p2_id').value; if(!id) return alert('請選擇粉號 ');
         db.ref(`/inventory/${id}`).set({ box: Number(document.getElementById('p2_box').value) || 0, loose: Number(document.getElementById('p2_loose').value) || 0 });
-        alert('✅ 盤點庫存已強制覆寫更新！ INVENTORY OVERWRITTEN');
+        alert('✅ 盤點庫存已強制覆寫更新！ ');
     }
 
     function saveP3() {
@@ -786,7 +786,7 @@
         const id = document.getElementById('p3_id').value;
         const box = Number(document.getElementById('p3_box').value) || 0; 
         const loose = Number(document.getElementById('p3_loose').value) || 0;
-        if(!id) return alert('請先選擇粉號 SELECT ID');
+        if(!id) return alert('請先選擇粉號 ');
 
         let inv = dbData.inventory[id] || { box: 0, loose: 0 };
         let updates = {};
@@ -803,7 +803,7 @@
             }
             updates[`/purchase/${key}`] = { date, id, box, loose };
             editKeys.purchase = null;
-            document.getElementById('btn_saveP3').innerText = "確認入庫 COMMIT INBOUND";
+            document.getElementById('btn_saveP3').innerText = "確認入庫 ";
         } else {
             key = db.ref().child('purchase').push().key;
             updates[`/purchase/${key}`] = { date, id, box, loose };
@@ -813,7 +813,7 @@
         db.ref().update(updates);
         
         document.getElementById('p3_box').value = 0; document.getElementById('p3_loose').value = 0; 
-        alert('✅ 採購入庫儲存成功！ INBOUND SAVED');
+        alert('✅ 採購入庫儲存成功！ ');
     }
 
     function editP3(key) {
@@ -822,7 +822,7 @@
         document.getElementById('p3_date').value = r.date; document.getElementById('p3_id').value = r.id;
         document.getElementById('p3_box').value = r.box; document.getElementById('p3_loose').value = r.loose;
         editKeys.purchase = key;
-        document.getElementById('btn_saveP3').innerText = "儲存修改紀錄 UPDATE INBOUND";
+        document.getElementById('btn_saveP3').innerText = "儲存修改紀錄 ";
         document.getElementById('p3_date').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -830,7 +830,7 @@
         const id = document.getElementById('p4_id').value;
         if(!id || !dbData.inventory[id]) { document.getElementById('p4_stock').value = ''; return; }
         const inv = dbData.inventory[id];
-        document.getElementById('p4_stock').value = `📦 ${inv.box} BOX   +   ⚖️ ${inv.loose} KG LOOSE`;
+        document.getElementById('p4_stock').value = `📦 ${inv.box} 箱   +   ⚖️ ${inv.loose} KG `;
         calcP4Usage();
     }
 
@@ -851,7 +851,7 @@
         const box = Number(document.getElementById('p4_box').value) || 0; 
         const loose = Number(document.getElementById('p4_loose').value) || 0;
         const return_qty = Number(document.getElementById('p4_return').value) || 0;
-        if(!id) return alert('請選擇粉號 SELECT ID');
+        if(!id) return alert('請選擇粉號 ');
 
         const w = dbData.powder[id] ? dbData.powder[id].weight : 25;
         const usage_qty = (box * w) + loose - return_qty;
@@ -871,7 +871,7 @@
             }
             updates[`/usage/${key}`] = { date, id, box, loose, return_qty, usage_qty };
             editKeys.usage = null;
-            document.getElementById('btn_saveP4').innerText = "確認出庫 COMMIT OUTBOUND";
+            document.getElementById('btn_saveP4').innerText = "確認出庫 ";
         } else {
             key = db.ref().child('usage').push().key;
             updates[`/usage/${key}`] = { date, id, box, loose, return_qty, usage_qty };
@@ -879,7 +879,7 @@
 
         let newBox = inv.box - box; 
         let newLoose = inv.loose - loose + return_qty;
-        if(newBox < 0 || newLoose < 0) return alert('⚠️ 警告：變更後庫存呈現負數！ STOCK CANNOT BE NEGATIVE');
+        if(newBox < 0 || newLoose < 0) return alert('⚠️ 警告：變更後庫存呈現負數！ ');
 
         updates[`/inventory/${id}`] = { box: newBox, loose: newLoose };
         db.ref().update(updates);
@@ -896,7 +896,7 @@
         fetchCurrentStock();
         document.getElementById('p4_box').value = r.box; document.getElementById('p4_loose').value = r.loose; document.getElementById('p4_return').value = r.return_qty || 0;
         editKeys.usage = key;
-        document.getElementById('btn_saveP4').innerText = "儲存修改紀錄 UPDATE OUTBOUND";
+        document.getElementById('btn_saveP4').innerText = "儲存修改紀錄 ";
         calcP4Usage();
         document.getElementById('p4_date').scrollIntoView({ behavior: 'smooth' });
     }
@@ -904,15 +904,15 @@
     function saveP7() {
         const date = document.getElementById('p7_date').value; 
         const qty = Number(document.getElementById('p7_qty').value);
-        if(!qty) return alert('請填寫桶數 ENTER QUANTITY');
+        if(!qty) return alert('請填寫桶數 ');
         
         let updates = {}; let key = editKeys.waste;
-        if(key) { updates[`/waste/${key}`] = { date, qty }; editKeys.waste = null; document.getElementById('btn_saveP7').innerText = "新增廢粉紀錄 SAVE WASTE"; } 
+        if(key) { updates[`/waste/${key}`] = { date, qty }; editKeys.waste = null; document.getElementById('btn_saveP7').innerText = "新增廢粉紀錄 "; } 
         else { key = db.ref().child('waste').push().key; updates[`/waste/${key}`] = { date, qty }; }
         
         db.ref().update(updates);
         document.getElementById('p7_qty').value = ''; 
-        alert('✅ 廢粉紀錄儲存成功！ WASTE LOGGED');
+        alert('✅ 廢粉紀錄儲存成功！');
     }
 
     function editP7(key) {
@@ -920,7 +920,7 @@
         if(!r) return;
         document.getElementById('p7_date').value = r.date; document.getElementById('p7_qty').value = r.qty;
         editKeys.waste = key;
-        document.getElementById('btn_saveP7').innerText = "儲存修改紀錄 UPDATE WASTE";
+        document.getElementById('btn_saveP7').innerText = "儲存修改紀錄 ";
         document.getElementById('p7_date').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -941,14 +941,14 @@
                 }
             }
             updates[`/${node}/${key}`] = null;
-            db.ref().update(updates).then(() => alert('✅ 資料已成功刪除！ DELETED'));
+            db.ref().update(updates).then(() => alert('✅ 資料已成功刪除！ '));
         }
     }
 
     // --- 5. 查詢與統計儀表板 ---
     function updateDateDropdown() {
         let dates = new Set(); Object.values(dbData.usage).forEach(r => dates.add(r.date));
-        let html = '<option value="">請選擇欲查詢之日期 SELECT DATE...</option>';
+        let html = '<option value="">請選擇欲查詢之日期 ...</option>';
         [...dates].sort().reverse().forEach(d => html += `<option value="${d}">${d}</option>`);
         document.getElementById('p5_date').innerHTML = html;
     }
@@ -976,29 +976,29 @@
         res.innerHTML = `
             <div class="dashboard-grid">
                 <div class="dash-card">
-                    <div class="dash-card-header">📋 粉體基本資訊 METADATA</div>
-                    <div class="info-row"><span class="info-label">系統粉號 SYSTEM ID</span><span class="info-value" style="color:var(--accent-cyan); font-size:18px;">${id}</span></div>
-                    <div class="info-row"><span class="info-label">廠商代號 CODE</span><span class="info-value">${d.code || 'N/A'}</span></div>
-                    <div class="info-row"><span class="info-label">粉體色系 COLOR</span><span class="info-value">${d.color_system || 'N/A'}</span></div>
-                    <div class="info-row"><span class="info-label">配合廠商 SUPPLIER</span><span class="info-value">${d.supplier || 'N/A'}</span></div>
-                    <div class="info-row"><span class="info-label">單箱淨重 NET WEIGHT</span><span class="info-value">${weight} KG</span></div>
+                    <div class="dash-card-header">📋 粉體基本資訊 </div>
+                    <div class="info-row"><span class="info-label">系統粉號 </span><span class="info-value" style="color:var(--accent-cyan); font-size:18px;">${id}</span></div>
+                    <div class="info-row"><span class="info-label">廠商代號 </span><span class="info-value">${d.code || 'N/A'}</span></div>
+                    <div class="info-row"><span class="info-label">粉體色系 </span><span class="info-value">${d.color_system || 'N/A'}</span></div>
+                    <div class="info-row"><span class="info-label">配合廠商 </span><span class="info-value">${d.supplier || 'N/A'}</span></div>
+                    <div class="info-row"><span class="info-label">單箱淨重 </span><span class="info-value">${weight} KG</span></div>
                 </div>
                 
                 <div class="split-stats">
                     <div class="stat-box box-stat">
-                        <div class="stat-unit">📦 現存箱數 STOCK BOX</div>
+                        <div class="stat-unit">📦 現存箱數 </div>
                         <div class="num">${inv.box}</div>
                         <div class="stat-unit">BOXES</div>
                     </div>
                     <div class="stat-box loose-stat">
-                        <div class="stat-unit">⚖️ 現存散粉 LOOSE WEIGHT</div>
+                        <div class="stat-unit">⚖️ 現存散粉 </div>
                         <div class="num">${inv.loose}</div>
                         <div class="stat-unit">KG</div>
                     </div>
                 </div>
 
                 <div class="dash-card total-card">
-                    <div class="total-label">⚡ 即時總庫存數量 LIVE TOTAL BALANCE</div>
+                    <div class="total-label">⚡ 即時總庫存數量 </div>
                     <div><span class="total-value">${total}</span> <span class="total-unit">KG</span></div>
                 </div>
             </div>
@@ -1029,12 +1029,12 @@
         let avgPerDay = totalKg / days;
         
         if(totalKg >= target) {
-            document.getElementById('waste_forecast').innerHTML = '<span style="color:var(--danger-color); font-weight:900;">⚠️ 警告！廢粉量已超越 10 噸，請立即安排清運！ CRITICAL LIMIT EXCEEDED</span>';
+            document.getElementById('waste_forecast').innerHTML = '<span style="color:var(--danger-color); font-weight:900;">⚠️ 警告！廢粉量已超越 10 噸，請立即安排清運！ </span>';
         } else if(avgPerDay > 0) {
             let remainDays = Math.ceil((target - totalKg) / avgPerDay);
-            document.getElementById('waste_forecast').innerHTML = `預計剩餘 EST. <span style="color:var(--danger-color); font-size:32px;">${remainDays}</span> 天將逼近 10 噸上限`;
+            document.getElementById('waste_forecast').innerHTML = `預計剩餘 . <span style="color:var(--danger-color); font-size:32px;">${remainDays}</span> 天將逼近 10 噸上限`;
         } else {
-            document.getElementById('waste_forecast').innerHTML = '<span style="color:var(--text-muted); font-size:15px;">尚無足夠歷史數據進行預測 NO DATA</span>';
+            document.getElementById('waste_forecast').innerHTML = '<span style="color:var(--text-muted); font-size:15px;">尚無足夠歷史數據進行預測 </span>';
         }
     }
 
@@ -1054,7 +1054,7 @@
 
     function importCSV(node, inputId) {
         const file = document.getElementById(inputId).files[0];
-        if(!file) return alert("請先選擇要匯入的 CSV 檔案 SELECT CSV FILE");
+        if(!file) return alert("請先選擇要匯入的 CSV 檔案 ");
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
@@ -1068,9 +1068,9 @@
                     else if(node === 'usage' && cols.length >= 4) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], id: cols[1], box: isNaN(Number(cols[2]))?0:Number(cols[2]), loose: isNaN(Number(cols[3]))?0:Number(cols[3]), return_qty: cols.length>=6?Number(cols[4]):0, usage_qty: cols.length>=6?Number(cols[5]):((Number(cols[2])*(dbData.powder[cols[1]]?.weight||25))+Number(cols[3])-(cols.length>=6?Number(cols[4]):0)) }; }
                     else if(node === 'waste' && cols.length >= 2) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], qty: isNaN(Number(cols[1]))?0:Number(cols[1]) }; }
                 }
-                if(Object.keys(updates).length === 0) return alert("❌ 無可匯入之有效資料列。 NO VALID ROWS");
-                db.ref().update(updates).then(() => { alert("✅ CSV 批次資料匯入成功！ IMPORT SUCCESS"); document.getElementById(inputId).value = ''; });
-            } catch (err) { alert("❌ CSV 解析出錯 ERROR: " + err.message); }
+                if(Object.keys(updates).length === 0) return alert("❌ 無可匯入之有效資料列。 ");
+                db.ref().update(updates).then(() => { alert("✅ CSV 批次資料匯入成功！ "); document.getElementById(inputId).value = ''; });
+            } catch (err) { alert("❌ CSV 解析出錯 : " + err.message); }
         };
         reader.readAsText(file); 
     }
