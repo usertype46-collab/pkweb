@@ -546,7 +546,7 @@
         <div class="page-title"><span>♻️ 7. 廢粉回收紀錄 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
         <div class="card-form admin-only">
             <div class="form-group"><label>日期 ：</label><input type="date" id="p7_date"></div>
-            <div class="form-group"><label>回收桶數 ：</label><input type="number" id="p7_qty" placeholder="每桶預設為 25 KG"></div>
+            <div class="form-group"><label>回收箱數 ：</label><input type="number" id="p7_qty" placeholder="每箱預設為 25 KG"></div>
             <button class="btn btn-success" id="btn_saveP7" onclick="saveP7()">新增 / 更新廢粉紀錄 </button>
         </div>
         <div class="file-ops admin-only">
@@ -556,7 +556,7 @@
                 <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('waste')">匯出 </button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p7"><thead><tr><th>日期 </th><th>桶數 </th><th>估算重量 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p7"><thead><tr><th>日期 </th><th>箱數 </th><th>估算重量 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page8" class="page">
@@ -612,7 +612,7 @@
     function login(role) {
         if(role === 'admin') {
             const pwd = document.getElementById('admin_pwd').value;
-            if(pwd !== 'M0282') return alert('登入失敗：密碼錯誤！ ERROR: WRONG PASSWORD');
+            if(pwd !== 'M0282') return alert('登入失敗：密碼錯誤！ ');
             userRole = 'admin';
         } else {
             userRole = 'viewer';
@@ -747,7 +747,7 @@
         const weight = Number(document.getElementById('p1_weight').value);
         const supplier = document.getElementById('p1_supplier').value.trim();
 
-        if(!id) return alert('粉號為必填資訊！ ID REQUIRED');
+        if(!id) return alert('粉號為必填資訊！ ');
         
         let updates = {}; 
         updates[`/powder/${id}`] = { code, color_system, weight, supplier };
@@ -886,7 +886,7 @@
         
         document.getElementById('p4_box').value = 0; document.getElementById('p4_loose').value = 0; document.getElementById('p4_return').value = 0;
         fetchCurrentStock(); 
-        alert('✅ 出庫紀錄已儲存！ OUTBOUND LOGGED');
+        alert('✅ 出庫紀錄已儲存！');
     }
 
     function editP4(key) {
@@ -904,7 +904,7 @@
     function saveP7() {
         const date = document.getElementById('p7_date').value; 
         const qty = Number(document.getElementById('p7_qty').value);
-        if(!qty) return alert('請填寫桶數 ');
+        if(!qty) return alert('請填寫箱數 ');
         
         let updates = {}; let key = editKeys.waste;
         if(key) { updates[`/waste/${key}`] = { date, qty }; editKeys.waste = null; document.getElementById('btn_saveP7').innerText = "新增廢粉紀錄 "; } 
@@ -925,7 +925,7 @@
     }
 
     function delData(node, key) {
-        if(confirm('確定要刪除此筆紀錄？系統將自動平衡庫存。 CONFIRM DELETE?')) {
+        if(confirm('確定要刪除此筆紀錄？系統將自動平衡庫存。 ')) {
             let updates = {};
             if(node === 'purchase') {
                 const r = dbData.purchase[key];
