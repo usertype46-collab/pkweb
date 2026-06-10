@@ -448,13 +448,32 @@
     <div id="page1" class="page">
         <div class="page-title"><span>📝 1. 烤漆粉號清冊 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>粉號 ：</label><input type="text" id="p1_id" placeholder="例如：P-101"></div>
-            <div class="form-group"><label>代號 ：</label><input type="text" id="p1_code" placeholder="廠商辨識代號"></div>
-            <div class="form-group"><label>色系 ：</label><input type="text" id="p1_color" placeholder="例如：黑色/白色/陽極發色"></div>
-            <div class="form-group"><label>淨重  (KG)：</label><input type="number" id="p1_weight" value="25"></div>
-            <div class="form-group"><label>廠商 ：</label><input type="text" id="p1_supplier"></div>
-            <button class="btn btn-success" id="btn_saveP1" onclick="saveP1()">新增 / 更新粉號資料 </button>
-        </div>
+    <div class="form-group"><label>粉號 ：</label><input type="text" id="p1_id" placeholder="例如：P-101"></div>
+    <div class="form-group"><label>代號 ：</label><input type="text" id="p1_code" placeholder="廠內辨識代號"></div>
+    <div class="form-group"><label>色系 ：</label><input type="text" id="p1_color" placeholder="例如：黑色/白色"></div>
+    
+    <div class="form-group">
+        <label>淨重 (KG)：</label>
+        <select id="p1_weight">
+            <option value="20">20 KG</option>
+            <option value="25" selected>25 KG</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label>廠商 ：</label>
+        <select id="p1_supplier">
+            <option value="老虎">老虎</option>
+            <option value="國麗">國麗</option>
+            <option value="國邦">國邦</option>
+            <option value="台粉">台粉</option>
+            <option value="長誠">長誠</option>
+            <option value="南寶">南寶</option>
+            <option value="阿克斯">阿克斯</option>
+        </select>
+    </div>
+    <button class="btn btn-success" id="btn_saveP1" onclick="saveP1()">新增 / 更新粉號資料 </button>
+</div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p1" accept=".csv">
             <div style="display: flex; gap: 8px;">
@@ -695,6 +714,19 @@
         renderTables();
         if(document.getElementById('page6').style.display === 'block') renderP6();
     }
+
+         // 新增選取連動功能
+document.getElementById('p2_id').addEventListener('change', function() {
+    const id = this.value;
+    if(id && dbData.inventory[id]) {
+        document.getElementById('p2_box').value = dbData.inventory[id].box || 0;
+        document.getElementById('p2_loose').value = dbData.inventory[id].loose || 0;
+    } else {
+        document.getElementById('p2_box').value = 0;
+        document.getElementById('p2_loose').value = 0;
+    }
+});
+
 
     function renderTables() {
         // P1 粉號
