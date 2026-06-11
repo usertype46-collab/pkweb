@@ -3,46 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>烤漆部粉體管理系統 V5.0 </title>
+    <title>烤漆部粉體管理系統 版本 5.0</title>
     <style>
-        /* ================= 星際宇宙元素設計變數 ================= */
+        /* ================= 未來星艦全息儀表板設計變數 ================= */
         :root {
-            --primary-bg: #040209;
-            --card-bg: rgba(11, 12, 24, 0.65);
-            --card-border: rgba(56, 189, 248, 0.25);
-            --card-glow: rgba(56, 189, 248, 0.1);
+            --bg-deep: #03060d;        /* 深空暗藍 */
+            --hud-cyan: #00f3ff;       /* 全息霓虹藍 */
+            --hud-cyan-dim: rgba(0, 243, 255, 0.2);
+            --hud-purple: #b026ff;     /* 躍遷引擎紫 */
+            --hud-danger: #ff0055;     /* 警報紅 */
+            --hud-warning: #ffb700;    /* 恆星黃 */
+            --hud-success: #00ff88;    /* 生命維持綠 */
             
-            --accent-cyan: #00f2fe;    /* 星體高能藍 */
-            --accent-purple: #9b51e0;  /* 星雲深邃紫 */
-            --accent-glow: rgba(0, 242, 254, 0.4);
-            
-            --danger-color: #ff3366;   /* 超新星爆發紅 */
-            --success-color: #00ffcc;  /* 極光生命綠 */
-            --warning-color: #ffb300;  /* 恆星閃耀金 */
-            
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --card-radius: 16px;
+            --panel-bg: rgba(4, 9, 20, 0.85);
+            --text-main: #e0f7fa;
+            --text-muted: #62aeb8;
         }
 
-        /* 全域樣式與強制作大寫 */
         * { 
             box-sizing: border-box; 
             margin: 0; 
             padding: 0; 
-            font-family: "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", sans-serif; 
+            font-family: "SF Pro Display", "Microsoft JhengHei", sans-serif; 
         }
-        
-        /* 英文強制作大寫套用區 */
+
+        /* 強制大寫套用區 (確保單位 KG 絕對大寫) */
         input, select, button, th, td, .btn, .role-badge, .status-badge, .total-unit, .stat-unit {
             text-transform: uppercase;
         }
-        
-        /* 宇宙深空背景與星芒特效 */
+
+        /* 宇宙深空掃描網格背景 */
         body { 
-            background: radial-gradient(circle at 50% 50%, #161233 0%, #060410 60%, #020105 100%);
-            background-size: 200% 200%;
-            animation: spacePulse 15s ease infinite;
+            background-color: var(--bg-deep);
+            background-image: 
+                linear-gradient(var(--hud-cyan-dim) 1px, transparent 1px),
+                linear-gradient(90deg, var(--hud-cyan-dim) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center center;
             min-height: 100vh; 
             color: var(--text-main); 
             font-size: 15px; 
@@ -51,365 +48,276 @@
             overflow-x: hidden;
         }
 
-        /* 模擬宇宙背景微弱星光波動 */
-        @keyframes spacePulse {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* 全局雷射掃描線動畫 */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(0,243,255,0) 0%, rgba(0,243,255,0.03) 50%, rgba(0,243,255,0) 100%);
+            background-size: 100% 8px;
+            animation: scanline 6s linear infinite;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        @keyframes scanline {
+            0% { background-position: 0 -100vh; }
+            100% { background-position: 0 100vh; }
         }
 
-        @keyframes cardFadeIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        @keyframes hudBootUp {
+            0% { opacity: 0; filter: contrast(3) brightness(3); transform: scaleY(0.01) scaleX(0); }
+            50% { transform: scaleY(0.01) scaleX(1); }
+            100% { opacity: 1; filter: contrast(1) brightness(1); transform: scaleY(1) scaleX(1); }
         }
 
-        /* 驗證遮罩 - 黑洞深淵毛玻璃 */
+        /* 黑洞深淵安全驗證遮罩 */
         #loginOverlay { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(2, 1, 5, 0.85); 
-            backdrop-filter: blur(15px); 
-            -webkit-backdrop-filter: blur(15px); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 9999; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(3, 6, 13, 0.9); backdrop-filter: blur(10px); 
+            display: flex; justify-content: center; align-items: center; z-index: 10000; 
         }
         .login-box { 
-            background: rgba(15, 12, 30, 0.9); 
-            backdrop-filter: blur(25px); 
-            padding: 45px 35px; 
-            border-radius: var(--card-radius); 
-            width: 90%; 
-            max-width: 400px; 
-            text-align: center; 
-            box-shadow: 0 0 40px rgba(0, 242, 254, 0.15); 
-            border: 1px solid var(--card-border); 
+            background: rgba(0, 20, 40, 0.8); 
+            padding: 40px; 
+            width: 90%; max-width: 400px; text-align: center; 
+            border: 1px solid var(--hud-cyan);
+            box-shadow: 0 0 30px var(--hud-cyan-dim), inset 0 0 20px var(--hud-cyan-dim);
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            position: relative;
         }
-        .login-box h2 { 
-            color: #fff; 
-            margin-bottom: 25px; 
-            font-weight: 800; 
-            font-size: 24px; 
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+        .login-box::before {
+            content: "[ 系統鎖定 ]";
+            position: absolute; top: 10px; left: 20px;
+            color: var(--hud-cyan); font-size: 12px; letter-spacing: 2px;
         }
+        .login-box h2 { color: var(--hud-cyan); margin-bottom: 25px; font-weight: 800; font-size: 24px; letter-spacing: 3px; text-shadow: 0 0 15px var(--hud-cyan); margin-top: 15px; }
         .login-box input { 
-            width: 100%; 
-            padding: 15px; 
-            margin-bottom: 25px; 
-            border: 1px solid var(--card-border); 
-            border-radius: 10px; 
-            font-size: 16px; 
-            color: #fff;
-            transition: 0.3s; 
-            background: rgba(255, 255, 255, 0.03); 
+            width: 100%; padding: 15px; margin-bottom: 25px; 
+            border: 1px solid var(--hud-cyan-dim); 
+            background: rgba(0, 243, 255, 0.05); color: var(--hud-cyan);
+            font-size: 16px; letter-spacing: 2px;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: 0.3s;
         }
-        .login-box input:focus { 
-            border-color: var(--accent-cyan); 
-            outline: none; 
-            box-shadow: 0 0 15px var(--accent-glow); 
-            background: rgba(255, 255, 255, 0.08); 
-        }
+        .login-box input:focus { border-color: var(--hud-cyan); outline: none; box-shadow: 0 0 15px var(--hud-cyan-dim); background: rgba(0, 243, 255, 0.1); }
 
         /* 主容器 - 星艦中控面板 */
         .container { 
-            max-width: 800px; 
-            margin: 30px auto; 
-            background: var(--card-bg); 
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px); 
-            border: 1px solid var(--card-border); 
-            border-radius: 24px; 
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 30px var(--card-glow); 
-            padding: 30px; 
+            max-width: 850px; margin: 40px auto; 
+            background: var(--panel-bg); 
+            backdrop-filter: blur(15px); 
+            border: 1px solid var(--hud-cyan-dim); 
+            box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 30px var(--hud-cyan-dim); 
+            padding: 40px; 
             min-height: 85vh; 
+            clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
+            position: relative;
+            animation: hudBootUp 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
         }
         
+        /* 四角科技瞄準裝飾 */
+        .container::before, .container::after {
+            content: ''; position: absolute; width: 20px; height: 20px; border: 2px solid var(--hud-cyan); pointer-events: none;
+        }
+        .container::before { top: 15px; left: 15px; border-right: none; border-bottom: none; }
+        .container::after { bottom: 15px; right: 15px; border-left: none; border-top: none; }
+
         .header-bar { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding-bottom: 20px; 
-            border-bottom: 1px solid rgba(255,255,255,0.08); 
-            margin-bottom: 25px; 
-            font-size: 13px; 
-            letter-spacing: 1px;
+            display: flex; justify-content: space-between; align-items: center; 
+            padding-bottom: 20px; border-bottom: 1px dashed var(--hud-cyan-dim); 
+            margin-bottom: 30px; font-size: 14px; letter-spacing: 2px; font-weight: bold;
         }
         .status-badge { 
-            background: rgba(0, 255, 204, 0.1); 
-            color: var(--success-color); 
-            padding: 6px 14px; 
-            border-radius: 20px; 
-            font-weight: 700; 
-            border: 1px solid rgba(0, 255, 204, 0.3);
-            text-shadow: 0 0 5px var(--success-color);
+            color: var(--hud-success); text-shadow: 0 0 8px var(--hud-success);
         }
         .role-badge { 
-            background: rgba(255, 255, 255, 0.05); 
-            color: var(--text-muted); 
-            padding: 6px 14px; 
-            border-radius: 20px; 
-            font-weight: 700; 
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--hud-cyan); text-shadow: 0 0 8px var(--hud-cyan);
         }
         
         .main-title { 
-            font-size: 28px; 
-            font-weight: 900; 
-            background: linear-gradient(135deg, #ffffff, var(--accent-cyan)); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            text-align: center; 
-            margin-bottom: 35px; 
-            letter-spacing: 2px; 
-            filter: drop-shadow(0 2px 8px rgba(0,242,254,0.3));
+            font-size: 32px; font-weight: 900; 
+            color: var(--text-main); text-align: center; 
+            margin-bottom: 40px; letter-spacing: 4px; 
+            text-shadow: 0 0 20px var(--hud-cyan);
+            display: flex; align-items: center; justify-content: center; gap: 15px;
         }
+        .main-title::before, .main-title::after { content: '///'; color: var(--hud-cyan-dim); font-size: 20px; }
         
-        /* 選單 - 星際引力卡片 */
-        .menu-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+        /* 選單 - 全息操作區塊 */
+        .menu-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
         .menu-item { 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.07); 
+            background: linear-gradient(90deg, rgba(0,243,255,0.02) 0%, rgba(0,243,255,0.08) 100%);
+            border: 1px solid var(--hud-cyan-dim); 
             padding: 20px 25px; 
-            border-radius: 16px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            cursor: pointer; 
-            font-weight: 700; 
-            color: #cbd5e1; 
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            display: flex; justify-content: space-between; align-items: center; 
+            cursor: pointer; font-weight: 800; color: var(--text-main); 
+            letter-spacing: 2px; font-size: 16px;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            transition: all 0.3s ease; 
+            position: relative; overflow: hidden;
+        }
+        .menu-item::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,243,255,0.4), transparent);
+            transform: skewX(-45deg); transition: 0.5s;
         }
         .menu-item:hover { 
-            transform: translateY(-3px); 
-            background: rgba(0, 242, 254, 0.05);
-            box-shadow: 0 10px 25px rgba(0, 242, 254, 0.15), inset 0 0 15px rgba(0, 242, 254, 0.1); 
-            border-color: var(--accent-cyan); 
-            color: #fff; 
+            border-color: var(--hud-cyan); color: #fff;
+            box-shadow: 0 0 20px var(--hud-cyan-dim); 
+            background: rgba(0, 243, 255, 0.15); 
         }
-        .menu-item::after { content: '➔'; font-size: 16px; color: var(--accent-cyan); opacity: 0.6; transition: 0.3s; }
-        .menu-item:hover::after { opacity: 1; transform: translateX(4px); filter: drop-shadow(0 0 5px var(--accent-cyan)); }
+        .menu-item:hover::before { left: 200%; }
+        .menu-item::after { content: '►'; font-size: 14px; color: var(--hud-cyan); opacity: 0.5; transition: 0.3s; }
+        .menu-item:hover::after { opacity: 1; transform: translateX(5px); text-shadow: 0 0 10px var(--hud-cyan); }
 
-        /* 按鈕與表單量子化 */
+        /* 未來風按鈕體系 */
         .btn { 
-            border: none; 
-            padding: 14px 24px; 
-            border-radius: 10px; 
-            font-size: 18px; 
-            cursor: pointer; 
-            font-weight: 800; 
-            width: 100%; 
-            transition: all 0.25s; 
-            color: #fff; 
-            letter-spacing: 1px; 
+            border: 1px solid transparent; padding: 12px 20px; 
+            font-size: 16px; cursor: pointer; font-weight: 800; width: 100%; 
+            letter-spacing: 2px; transition: all 0.3s;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            position: relative; overflow: hidden;
         }
-        .btn:hover { 
-            transform: translateY(-2px); 
-            filter: brightness(1.1);
-        }
-        .btn:active { transform: scale(0.98); }
+        .btn:active { transform: scale(0.95); }
+        
         .btn-primary { 
-            background: linear-gradient(135deg, #0070f3, var(--accent-cyan)); 
-            box-shadow: 0 4px 15px rgba(0, 112, 243, 0.4);
+            background: rgba(0, 243, 255, 0.1); border-color: var(--hud-cyan); color: var(--hud-cyan); 
         }
+        .btn-primary:hover { background: var(--hud-cyan); color: #000; box-shadow: 0 0 20px var(--hud-cyan); }
+        
         .btn-success { 
-            background: linear-gradient(135deg, #00b485, var(--success-color)); 
-            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
-            color: #040209;
+            background: rgba(0, 255, 136, 0.1); border-color: var(--hud-success); color: var(--hud-success); 
         }
+        .btn-success:hover { background: var(--hud-success); color: #000; box-shadow: 0 0 20px var(--hud-success); }
+        
         .btn-danger { 
-            background: linear-gradient(135deg, #d00040, var(--danger-color)); 
-            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
+            background: rgba(255, 0, 85, 0.1); border-color: var(--hud-danger); color: var(--hud-danger); 
         }
+        .btn-danger:hover { background: var(--hud-danger); color: #fff; box-shadow: 0 0 20px var(--hud-danger); }
+        
         .btn-secondary { 
-            background: rgba(255, 255, 255, 0.1); 
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.2); color: #fff;
         }
-        .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); border-color: #fff; }
 
-        .page { display: none; animation: cardFadeIn 0.5s ease-out forwards; }
+        .page { display: none; animation: hudBootUp 0.4s ease forwards; }
         .page-title { 
-            font-size: 20px; 
-            font-weight: 800; 
-            margin-bottom: 25px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            color: #fff;
-            letter-spacing: 1px;
-            border-left: 4px solid var(--accent-cyan);
-            padding-left: 12px;
+            font-size: 22px; font-weight: 800; margin-bottom: 30px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            color: var(--hud-cyan); letter-spacing: 2px;
+            border-left: 4px solid var(--hud-cyan); padding-left: 15px;
+            text-shadow: 0 0 10px var(--hud-cyan-dim);
         }
         
         .card-form { 
-            background: rgba(255, 255, 255, 0.02); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            border-radius: 16px; 
-            padding: 25px; 
-            margin-bottom: 25px; 
-            box-shadow: inset 0 0 20px rgba(255,255,255,0.01);
+            background: rgba(0, 0, 0, 0.4); 
+            border: 1px solid var(--hud-cyan-dim); 
+            padding: 30px; margin-bottom: 25px; 
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            position: relative;
         }
-        .form-group { margin-bottom: 18px; display: flex; align-items: center; }
-        .form-group label { width: 30%; font-weight: 700; color: var(--text-muted); font-size: 14px; }
+        .form-group { margin-bottom: 20px; display: flex; align-items: center; }
+        .form-group label { width: 30%; font-weight: 800; color: var(--text-muted); font-size: 15px; letter-spacing: 1px; }
         .form-group input, .form-group select { 
-            width: 70%; 
-            padding: 12px 15px; 
-            border: 1px solid var(--card-border); 
-            border-radius: 8px; 
-            font-size: 15px; 
-            background: rgba(4, 2, 9, 0.6); 
-            color: #fff;
+            width: 70%; padding: 12px 15px; 
+            border: 1px solid var(--hud-cyan-dim); 
+            font-size: 16px; font-weight: bold;
+            background: rgba(0, 243, 255, 0.03); color: var(--hud-cyan);
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
             transition: 0.3s; 
         }
         .form-group input:focus, .form-group select:focus { 
-            border-color: var(--accent-cyan); 
-            outline: none; 
-            box-shadow: 0 0 10px var(--accent-glow); 
+            border-color: var(--hud-cyan); outline: none; box-shadow: 0 0 15px var(--hud-cyan-dim); background: rgba(0, 243, 255, 0.1); 
         }
         .form-group input[readonly] { 
-            background: rgba(255, 255, 255, 0.01); 
-            border-style: dashed; 
-            font-weight: 800; 
-            color: var(--accent-cyan); 
-            text-shadow: 0 0 4px var(--accent-glow);
+            background: transparent; border-style: dashed; border-color: var(--hud-purple); color: var(--hud-purple); 
         }
         
-        /* 軌道空間檔案操作區 */
+        /* 資料流檔案傳輸區 */
         .file-ops { 
-            display: flex; 
-            gap: 15px; 
-            background: rgba(255, 255, 255, 0.01); 
-            padding: 15px 20px; 
-            border-radius: 12px; 
-            align-items: center; 
-            justify-content: space-between; 
-            margin-bottom: 20px; 
-            border: 1px dashed rgba(56, 189, 248, 0.3); 
+            display: flex; gap: 15px; padding: 15px 25px; align-items: center; justify-content: space-between; margin-bottom: 25px; 
+            background: rgba(0, 0, 0, 0.5); border: 1px dashed var(--hud-cyan-dim);
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
         }
-        .file-ops input[type="file"] { width: 60%; font-size: 13px; color: var(--text-muted); }
+        .file-ops input[type="file"] { width: 60%; font-size: 14px; color: var(--hud-cyan); font-weight: bold; }
         
-        /* 星際終端數據表 */
+        /* 全息終端數據庫表 */
         .data-container { 
-            max-height: 450px; 
-            overflow-y: auto; 
-            border: 1px solid rgba(255, 255, 255, 0.06); 
-            border-radius: 12px; 
-            background: rgba(0, 0, 0, 0.3); 
+            max-height: 450px; overflow-y: auto; 
+            border: 1px solid var(--hud-cyan-dim); 
+            background: rgba(0, 0, 0, 0.5); 
+            padding: 2px;
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
         }
-        .data-container::-webkit-scrollbar { width: 6px; }
-        .data-container::-webkit-scrollbar-thumb { background-color: var(--card-border); border-radius: 10px; }
-        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
-        .data-table th, .data-table td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.04); text-align: left; }
+        .data-container::-webkit-scrollbar { width: 4px; }
+        .data-container::-webkit-scrollbar-thumb { background-color: var(--hud-cyan); }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 14px; letter-spacing: 1px; }
+        .data-table th, .data-table td { padding: 15px; text-align: left; border-bottom: 1px solid rgba(0, 243, 255, 0.1); }
         .data-table th { 
-            background: #0f0d22; 
-            position: sticky; 
-            top: 0; 
-            font-weight: 800; 
-            color: var(--accent-cyan); 
-            z-index: 10; 
-            border-bottom: 1px solid var(--card-border);
+            background: rgba(0, 20, 40, 0.9); position: sticky; top: 0; font-weight: 900; 
+            color: var(--hud-cyan); z-index: 10; border-bottom: 2px solid var(--hud-cyan);
+            text-shadow: 0 0 5px var(--hud-cyan);
         }
-        .data-table tr:hover td { background-color: rgba(255, 255, 255, 0.02); }
+        .data-table tr:hover td { background-color: rgba(0, 243, 255, 0.08); }
         .action-btn { 
-            padding: 6px 12px; 
-            border-radius: 6px; 
-            font-size: 12px; 
-            cursor: pointer; 
-            border: none; 
-            color: white; 
-            background: var(--danger-color); 
-            font-weight: bold; 
-            transition: 0.2s; 
+            padding: 6px 15px; font-size: 12px; cursor: pointer; border: 1px solid var(--hud-danger); color: var(--hud-danger); 
+            background: transparent; font-weight: 900; transition: 0.3s;
+            clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+            letter-spacing: 2px;
         }
-        .action-btn:hover { transform: scale(1.05); filter: brightness(1.2); }
+        .action-btn:hover { background: var(--hud-danger); color: #fff; box-shadow: 0 0 10px var(--hud-danger); }
         
-        /* 量子進度條 */
+        /* 能量進度條 */
         .progress-container { 
-            background: rgba(255, 255, 255, 0.05); 
-            border-radius: 20px; 
-            overflow: hidden; 
-            position: relative; 
-            height: 24px; 
-            width: 100%; 
-            margin-top: 15px; 
-            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0, 0, 0, 0.6); border: 1px solid var(--hud-cyan-dim);
+            height: 28px; width: 100%; margin-top: 15px; 
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
         .progress-bar { 
-            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan)); 
-            width: 0%; 
-            height: 100%; 
-            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            font-weight: 900; 
-            font-size: 12px; 
-            box-shadow: 0 0 10px var(--accent-glow);
+            background: linear-gradient(90deg, var(--hud-purple), var(--hud-cyan)); 
+            width: 0%; height: 100%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); 
+            display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 900; 
+            font-size: 13px; box-shadow: 0 0 15px var(--hud-cyan); letter-spacing: 2px;
         }
 
-        /* 宇宙儀表板面板專用 */
-        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+        /* 儀表板專用全息顯示區 */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
         .dash-card { 
-            background: rgba(255, 255, 255, 0.02); 
-            border-radius: 16px; 
-            padding: 20px; 
-            box-shadow: inset 0 0 15px rgba(255,255,255,0.01); 
-            border: 1px solid rgba(255, 255, 255, 0.06); 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
+            background: rgba(0, 0, 0, 0.4); border: 1px solid var(--hud-cyan-dim); 
+            padding: 25px; display: flex; flex-direction: column; justify-content: center; 
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
         }
         .dash-card-header { 
-            font-size: 13px; 
-            font-weight: 700; 
-            color: var(--text-muted); 
-            margin-bottom: 15px; 
-            letter-spacing: 1px; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
+            font-size: 15px; font-weight: 900; color: var(--hud-cyan); margin-bottom: 20px; 
+            letter-spacing: 2px; border-bottom: 1px dashed var(--hud-cyan-dim); padding-bottom: 10px;
         }
         
-        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.08); }
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(0,243,255,0.05); }
         .info-row:last-child { border-bottom: none; }
-        .info-label { color: var(--text-muted); font-weight: 600; }
-        .info-value { color: #fff; font-weight: 700; }
+        .info-label { color: var(--text-muted); font-weight: 800; letter-spacing: 1px;}
+        .info-value { color: #fff; font-weight: 900; }
 
-        /* 雙艙數據佈局 */
-        .split-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .split-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .stat-box { 
-            background: rgba(0, 0, 0, 0.2); 
-            border-radius: 12px; 
-            padding: 15px; 
-            text-align: center; 
-            border: 1px solid rgba(255, 255, 255, 0.04); 
+            background: rgba(0, 243, 255, 0.05); border: 1px solid var(--hud-cyan-dim); 
+            padding: 20px; text-align: center; 
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
         }
-        .stat-box .num { font-size: 28px; font-weight: 900; margin: 5px 0; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
-        .stat-box.box-stat .num { color: var(--accent-cyan); text-shadow: 0 0 8px var(--accent-glow); }
-        .stat-box.loose-stat .num { color: var(--warning-color); text-shadow: 0 0 8px rgba(255,179,0,0.3); }
-        .stat-unit { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+        .stat-box .num { font-size: 36px; font-weight: 900; margin: 10px 0; font-family: "Courier New", Courier, monospace; }
+        .stat-box.box-stat .num { color: var(--hud-cyan); text-shadow: 0 0 15px var(--hud-cyan); }
+        .stat-box.loose-stat .num { color: var(--hud-warning); text-shadow: 0 0 15px var(--hud-warning); }
+        .stat-unit { font-size: 14px; color: var(--text-muted); font-weight: 800; letter-spacing: 2px; }
 
-        /* 核心能量源能量卡 */
         .total-card { 
-            background: linear-gradient(135deg, #1e1b4b, #4c1d95, #701a75); 
-            color: white; 
-            text-align: center; 
-            padding: 30px 20px; 
-            position: relative; 
-            overflow: hidden; 
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: linear-gradient(135deg, rgba(176,38,255,0.2), rgba(0,243,255,0.2)); 
+            border: 1px solid var(--hud-cyan); color: #fff; text-align: center; padding: 35px 20px; 
+            box-shadow: inset 0 0 30px rgba(0,243,255,0.1);
         }
-        .total-label { font-size: 15px; font-weight: 700; opacity: 0.8; margin-bottom: 5px; letter-spacing: 1px; }
-        .total-value { font-size: 50px; font-weight: 900; line-height: 1; text-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
-        .total-unit { font-size: 18px; font-weight: 600; opacity: 0.8; margin-left: 4px; }
+        .total-label { font-size: 16px; font-weight: 900; color: var(--hud-cyan); margin-bottom: 10px; letter-spacing: 3px; text-shadow: 0 0 5px var(--hud-cyan); }
+        .total-value { font-size: 60px; font-weight: 900; line-height: 1; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); font-family: "Courier New", Courier, monospace;}
+        .total-unit { font-size: 20px; font-weight: 800; color: var(--hud-cyan); margin-left: 8px; letter-spacing: 2px;}
 
-        /* 權限控制隱藏 */
+        /* 系統權限隱藏 */
         .admin-only { display: none; } 
     </style>
 </head>
@@ -417,187 +325,171 @@
 
 <div id="loginOverlay">
     <div class="login-box">
-        <h2>⚡ 系統安全驗證</h2>
-        <input type="password" id="admin_pwd" placeholder="請輸入管理員密碼">
-        <button class="btn btn-primary" style="margin-bottom: 15px;" onclick="login('admin')">管理員登入 </button>
-        <div style="margin: 15px 0; color: var(--text-muted); font-size: 13px; font-weight: bold; letter-spacing: 1px;">— 🪐 —</div>
-        <button class="btn btn-secondary" onclick="login('viewer')">以檢視者進入 </button>
+        <h2>系統安全驗證</h2>
+        <input type="password" id="admin_pwd" placeholder="請輸入安全授權碼">
+        <button class="btn btn-primary" style="margin-bottom: 20px;" onclick="login('admin')">授權登入</button>
+        <div style="margin: 15px 0; color: var(--hud-cyan-dim); font-size: 12px; letter-spacing: 4px;">▼ ▼ ▼</div>
+        <button class="btn btn-secondary" onclick="login('viewer')">檢視者登入</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header-bar">
-        <div>即時狀態 : <span class="status-badge" id="syncStatus">● 連線中 ...</span></div>
-        <div>當前權限 : <span class="role-badge" id="roleDisplay">未登入 </span></div>
+        <div>伺服器狀態：<span class="status-badge" id="syncStatus">連線中...</span></div>
+        <div>存取層級：<span class="role-badge" id="roleDisplay">等待授權</span></div>
     </div>
 
     <div id="homePage" class="page" style="display: block;">
-        <div class="main-title">✨ 烤漆部粉體管理中心 </div>
+        <div class="main-title">烤漆部粉體管理系統</div>
         <div class="menu-list">
-            <div class="menu-item" onclick="goPage(1)">1. 烤漆粉號清冊 </div>
-            <div class="menu-item" onclick="goPage(2)">2. 庫存盤點監控 </div>
-            <div class="menu-item" onclick="goPage(3)">3. 採購入庫流水帳 </div>
-            <div class="menu-item" onclick="goPage(4)">4. 出庫用量紀錄 </div>
-            <div class="menu-item" onclick="goPage(5)">🔍5. 用量紀錄查詢 </div>
-            <div class="menu-item" style="background: rgba(0, 242, 254, 0.02); border-color: rgba(0, 242, 254, 0.3);" onclick="goPage(6)">🔍 6. 庫存快速查詢 </div>
-            <div class="menu-item" onclick="goPage(7)">7. 廢粉回收紀錄 </div>
-            <div class="menu-item" onclick="goPage(8)">🔍8. 廢粉統計預測 </div>
+            <div class="menu-item admin-only" onclick="goPage(1)">1.烤漆粉號清冊</div>
+            <div class="menu-item admin-only" onclick="goPage(2)">2.庫存盤點監控</div>
+            <div class="menu-item admin-only" onclick="goPage(3)">3.採購入庫紀錄</div>
+            <div class="menu-item admin-only" onclick="goPage(4)">4.出庫用量紀錄</div>
+            <div class="menu-item" onclick="goPage(5)">5.用量歷史查詢</div>
+            <div class="menu-item" style="border-color: var(--hud-purple); color: var(--hud-cyan);" onclick="goPage(6)">6.即時庫存</div>
+            <div class="menu-item admin-only" onclick="goPage(7)">7.廢粉回收紀錄</div>
+            <div class="menu-item" onclick="goPage(8)">8.廢粉數據預測</div>
         </div>
     </div>
 
     <div id="page1" class="page">
-        <div class="page-title"><span>📝 1. 烤漆粉號清冊 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
+        <div class="page-title"><span>📝 烤漆粉號清冊</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
         <div class="card-form admin-only">
-    <div class="form-group"><label>粉號 ：</label><input type="text" id="p1_id" placeholder="例如：P-101"></div>
-    <div class="form-group"><label>代號 ：</label><input type="text" id="p1_code" placeholder="廠內辨識代號"></div>
-    <div class="form-group"><label>色系 ：</label><input type="text" id="p1_color" placeholder="例如：黑色/白色"></div>
-    
-    <div class="form-group">
-        <label>淨重 (KG)：</label>
-        <select id="p1_weight">
-            <option value="20">20 KG</option>
-            <option value="25" selected>25 KG</option>
-        </select>
-    </div>
-    
-    <div class="form-group">
-        <label>廠商 ：</label>
-        <select id="p1_supplier">
-            <option value="老虎">老虎</option>
-            <option value="國麗">國麗</option>
-            <option value="國邦">國邦</option>
-            <option value="台粉">台粉</option>
-            <option value="長誠">長誠</option>
-            <option value="南寶">南寶</option>
-            <option value="阿克斯">阿克斯</option>
-        </select>
-    </div>
-    <button class="btn btn-success" id="btn_saveP1" onclick="saveP1()">新增 / 更新粉號資料 </button>
-</div>
+            <div class="form-group"><label>粉號：</label><input type="text" id="p1_id" placeholder="例如：P-101"></div>
+            <div class="form-group"><label>代號：</label><input type="text" id="p1_code" placeholder="識別編碼"></div>
+            <div class="form-group"><label>色系：</label><input type="text" id="p1_color" placeholder="例如：黑色/白色"></div>
+            <div class="form-group"><label>淨重 (KG)：</label><input type="number" id="p1_weight" value="25"></div>
+            <div class="form-group"><label>廠商：</label><input type="text" id="p1_supplier"></div>
+            <button class="btn btn-success" id="btn_saveP1" onclick="saveP1()">寫入資料庫</button>
+        </div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p1" accept=".csv">
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('powder', 'file_p1')">匯入 </button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('powder')">匯出 </button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="width:auto; padding:8px 20px;" onclick="importCSV('powder', 'file_p1')">匯入</button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 20px;" onclick="exportCSV('powder')">匯出</button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p1"><thead><tr><th>粉號 </th><th>代號 </th><th>色系 </th><th>淨重 </th><th>廠商 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p1"><thead><tr><th>粉號</th><th>代號</th><th>色系</th><th>淨重</th><th>廠商</th><th class="admin-only">執行指令</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page2" class="page">
-        <div class="page-title"><span>📦 2. 庫存盤點監控 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
+        <div class="page-title"><span>📦 庫存盤點監控</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>粉號 ：</label><select id="p2_id"></select></div>
-            <div class="form-group"><label>現存箱數 ：</label><input type="number" id="p2_box"></div>
-            <div class="form-group"><label>現存散粉  (KG)：</label><input type="number" id="p2_loose"></div>
-            <button class="btn btn-success" onclick="saveP2()">強制覆寫盤點庫存 </button>
+            <div class="form-group"><label>指定粉號：</label><select id="p2_id"></select></div>
+            <div class="form-group"><label>現存箱數：</label><input type="number" id="p2_box"></div>
+            <div class="form-group"><label>現存散粉 (KG)：</label><input type="number" id="p2_loose"></div>
+            <button class="btn btn-danger" onclick="saveP2()">強制覆寫現存庫存</button>
         </div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p2" accept=".csv">
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('inventory', 'file_p2')">匯入 </button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('inventory')">匯出 </button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="width:auto; padding:8px 20px;" onclick="importCSV('inventory', 'file_p2')">匯入</button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 20px;" onclick="exportCSV('inventory')">匯出</button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p2"><thead><tr><th>粉號 </th><th>箱數 </th><th>散粉  (KG)</th><th>總重  (KG)</th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p2"><thead><tr><th>粉號</th><th>箱數</th><th>散粉 (KG)</th><th>總重 (KG)</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page3" class="page">
-        <div class="page-title"><span>📥 3. 採購入庫流水帳 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
+        <div class="page-title"><span>📥 採購入庫紀錄</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>日期 ：</label><input type="date" id="p3_date"></div>
-            <div class="form-group"><label>粉號 ：</label><select id="p3_id"></select></div>
-            <div class="form-group"><label>進貨箱數 ：</label><input type="number" id="p3_box" value="0"></div>
-            <div class="form-group"><label>進貨散粉  (KG)：</label><input type="number" id="p3_loose" value="0"></div>
-            <button class="btn btn-success" id="btn_saveP3" onclick="saveP3()">確認入庫 </button>
+            <div class="form-group"><label>入庫日期：</label><input type="date" id="p3_date"></div>
+            <div class="form-group"><label>指定粉號：</label><select id="p3_id"></select></div>
+            <div class="form-group"><label>進貨箱數：</label><input type="number" id="p3_box" value="0"></div>
+            <div class="form-group"><label>進貨散粉 (KG)：</label><input type="number" id="p3_loose" value="0"></div>
+            <button class="btn btn-success" id="btn_saveP3" onclick="saveP3()">確認執行入庫</button>
         </div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p3" accept=".csv">
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('purchase', 'file_p3')">匯入 IMPORT</button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('purchase')">匯出 </button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="width:auto; padding:8px 20px;" onclick="importCSV('purchase', 'file_p3')">匯入</button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 20px;" onclick="exportCSV('purchase')">匯出</button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p3"><thead><tr><th>日期 </th><th>粉號 </th><th>入箱數 </th><th>入散粉 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p3"><thead><tr><th>日期</th><th>粉號</th><th>入箱數</th><th>入散粉</th><th class="admin-only">執行指令</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page4" class="page">
-        <div class="page-title"><span>📤 4. 出庫用量紀錄 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
+        <div class="page-title"><span>📤 出庫用量紀錄</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>日期 ：</label><input type="date" id="p4_date"></div>
-            <div class="form-group"><label>選擇粉號 ：</label><select id="p4_id" onchange="fetchCurrentStock()"></select></div>
-            <div class="form-group"><label>當前剩餘庫存 ：</label><input type="text" id="p4_stock" readonly placeholder="請先選擇上方粉號"></div>
-            <div class="form-group"><label>領出箱數 ：</label><input type="number" id="p4_box" value="0" oninput="calcP4Usage()"></div>
+            <div class="form-group"><label>出庫日期：</label><input type="date" id="p4_date"></div>
+            <div class="form-group"><label>指定粉號：</label><select id="p4_id" onchange="fetchCurrentStock()"></select></div>
+            <div class="form-group"><label>當前剩餘庫存：</label><input type="text" id="p4_stock" readonly placeholder="系統等待指令..."></div>
+            <div class="form-group"><label>領出箱數：</label><input type="number" id="p4_box" value="0" oninput="calcP4Usage()"></div>
             <div class="form-group"><label>領出散粉 (KG)：</label><input type="number" id="p4_loose" value="0" oninput="calcP4Usage()"></div>
             <div class="form-group"><label>回庫散粉 (KG)：</label><input type="number" id="p4_return" value="0" oninput="calcP4Usage()"></div>
-            <div class="form-group"><label>🔥 實際用量 (KG)：</label><input type="text" id="p4_usage" readonly placeholder="自動動態計算 (領出-回庫)"></div>
-            <button class="btn btn-primary" id="btn_saveP4" onclick="saveP4()">確認出庫 </button>
+            <div class="form-group"><label>實際消耗 (KG)：</label><input type="text" id="p4_usage" readonly placeholder="系統自動計算 (領出扣除回庫)"></div>
+            <button class="btn btn-primary" id="btn_saveP4" onclick="saveP4()">確認執行出庫</button>
         </div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p4" accept=".csv">
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('usage', 'file_p4')">匯入 </button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('usage')">匯出 </button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="width:auto; padding:8px 20px;" onclick="importCSV('usage', 'file_p4')">匯入</button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 20px;" onclick="exportCSV('usage')">匯出</button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p4"><thead><tr><th>日期 </th><th>粉號 </th><th>領箱數 </th><th>領散粉 </th><th>回庫 </th><th>用量 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p4"><thead><tr><th>日期</th><th>粉號</th><th>領箱數</th><th>領散粉</th><th>回庫</th><th>實際用量</th><th class="admin-only">執行指令</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page5" class="page">
-        <div class="page-title"><span>📅 5. 用量紀錄查詢 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
-        <div class="card-form"><div class="form-group"><label>選擇日期 ：</label><select id="p5_date" onchange="renderP5()"></select></div></div>
-        <div class="data-container"><table class="data-table" id="tb_p5"><thead><tr><th>粉號 </th><th>領箱數 </th><th>領散粉 </th><th>回庫 </th><th>總用量 </th></tr></thead><tbody></tbody></table></div>
+        <div class="page-title"><span>📅 用量歷史查詢</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
+        <div class="card-form"><div class="form-group"><label>選擇分析日期：</label><select id="p5_date" onchange="renderP5()"></select></div></div>
+        <div class="data-container"><table class="data-table" id="tb_p5"><thead><tr><th>粉號</th><th>領箱數</th><th>領散粉</th><th>回庫</th><th>總消耗量</th></tr></thead><tbody></tbody></table></div>
     </div>
     
     <div id="page6" class="page">
-        <div class="page-title"><span>🔍 6. 庫存快速查詢面板 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
-        <div class="card-form" style="background: rgba(0,0,0,0.4);">
+        <div class="page-title"><span>🔍 即時庫存</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
+        <div class="card-form">
             <div class="form-group" style="margin-bottom: 0;">
-                <label style="color: var(--accent-cyan); font-size: 16px;">粉號/代號查詢 ：</label>
-                <select id="p6_id" style="font-size: 16px; font-weight: bold; background: rgba(4,2,9,0.8);" onchange="renderP6()"></select>
+                <label style="color: var(--hud-purple); font-size: 16px;">輸入目標：</label>
+                <select id="p6_id" style="font-size: 16px; border-color: var(--hud-purple); color: var(--hud-purple);" onchange="renderP6()"></select>
             </div>
         </div>
-        
         <div id="p6_result" style="display:none;"></div>
     </div>
 
     <div id="page7" class="page">
-        <div class="page-title"><span>♻️ 7. 廢粉回收紀錄 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
+        <div class="page-title"><span>♻️ 廢粉回收紀錄</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
         <div class="card-form admin-only">
-            <div class="form-group"><label>日期 ：</label><input type="date" id="p7_date"></div>
-            <div class="form-group"><label>回收箱數 ：</label><input type="number" id="p7_qty" placeholder="每箱預設為 25 KG"></div>
-            <button class="btn btn-success" id="btn_saveP7" onclick="saveP7()">新增 / 更新廢粉紀錄 </button>
+            <div class="form-group"><label>回收日期：</label><input type="date" id="p7_date"></div>
+            <div class="form-group"><label>回收箱數：</label><input type="number" id="p7_qty" placeholder="每箱基準重量 25 KG"></div>
+            <button class="btn btn-success" id="btn_saveP7" onclick="saveP7()">寫入回收紀錄</button>
         </div>
         <div class="file-ops admin-only">
             <input type="file" id="file_p7" accept=".csv">
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-primary" style="width:auto; padding:8px 15px;" onclick="importCSV('waste', 'file_p7')">匯入 </button>
-                <button class="btn btn-secondary" style="width:auto; padding:8px 15px;" onclick="exportCSV('waste')">匯出 </button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="width:auto; padding:8px 20px;" onclick="importCSV('waste', 'file_p7')">匯入</button>
+                <button class="btn btn-secondary" style="width:auto; padding:8px 20px;" onclick="exportCSV('waste')">匯出</button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p7"><thead><tr><th>日期 </th><th>箱數 </th><th>估算重量 </th><th class="admin-only">操作 </th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p7"><thead><tr><th>日期</th><th>回收箱數</th><th>換算重量</th><th class="admin-only">執行指令</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page8" class="page">
-        <div class="page-title"><span>📈 8. 廢粉統計預測 </span><button class="btn btn-secondary" style="width:auto; padding: 10px 15px;" onclick="goHome()">返回首頁 </button></div>
-        
+        <div class="page-title"><span>📈 廢粉數據預測</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
         <div class="dashboard-grid">
-            <div class="dash-card total-card" style="padding: 40px 20px;">
-                <div class="total-label">總累積廢粉量 </div>
+            <div class="dash-card total-card">
+                <div class="total-label">累積廢粉重量</div>
                 <div><span class="total-value" id="waste_total">0</span> <span class="total-unit">KG</span></div>
             </div>
-            
             <div class="dash-card">
-                <div class="dash-card-header">🔴 載重安全監控容量比 (MAX 10 TON)</div>
+                <div class="dash-card-header">🔴 空間負載監控 (上限 10 噸)</div>
                 <div class="progress-container">
                     <div id="waste_progress_bar" class="progress-bar">0%</div>
                 </div>
             </div>
-
-            <div class="dash-card" style="background: linear-gradient(135deg, #100b26, #1a103c); border-color: rgba(0, 255, 204, 0.2);">
-                <div class="dash-card-header" style="color: var(--success-color);">⏱️ 預測距離清運閾值 (10,000 KG)</div>
-                <div id="waste_forecast" style="font-size:18px; font-weight:800; color:#fff; text-align: center; margin-top: 10px;">資料計算同步中...</div>
+            <div class="dash-card" style="border-color: var(--hud-purple);">
+                <div class="dash-card-header" style="color: var(--hud-purple);">⏱️ 臨界清運預測模型</div>
+                <div id="waste_forecast" style="font-size:18px; font-weight:900; color:#fff; text-align: center; margin-top: 15px; letter-spacing: 2px;">系統運算中...</div>
             </div>
+        </div>
+        <div class="page-title" style="margin-top: 40px; font-size: 18px;"><span>📋 歷史數據封存庫</span></div>
+        <div class="data-container">
+            <table class="data-table" id="tb_p8">
+                <thead><tr><th>紀錄日期</th><th>回收箱數</th><th>換算重量</th></tr></thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -606,7 +498,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <script>
-    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyDTIMGBYqAqOpFcCqEMjWWUwC_nPAfQ9ko",
         authDomain: "paint-system-21867.firebaseapp.com",
@@ -631,7 +522,7 @@
     function login(role) {
         if(role === 'admin') {
             const pwd = document.getElementById('admin_pwd').value;
-            if(pwd !== 'M0282') return alert('登入失敗：密碼錯誤！ ');
+            if(pwd !== 'M0282') return alert('驗證失敗：授權碼錯誤！');
             userRole = 'admin';
         } else {
             userRole = 'viewer';
@@ -639,8 +530,8 @@
         
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('roleDisplay').innerHTML = role === 'admin' 
-            ? '<span style="color:var(--danger-color); font-weight:bold; text-shadow:0 0 10px rgba(255,51,102,0.5);">管理員 </span>' 
-            : '<span style="color:var(--text-muted)">檢視者 </span>';
+            ? '<span style="color:var(--hud-danger); font-weight:900; letter-spacing:2px;">[ 管理員 ]</span>' 
+            : '<span style="color:var(--text-muted); font-weight:900; letter-spacing:2px;">[ 檢視者 ]</span>';
         
         applyPermissions();
     }
@@ -678,9 +569,8 @@
             ['powder','inventory','purchase','usage','waste'].forEach(k => { if(!dbData[k]) dbData[k] = {}; });
             
             const statusEl = document.getElementById('syncStatus');
-            statusEl.innerText = "● 已連線 ";
-            statusEl.style.borderColor = "rgba(0, 255, 204, 0.4)";
-            statusEl.style.color = "var(--success-color)";
+            statusEl.innerText = "[ 已連線 ]";
+            statusEl.style.color = "var(--hud-success)";
             
             refreshAllUI();
         } else {
@@ -691,15 +581,13 @@
     setTimeout(() => {
         if(document.getElementById('syncStatus').innerText.includes("連線中")) {
             const statusEl = document.getElementById('syncStatus');
-            statusEl.innerText = "✖ 連線失敗 ";
-            statusEl.style.background = "rgba(255, 51, 102, 0.1)";
-            statusEl.style.borderColor = "rgba(255, 51, 102, 0.4)";
-            statusEl.style.color = "var(--danger-color)";
+            statusEl.innerText = "[ 網路連線失敗 ]";
+            statusEl.style.color = "var(--hud-danger)";
         }
     }, 5000);
 
     function refreshAllUI() {
-        let optHtml = '<option value="">請點擊下拉選擇粉號或代號 ...</option>';
+        let optHtml = '<option value="">請點擊展開...</option>';
         for (let id in dbData.powder) { 
             let code = dbData.powder[id].code ? ` [${dbData.powder[id].code}]` : '';
             optHtml += `<option value="${id}">${id}${code}</option>`; 
@@ -715,63 +603,46 @@
         if(document.getElementById('page6').style.display === 'block') renderP6();
     }
 
-         // 新增選取連動功能
-document.getElementById('p2_id').addEventListener('change', function() {
-    const id = this.value;
-    if(id && dbData.inventory[id]) {
-        document.getElementById('p2_box').value = dbData.inventory[id].box || 0;
-        document.getElementById('p2_loose').value = dbData.inventory[id].loose || 0;
-    } else {
-        document.getElementById('p2_box').value = 0;
-        document.getElementById('p2_loose').value = 0;
-    }
-});
-
-
     function renderTables() {
-        // P1 粉號
         let htmlP1 = '';
         for(let id in dbData.powder) {
             let d = dbData.powder[id];
-            htmlP1 += `<tr><td><strong>${id}</strong></td><td>${d.code || '-'}</td><td>${d.color_system || '-'}</td><td>${d.weight || 25} KG</td><td>${d.supplier || '-'}</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP1('${id}')">修改 </button><button class="action-btn" onclick="delData('powder', '${id}')">刪除 </button></td></tr>`;
+            htmlP1 += `<tr><td><strong>${id}</strong></td><td>${d.code || '無資料'}</td><td>${d.color_system || '無資料'}</td><td>${d.weight || 25} KG</td><td>${d.supplier || '無資料'}</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-purple); color:var(--hud-purple); margin-right:5px;" onclick="editP1('${id}')">修改</button><button class="action-btn" onclick="delData('powder', '${id}')">刪除</button></td></tr>`;
         }
         document.querySelector('#tb_p1 tbody').innerHTML = htmlP1;
 
-        // P2 庫存
         let htmlP2 = '';
         for(let id in dbData.inventory) {
             let inv = dbData.inventory[id];
             let w = dbData.powder[id] ? dbData.powder[id].weight : 25;
             let total = (inv.box * w) + inv.loose;
-            htmlP2 += `<tr><td><strong>${id}</strong></td><td>${inv.box}</td><td>${inv.loose}</td><td style="font-weight:900; color:var(--accent-cyan); font-size:16px;">${total} KG</td></tr>`;
+            htmlP2 += `<tr><td><strong style="color:var(--hud-cyan);">${id}</strong></td><td>${inv.box}</td><td>${inv.loose}</td><td style="font-weight:900; color:#fff; font-size:16px; font-family:'Courier New', Courier, monospace;">${total} KG</td></tr>`;
         }
         document.querySelector('#tb_p2 tbody').innerHTML = htmlP2;
 
-        // P3 入庫流水帳
         let htmlP3 = '';
         Object.entries(dbData.purchase || {}).reverse().forEach(([key, r]) => {
-            htmlP3 += `<tr><td>${r.date}</td><td><strong>${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP3('${key}')">修改 </button><button class="action-btn" onclick="delData('purchase', '${key}')">刪除 </button></td></tr>`;
+            htmlP3 += `<tr><td>${r.date}</td><td><strong style="color:var(--hud-success);">${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-purple); color:var(--hud-purple); margin-right:5px;" onclick="editP3('${key}')">修改</button><button class="action-btn" onclick="delData('purchase', '${key}')">刪除</button></td></tr>`;
         });
         document.querySelector('#tb_p3 tbody').innerHTML = htmlP3;
 
-        // P4 出庫用量紀錄
         let htmlP4 = '';
         Object.entries(dbData.usage || {}).reverse().forEach(([key, r]) => {
-            htmlP4 += `<tr><td>${r.date}</td><td><strong>${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td><td style="font-weight:900; color:var(--warning-color); font-size:15px;">${r.usage_qty || 0} COMPLETED</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP4('${key}')">修改 </button><button class="action-btn" onclick="delData('usage', '${key}')">刪除 </button></td></tr>`;
+            htmlP4 += `<tr><td>${r.date}</td><td><strong style="color:var(--hud-warning);">${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td><td style="font-weight:900; color:var(--hud-cyan); font-size:15px;">${r.usage_qty || 0} 已結算</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-purple); color:var(--hud-purple); margin-right:5px;" onclick="editP4('${key}')">修改</button><button class="action-btn" onclick="delData('usage', '${key}')">刪除</button></td></tr>`;
         });
         document.querySelector('#tb_p4 tbody').innerHTML = htmlP4;
 
-        // P7 廢粉紀錄
-        let htmlP7 = '';
+        let htmlP7 = ''; let htmlP8 = '';
         Object.entries(dbData.waste || {}).reverse().forEach(([key, r]) => {
-            htmlP7 += `<tr><td>${r.date}</td><td><strong>${r.qty}</strong></td><td>${r.qty * 25} KG</td><td class="admin-only"><button class="action-btn" style="background:var(--accent-purple); margin-right:5px;" onclick="editP7('${key}')">修改 </button><button class="action-btn" onclick="delData('waste', '${key}')">刪除 </button></td></tr>`;
+            htmlP7 += `<tr><td>${r.date}</td><td><strong style="color:var(--hud-purple);">${r.qty}</strong></td><td>${r.qty * 25} KG</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-cyan); color:var(--hud-cyan); margin-right:5px;" onclick="editP7('${key}')">修改</button><button class="action-btn" onclick="delData('waste', '${key}')">刪除</button></td></tr>`;
+            htmlP8 += `<tr><td>${r.date}</td><td><strong style="color:var(--hud-purple);">${r.qty}</strong></td><td>${r.qty * 25} KG</td></tr>`;
         });
         document.querySelector('#tb_p7 tbody').innerHTML = htmlP7;
+        if(document.querySelector('#tb_p8 tbody')) document.querySelector('#tb_p8 tbody').innerHTML = htmlP8;
 
         applyPermissions();
     }
 
-    // --- 4. 業務寫入與修改邏輯 ---
     function saveP1() {
         const id = document.getElementById('p1_id').value.trim(); 
         const code = document.getElementById('p1_code').value.trim(); 
@@ -779,7 +650,7 @@ document.getElementById('p2_id').addEventListener('change', function() {
         const weight = Number(document.getElementById('p1_weight').value);
         const supplier = document.getElementById('p1_supplier').value.trim();
 
-        if(!id) return alert('粉號為必填資訊！ ');
+        if(!id) return alert('錯誤：系統粉號為必填參數！');
         
         let updates = {}; 
         updates[`/powder/${id}`] = { code, color_system, weight, supplier };
@@ -790,8 +661,8 @@ document.getElementById('p2_id').addEventListener('change', function() {
         document.getElementById('p1_id').value = ''; document.getElementById('p1_code').value = ''; 
         document.getElementById('p1_color').value = ''; document.getElementById('p1_supplier').value = '';
         document.getElementById('p1_id').readOnly = false;
-        document.getElementById('btn_saveP1').innerText = "新增 / 更新粉號資料 ";
-        alert('✅ 資料儲存成功！ ');
+        document.getElementById('btn_saveP1').innerText = "寫入資料庫";
+        alert('✅ 晶片寫入成功！');
     }
 
     function editP1(id) {
@@ -803,14 +674,14 @@ document.getElementById('p2_id').addEventListener('change', function() {
         document.getElementById('p1_color').value = d.color_system || '';
         document.getElementById('p1_weight').value = d.weight || 25;
         document.getElementById('p1_supplier').value = d.supplier || '';
-        document.getElementById('btn_saveP1').innerText = "儲存修改資料 ";
+        document.getElementById('btn_saveP1').innerText = "儲存修正資料";
         document.getElementById('p1_id').scrollIntoView({ behavior: 'smooth' });
     }
 
     function saveP2() {
-        const id = document.getElementById('p2_id').value; if(!id) return alert('請選擇粉號 ');
+        const id = document.getElementById('p2_id').value; if(!id) return alert('警告：未指定目標粉號');
         db.ref(`/inventory/${id}`).set({ box: Number(document.getElementById('p2_box').value) || 0, loose: Number(document.getElementById('p2_loose').value) || 0 });
-        alert('✅ 盤點庫存已強制覆寫更新！ ');
+        alert('✅ 庫存參數已強制覆寫！');
     }
 
     function saveP3() {
@@ -818,7 +689,7 @@ document.getElementById('p2_id').addEventListener('change', function() {
         const id = document.getElementById('p3_id').value;
         const box = Number(document.getElementById('p3_box').value) || 0; 
         const loose = Number(document.getElementById('p3_loose').value) || 0;
-        if(!id) return alert('請先選擇粉號 ');
+        if(!id) return alert('警告：未指定目標粉號');
 
         let inv = dbData.inventory[id] || { box: 0, loose: 0 };
         let updates = {};
@@ -835,7 +706,7 @@ document.getElementById('p2_id').addEventListener('change', function() {
             }
             updates[`/purchase/${key}`] = { date, id, box, loose };
             editKeys.purchase = null;
-            document.getElementById('btn_saveP3').innerText = "確認入庫 ";
+            document.getElementById('btn_saveP3').innerText = "確認執行入庫";
         } else {
             key = db.ref().child('purchase').push().key;
             updates[`/purchase/${key}`] = { date, id, box, loose };
@@ -845,7 +716,7 @@ document.getElementById('p2_id').addEventListener('change', function() {
         db.ref().update(updates);
         
         document.getElementById('p3_box').value = 0; document.getElementById('p3_loose').value = 0; 
-        alert('✅ 採購入庫儲存成功！ ');
+        alert('✅ 入庫序列已確認執行！');
     }
 
     function editP3(key) {
@@ -854,7 +725,7 @@ document.getElementById('p2_id').addEventListener('change', function() {
         document.getElementById('p3_date').value = r.date; document.getElementById('p3_id').value = r.id;
         document.getElementById('p3_box').value = r.box; document.getElementById('p3_loose').value = r.loose;
         editKeys.purchase = key;
-        document.getElementById('btn_saveP3').innerText = "儲存修改紀錄 ";
+        document.getElementById('btn_saveP3').innerText = "儲存修正紀錄";
         document.getElementById('p3_date').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -862,7 +733,7 @@ document.getElementById('p2_id').addEventListener('change', function() {
         const id = document.getElementById('p4_id').value;
         if(!id || !dbData.inventory[id]) { document.getElementById('p4_stock').value = ''; return; }
         const inv = dbData.inventory[id];
-        document.getElementById('p4_stock').value = `📦 ${inv.box} 箱   +   ⚖️ ${inv.loose} KG `;
+        document.getElementById('p4_stock').value = `📦 ${inv.box} 箱   /   ⚖️ ${inv.loose} KG`;
         calcP4Usage();
     }
 
@@ -883,7 +754,7 @@ document.getElementById('p2_id').addEventListener('change', function() {
         const box = Number(document.getElementById('p4_box').value) || 0; 
         const loose = Number(document.getElementById('p4_loose').value) || 0;
         const return_qty = Number(document.getElementById('p4_return').value) || 0;
-        if(!id) return alert('請選擇粉號 ');
+        if(!id) return alert('警告：未指定目標粉號');
 
         const w = dbData.powder[id] ? dbData.powder[id].weight : 25;
         const usage_qty = (box * w) + loose - return_qty;
@@ -903,7 +774,7 @@ document.getElementById('p2_id').addEventListener('change', function() {
             }
             updates[`/usage/${key}`] = { date, id, box, loose, return_qty, usage_qty };
             editKeys.usage = null;
-            document.getElementById('btn_saveP4').innerText = "確認出庫 ";
+            document.getElementById('btn_saveP4').innerText = "確認執行出庫";
         } else {
             key = db.ref().child('usage').push().key;
             updates[`/usage/${key}`] = { date, id, box, loose, return_qty, usage_qty };
@@ -911,14 +782,14 @@ document.getElementById('p2_id').addEventListener('change', function() {
 
         let newBox = inv.box - box; 
         let newLoose = inv.loose - loose + return_qty;
-        if(newBox < 0 || newLoose < 0) return alert('⚠️ 警告：變更後庫存呈現負數！ ');
+        if(newBox < 0 || newLoose < 0) return alert('⚠️ 嚴重警告：預算執行後庫存數值呈現異常（小於零）！');
 
         updates[`/inventory/${id}`] = { box: newBox, loose: newLoose };
         db.ref().update(updates);
         
         document.getElementById('p4_box').value = 0; document.getElementById('p4_loose').value = 0; document.getElementById('p4_return').value = 0;
         fetchCurrentStock(); 
-        alert('✅ 出庫紀錄已儲存！');
+        alert('✅ 能量扣除與出庫序列執行完畢！');
     }
 
     function editP4(key) {
@@ -928,7 +799,7 @@ document.getElementById('p2_id').addEventListener('change', function() {
         fetchCurrentStock();
         document.getElementById('p4_box').value = r.box; document.getElementById('p4_loose').value = r.loose; document.getElementById('p4_return').value = r.return_qty || 0;
         editKeys.usage = key;
-        document.getElementById('btn_saveP4').innerText = "儲存修改紀錄 ";
+        document.getElementById('btn_saveP4').innerText = "儲存修正紀錄";
         calcP4Usage();
         document.getElementById('p4_date').scrollIntoView({ behavior: 'smooth' });
     }
@@ -936,15 +807,15 @@ document.getElementById('p2_id').addEventListener('change', function() {
     function saveP7() {
         const date = document.getElementById('p7_date').value; 
         const qty = Number(document.getElementById('p7_qty').value);
-        if(!qty) return alert('請填寫箱數 ');
+        if(!qty) return alert('錯誤：參數箱數不可為空');
         
         let updates = {}; let key = editKeys.waste;
-        if(key) { updates[`/waste/${key}`] = { date, qty }; editKeys.waste = null; document.getElementById('btn_saveP7').innerText = "新增廢粉紀錄 "; } 
+        if(key) { updates[`/waste/${key}`] = { date, qty }; editKeys.waste = null; document.getElementById('btn_saveP7').innerText = "寫入回收紀錄"; } 
         else { key = db.ref().child('waste').push().key; updates[`/waste/${key}`] = { date, qty }; }
         
         db.ref().update(updates);
         document.getElementById('p7_qty').value = ''; 
-        alert('✅ 廢粉紀錄儲存成功！');
+        alert('✅ 廢棄質能回收參數更新完畢！');
     }
 
     function editP7(key) {
@@ -952,12 +823,12 @@ document.getElementById('p2_id').addEventListener('change', function() {
         if(!r) return;
         document.getElementById('p7_date').value = r.date; document.getElementById('p7_qty').value = r.qty;
         editKeys.waste = key;
-        document.getElementById('btn_saveP7').innerText = "儲存修改紀錄 ";
+        document.getElementById('btn_saveP7').innerText = "儲存修正紀錄";
         document.getElementById('p7_date').scrollIntoView({ behavior: 'smooth' });
     }
 
     function delData(node, key) {
-        if(confirm('確定要刪除此筆紀錄？系統將自動平衡庫存。 ')) {
+        if(confirm('啟動刪除程序：確定抹除此筆紀錄？系統將自動重算平衡矩陣。')) {
             let updates = {};
             if(node === 'purchase') {
                 const r = dbData.purchase[key];
@@ -973,14 +844,13 @@ document.getElementById('p2_id').addEventListener('change', function() {
                 }
             }
             updates[`/${node}/${key}`] = null;
-            db.ref().update(updates).then(() => alert('✅ 資料已成功刪除！ '));
+            db.ref().update(updates).then(() => alert('✅ 目標資料已自系統徹底抹除！'));
         }
     }
 
-    // --- 5. 查詢與統計儀表板 ---
     function updateDateDropdown() {
         let dates = new Set(); Object.values(dbData.usage).forEach(r => dates.add(r.date));
-        let html = '<option value="">請選擇欲查詢之日期 ...</option>';
+        let html = '<option value="">請指定時間軸參數...</option>';
         [...dates].sort().reverse().forEach(d => html += `<option value="${d}">${d}</option>`);
         document.getElementById('p5_date').innerHTML = html;
     }
@@ -988,12 +858,11 @@ document.getElementById('p2_id').addEventListener('change', function() {
     function renderP5() {
         const date = document.getElementById('p5_date').value; let html = '';
         Object.values(dbData.usage).forEach(r => { 
-            if(r.date === date) html += `<tr><td><strong>${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td><td style="font-weight:900; color:var(--warning-color);">${r.usage_qty || 0} KG</td></tr>`; 
+            if(r.date === date) html += `<tr><td><strong style="color:var(--hud-cyan);">${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td><td style="font-weight:900; color:var(--hud-warning);">${r.usage_qty || 0} KG</td></tr>`; 
         });
         document.querySelector('#tb_p5 tbody').innerHTML = html;
     }
 
-    // 第 6 頁：星際快速查詢面板
     function renderP6() {
         const id = document.getElementById('p6_id').value; 
         const res = document.getElementById('p6_result');
@@ -1008,29 +877,29 @@ document.getElementById('p2_id').addEventListener('change', function() {
         res.innerHTML = `
             <div class="dashboard-grid">
                 <div class="dash-card">
-                    <div class="dash-card-header">📋 粉體基本資訊 </div>
-                    <div class="info-row"><span class="info-label">系統粉號 </span><span class="info-value" style="color:var(--accent-cyan); font-size:18px;">${id}</span></div>
-                    <div class="info-row"><span class="info-label">廠商代號 </span><span class="info-value">${d.code || 'N/A'}</span></div>
-                    <div class="info-row"><span class="info-label">粉體色系 </span><span class="info-value">${d.color_system || 'N/A'}</span></div>
-                    <div class="info-row"><span class="info-label">配合廠商 </span><span class="info-value">${d.supplier || 'N/A'}</span></div>
-                    <div class="info-row"><span class="info-label">單箱淨重 </span><span class="info-value">${weight} KG</span></div>
+                    <div class="dash-card-header">📋 粉末資料</div>
+                    <div class="info-row"><span class="info-label">粉號</span><span class="info-value" style="color:var(--hud-cyan); font-size:18px;">${id}</span></div>
+                    <div class="info-row"><span class="info-label">代號</span><span class="info-value">${d.code || '無資料'}</span></div>
+                    <div class="info-row"><span class="info-label">色系</span><span class="info-value">${d.color_system || '無資料'}</span></div>
+                    <div class="info-row"><span class="info-label">廠商</span><span class="info-value">${d.supplier || '無資料'}</span></div>
+                    <div class="info-row"><span class="info-label">淨重</span><span class="info-value">${weight} KG</span></div>
                 </div>
                 
                 <div class="split-stats">
                     <div class="stat-box box-stat">
-                        <div class="stat-unit">📦 現存箱數 </div>
+                        <div class="stat-unit">📦 箱數</div>
                         <div class="num">${inv.box}</div>
-                        <div class="stat-unit">BOXES</div>
+                        <div class="stat-unit">箱</div>
                     </div>
                     <div class="stat-box loose-stat">
-                        <div class="stat-unit">⚖️ 現存散粉 </div>
+                        <div class="stat-unit">⚖️ 散粉</div>
                         <div class="num">${inv.loose}</div>
                         <div class="stat-unit">KG</div>
                     </div>
                 </div>
 
                 <div class="dash-card total-card">
-                    <div class="total-label">⚡ 即時總庫存數量 </div>
+                    <div class="total-label">⚡ 總重量估測</div>
                     <div><span class="total-value">${total}</span> <span class="total-unit">KG</span></div>
                 </div>
             </div>
@@ -1053,26 +922,27 @@ document.getElementById('p2_id').addEventListener('change', function() {
         progressBar.style.width = pct.toFixed(1) + '%';
         progressBar.innerText = pct.toFixed(1) + '%';
         
-        if(pct >= 90) { progressBar.style.background = 'linear-gradient(90deg, #be123c, var(--danger-color))'; } 
-        else if(pct >= 70) { progressBar.style.background = 'linear-gradient(90deg, var(--warning-color), #fbbf24)'; }
-        else { progressBar.style.background = 'linear-gradient(90deg, var(--accent-purple), var(--accent-cyan))'; }
+        if(pct >= 90) { progressBar.style.background = 'linear-gradient(90deg, #be123c, var(--hud-danger))'; progressBar.style.boxShadow = '0 0 20px var(--hud-danger)'; } 
+        else if(pct >= 70) { progressBar.style.background = 'linear-gradient(90deg, var(--hud-warning), #fbbf24)'; progressBar.style.boxShadow = '0 0 20px var(--hud-warning)'; }
+        else { progressBar.style.background = 'linear-gradient(90deg, var(--hud-purple), var(--hud-cyan))'; progressBar.style.boxShadow = '0 0 20px var(--hud-cyan)'; }
         
         let days = (new Date() - firstDate) / (1000 * 60 * 60 * 24); if(days < 1) days = 1;
         let avgPerDay = totalKg / days;
         
         if(totalKg >= target) {
-            document.getElementById('waste_forecast').innerHTML = '<span style="color:var(--danger-color); font-weight:900;">⚠️ 警告！廢粉量已超越 10 噸，請立即安排清運！ </span>';
+            document.getElementById('waste_forecast').innerHTML = '<span style="color:var(--hud-danger); font-weight:900;">⚠️ 最高級別警報：負載超越 10 噸，強烈建議啟動物理清運！</span>';
         } else if(avgPerDay > 0) {
             let remainDays = Math.ceil((target - totalKg) / avgPerDay);
-            document.getElementById('waste_forecast').innerHTML = `預計剩餘 . <span style="color:var(--danger-color); font-size:32px;">${remainDays}</span> 天將逼近 10 噸上限`;
+            document.getElementById('waste_forecast').innerHTML = `倒數... 剩餘 <span style="color:var(--hud-danger); font-size:36px; text-shadow: 0 0 10px var(--hud-danger);">${remainDays}</span> 個天數將達臨界值`;
         } else {
-            document.getElementById('waste_forecast').innerHTML = '<span style="color:var(--text-muted); font-size:15px;">尚無足夠歷史數據進行預測 </span>';
+            document.getElementById('waste_forecast').innerHTML = '<span style="color:var(--text-muted); font-size:15px;">數據模型建立中，尚缺推演參數</span>';
         }
     }
 
-    // --- 6. CSV 匯出匯入 ---
     function exportCSV(node) {
         let csv = "\uFEFF"; let data = dbData[node] || {};
+        let nameMap = { powder: '粉號清冊', inventory: '庫存盤點', purchase: '採購入庫', usage: '出庫用量', waste: '廢粉紀錄' };
+        
         if(node === 'powder') { csv += "粉號,代號,色系,淨重,廠商\n"; Object.keys(data).forEach(k => csv += `"${k}","${data[k].code || ''}","${data[k].color_system || ''}",${data[k].weight || 25},"${data[k].supplier || ''}"\n`); }
         if(node === 'inventory') { csv += "粉號,箱數,散粉\n"; Object.keys(data).forEach(k => csv += `"${k}",${data[k].box},${data[k].loose}\n`); }
         if(node === 'purchase') { csv += "日期,粉號,箱數,散粉\n"; Object.values(data).forEach(r => csv += `"${r.date}","${r.id}",${r.box},${r.loose}\n`); }
@@ -1080,13 +950,13 @@ document.getElementById('p2_id').addEventListener('change', function() {
         if(node === 'waste') { csv += "日期,桶數\n"; Object.values(data).forEach(r => csv += `"${r.date}",${r.qty}\n`); }
         
         let link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-        link.setAttribute("download", `${node}_DATA_EXPORT.CSV`);
+        link.setAttribute("download", `${nameMap[node]}_資料匯出.CSV`);
         document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
     function importCSV(node, inputId) {
         const file = document.getElementById(inputId).files[0];
-        if(!file) return alert("請先選擇要匯入的 CSV 檔案 ");
+        if(!file) return alert("系統提示：請先選定要載入的數據包 (CSV格式)");
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
@@ -1100,9 +970,9 @@ document.getElementById('p2_id').addEventListener('change', function() {
                     else if(node === 'usage' && cols.length >= 4) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], id: cols[1], box: isNaN(Number(cols[2]))?0:Number(cols[2]), loose: isNaN(Number(cols[3]))?0:Number(cols[3]), return_qty: cols.length>=6?Number(cols[4]):0, usage_qty: cols.length>=6?Number(cols[5]):((Number(cols[2])*(dbData.powder[cols[1]]?.weight||25))+Number(cols[3])-(cols.length>=6?Number(cols[4]):0)) }; }
                     else if(node === 'waste' && cols.length >= 2) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], qty: isNaN(Number(cols[1]))?0:Number(cols[1]) }; }
                 }
-                if(Object.keys(updates).length === 0) return alert("❌ 無可匯入之有效資料列。 ");
-                db.ref().update(updates).then(() => { alert("✅ CSV 批次資料匯入成功！ "); document.getElementById(inputId).value = ''; });
-            } catch (err) { alert("❌ CSV 解析出錯 : " + err.message); }
+                if(Object.keys(updates).length === 0) return alert("❌ 警告：數據包無效，無法解析參數");
+                db.ref().update(updates).then(() => { alert("✅ 大量數據包已成功注入系統樞紐！"); document.getElementById(inputId).value = ''; });
+            } catch (err) { alert("❌ 數據解析發生致命錯誤 : " + err.message); }
         };
         reader.readAsText(file); 
     }
