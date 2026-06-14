@@ -72,25 +72,73 @@
             transform: translateY(-1px);
         }
 
-        /* --- 新預約即時跑馬燈提示樣式 --- */
-        .marquee-banner {
-            max-width: 1300px;
-            margin: 0 auto 20px auto;
-            background: linear-gradient(90deg, #FFF9E6 0%, #FFF3CD 100%);
-            border: 1px solid #FFEBAA;
-            color: #856404;
-            padding: 12px 20px;
+        /* --- 新增：滑入式彈出提示視窗樣式 --- */
+        .toast-notification {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: #FFFFFF;
+            border-left: 6px solid var(--accent-purple);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
             border-radius: 12px;
-            font-weight: 700;
-            font-size: 1rem;
-            box-shadow: var(--shadow);
-            display: none;
-            align-items: center;
+            padding: 20px;
+            z-index: 2000;
+            display: none; /* 初始隱藏 */
+            flex-direction: column;
+            gap: 12px;
+            max-width: 380px;
+            width: 90%;
+            animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .marquee-banner marquee {
-            vertical-align: middle;
+        .toast-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1.05rem;
         }
+
+        .toast-body {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .toast-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .btn-toast-update {
+            background-color: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-toast-close {
+            background-color: #EBEAEF;
+            color: #4A4E69;
+            border: none;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-toast-update:hover { opacity: 0.9; }
+        .btn-toast-close:hover { background-color: #D6D5DB; }
 
         .container {
             max-width: 1300px;
@@ -102,11 +150,10 @@
             padding: 20px;
         }
 
-        /* --- 修正：新增響應式表格外框，開啟橫向滑動 --- */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch; /* 優化手機板滑動順暢度 */
+            -webkit-overflow-scrolling: touch;
         }
 
         .loading-status {
@@ -122,7 +169,7 @@
             border-collapse: collapse;
             text-align: left;
             font-size: 0.95rem;
-            min-width: 1150px; /* 修正：強制設定表格最小寬度，低於此寬度時啟動滾動條，避免欄位被壓縮擠扁 */
+            min-width: 1150px;
         }
 
         th {
@@ -337,6 +384,11 @@
             from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
+
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -349,8 +401,14 @@
         <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
     </div>
 
-    <div id="marqueeAlert" class="marquee-banner">
-        <marquee scrollamount="6">🔔 偵測到雲端資料庫有新預約！請點擊右上角「整理/重整資料」按鈕重新整理頁面以更新清單。 🔔</marquee>
+    <!-- 新增：右上方彈出式提醒視窗 -->
+    <div id="toastAlert" class="toast-notification">
+        <div class="toast-header">🔔 系統即時通知</div>
+        <div class="toast-body">偵測到雲端資料庫有全新的客戶預約進來囉！請更新頁面以載入最新清單。</div>
+        <div class="toast-actions">
+            <button class="btn-toast-close" id="closeToastBtn">暫時關閉</button>
+            <button class="btn-toast-update" id="updateToastBtn">立即更新</button>
+        </div>
     </div>
 
     <div class="container">
@@ -413,6 +471,22 @@
         const deleteModal = document.getElementById('deleteModal');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        
+        // 彈出提示相關 DOM
+        const toastAlert = document.getElementById('toastAlert');
+        const closeToastBtn = document.getElementById('closeToastBtn');
+        const updateToastBtn = document.getElementById('updateToastBtn');
+
+        // 關閉彈出提示
+        closeToastBtn.addEventListener('click', () => {
+            toastAlert.style.display = 'none';
+        });
+
+        // 點擊彈出提示中的立即更新
+        updateToastBtn.addEventListener('click', () => {
+            toastAlert.style.display = 'none';
+            loadBookings();
+        });
 
         cancelDeleteBtn.addEventListener('click', () => {
             deleteModal.style.display = 'none';
@@ -440,13 +514,48 @@
             }
         });
 
+        // 新增：高質感多聲調電子提示音發聲技術 (免外部載入音檔)
+        function playNotificationChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+
+                // 第一聲：溫柔的高音 (E5)
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(659.25, now);
+                gain1.gain.setValueAtTime(0.2, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.3);
+
+                // 第二聲：和弦高音 (A5) 在 0.1 秒後疊加，清脆和諧
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(880.00, now + 0.1);
+                gain2.gain.setValueAtTime(0.2, now + 0.1);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(now + 0.1);
+                osc2.stop(now + 0.5);
+            } catch (e) {
+                console.warn("瀏覽器尚未授權音效播放: ", e);
+            }
+        }
+
         async function loadBookings() {
             const tbody = document.getElementById('bookingListTbody');
             const loading = document.getElementById('loading');
             const table = document.getElementById('bookingTable');
-            const marqueeAlert = document.getElementById('marqueeAlert');
             
-            marqueeAlert.style.display = 'none';
+            toastAlert.style.display = 'none'; // 重整時確保提示框隱藏
             
             loading.style.display = 'block';
             table.style.display = 'none';
@@ -474,7 +583,7 @@
                 });
 
                 if(rawList.length === 0) {
-                    loading.innerText = "目前雲端尚無任何客戶預約資料。";
+                    loading.innerText = "目前雲端尚無 any 客戶預約資料。";
                     return;
                 }
 
@@ -544,7 +653,10 @@
             const hasNewBooking = snapshot.docChanges().some(change => change.type === "added");
             
             if (hasNewBooking) {
-                document.getElementById('marqueeAlert').style.display = 'flex';
+                // 1. 彈出滑入式視窗提醒
+                toastAlert.style.display = 'flex';
+                // 2. 觸發悅耳提示音效
+                playNotificationChime();
             }
         });
 
