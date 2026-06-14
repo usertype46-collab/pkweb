@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神の指藝 | 闆闆專屬預約管理後台</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #F8F9FA;
+            --text-dark: #2B2D42;
+            --accent-purple: #6C5CE7;
+            --danger-red: #D63031;
+            --danger-bg: #FFF5F5;
+            --shadow: 0 8px 24px rgba(0,0,0,0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding: 30px 20px;
+        }
+
+        .dashboard-header {
+            max-width: 1300px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #3D2C38 0%, #241922 100%);
+            padding: 25px 35px;
+            border-radius: 16px;
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .dashboard-header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+        }
+
+        .dashboard-header p {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .btn-refresh {
+            background-color: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-refresh:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* --- 新預約即時跑馬燈提示樣式 --- */
+        .marquee-banner {
+            max-width: 1300px;
+            margin: 0 auto 20px auto;
+            background: linear-gradient(90deg, #FFF9E6 0%, #FFF3CD 100%);
+            border: 1px solid #FFEBAA;
+            color: #856404;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: var(--shadow);
+            display: none;
+            align-items: center;
+        }
+
+        .marquee-banner marquee {
+            vertical-align: middle;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* --- 修正：新增響應式表格外框，開啟橫向滑動 --- */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* 優化手機板滑動順暢度 */
+        }
+
+        .loading-status {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #888;
+            font-weight: 500;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+            min-width: 1150px; /* 修正：強制設定表格最小寬度，低於此寬度時啟動滾動條，避免欄位被壓縮擠扁 */
+        }
+
+        th {
+            background-color: #F1EFF5;
+            color: #4A4E69;
+            padding: 15px;
+            font-weight: 700;
+            border-bottom: 2px solid #E2E0E7;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #EBEAEF;
+            vertical-align: top;
+        }
+
+        tr:hover {
+            background-color: #FAF9FC;
+        }
+
+        /* --- 日期與時間專用圖章 --- */
+        .datetime-badge {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .date-item {
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .time-item {
+            display: inline-block;
+            background-color: #E0E1DD;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            width: fit-content;
+        }
+
+        .client-name {
+            font-weight: 700;
+            color: var(--accent-purple);
+            font-size: 1.05rem;
+        }
+
+        .addon-tag {
+            display: inline-block;
+            background-color: #F0E6FF;
+            color: #5A32A3;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            font-weight: 500;
+        }
+
+        .total-price {
+            font-weight: 700;
+            color: #2196F3;
+        }
+
+        .notes-text {
+            font-size: 0.85rem;
+            color: #666;
+            max-width: 200px;
+            word-break: break-all;
+        }
+
+        /* --- 重疊警示樣式 --- */
+        tr.overlap-row {
+            background-color: var(--danger-bg) !important;
+            color: var(--danger-red) !important;
+        }
+
+        tr.overlap-row .client-name,
+        tr.overlap-row .total-price,
+        tr.overlap-row .date-item {
+            color: var(--danger-red) !important;
+        }
+
+        tr.overlap-row .time-item {
+            background-color: #FFD2D2 !important;
+            color: var(--danger-red) !important;
+        }
+
+        .overlap-warning {
+            display: block;
+            color: white;
+            background-color: var(--danger-red);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 5px;
+            text-align: center;
+            width: fit-content;
+        }
+
+        /* --- 刪除按鈕樣式 --- */
+        .btn-delete-row {
+            background-color: white;
+            color: var(--danger-red);
+            border: 1px solid #FAD2CF;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-delete-row:hover {
+            background-color: var(--danger-red);
+            color: white;
+            border-color: var(--danger-red);
+        }
+
+        /* --- 刪除確認彈窗 Modal 樣式 --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(43, 45, 66, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: #FFFFFF;
+            padding: 35px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-content h3 {
+            color: var(--danger-red);
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            padding: 10px 24px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .btn-cancel {
+            background-color: #EBEAEF;
+            color: #4A4E69;
+        }
+
+        .btn-cancel:hover {
+            background-color: #D6D5DB;
+        }
+
+        .btn-confirm-delete {
+            background-color: var(--danger-red);
+            color: white;
+            box-shadow: 0 4px 12px rgba(214, 48, 49, 0.2);
+        }
+
+        .btn-confirm-delete:hover {
+            background-color: #B92021;
+            transform: translateY(-1px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-header">
+        <div>
+            <h1>神の指藝 預約後台管理系統</h1>
+            <p>專屬闆闆的即時顧客清單（依照預約日期時間排序）</p>
+        </div>
+        <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
+    </div>
+
+    <div id="marqueeAlert" class="marquee-banner">
+        <marquee scrollamount="6">🔔 偵測到雲端資料庫有新預約！請點擊右上角「整理/重整資料」按鈕重新整理頁面以更新清單。 🔔</marquee>
+    </div>
+
+    <div class="container">
+        <div id="loading" class="loading-status">正在連線雲端資料庫並載入清單...</div>
+        
+        <div class="table-responsive">
+            <table id="bookingTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>預約時段</th>
+                        <th>顧客名稱</th>
+                        <th>聯絡電話</th>
+                        <th>選擇核心款式</th>
+                        <th>附加服務項目</th>
+                        <th>實收總額</th>
+                        <th>客戶備註需求</th>
+                        <th>操作管理</th> </tr>
+                </thead>
+                <tbody id="bookingListTbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon">⚠️</div>
+            <h3>確定要刪除這筆預約嗎？</h3>
+            <p>注意：刪除後資料將無法復原！<br>請確認客戶已完成服務或是確定取消預約。</p>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="cancelDeleteBtn">取消保留</button>
+                <button class="btn-modal btn-confirm-delete" id="confirmDeleteBtn">確認刪除</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ===================================================
+        // FIREBASE 配置設定
+        // ===================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
+            authDomain: "beautiful-68dbc.firebaseapp.com",
+            databaseURL: "https://beautiful-68dbc-default-rtdb.firebaseio.com",
+            projectId: "beautiful-68dbc",
+            storageBucket: "beautiful-68dbc.firebasestorage.app",
+            messagingSenderId: "348466975949",
+            appId: "1:348466975949:web:44eb81d962fe957fa34584",
+            measurementId: "G-3V4FDPJCQ0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let targetDeleteId = null;
+
+        const deleteModal = document.getElementById('deleteModal');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteModal.style.display = 'none';
+            targetDeleteId = null;
+        });
+
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!targetDeleteId) return;
+
+            try {
+                confirmDeleteBtn.innerText = "刪除中...";
+                confirmDeleteBtn.disabled = true;
+
+                await deleteDoc(doc(db, "nail_bookings", targetDeleteId));
+                
+                deleteModal.style.display = 'none';
+                await loadBookings();
+            } catch (error) {
+                console.error("刪除失敗: ", error);
+                alert("刪除失敗，請檢查網路連線或權限設定！");
+            } finally {
+                confirmDeleteBtn.innerText = "確認刪除";
+                confirmDeleteBtn.disabled = false;
+                targetDeleteId = null;
+            }
+        });
+
+        async function loadBookings() {
+            const tbody = document.getElementById('bookingListTbody');
+            const loading = document.getElementById('loading');
+            const table = document.getElementById('bookingTable');
+            const marqueeAlert = document.getElementById('marqueeAlert');
+            
+            marqueeAlert.style.display = 'none';
+            
+            loading.style.display = 'block';
+            table.style.display = 'none';
+            tbody.innerHTML = '';
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "nail_bookings"));
+                let rawList = [];
+                
+                querySnapshot.forEach((doc) => {
+                    rawList.push({ id: doc.id, ...doc.data() });
+                });
+
+                rawList.sort((a, b) => {
+                    if (a.bookingDate !== b.bookingDate) {
+                        return a.bookingDate.localeCompare(b.bookingDate);
+                    }
+                    return a.bookingTime.localeCompare(b.bookingTime);
+                });
+
+                const timeCounts = {};
+                rawList.forEach(item => {
+                    const key = `${item.bookingDate}_${item.bookingTime}`;
+                    timeCounts[key] = (timeCounts[key] || 0) + 1;
+                });
+
+                if(rawList.length === 0) {
+                    loading.innerText = "目前雲端尚無任何客戶預約資料。";
+                    return;
+                }
+
+                rawList.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const key = `${item.bookingDate}_${item.bookingTime}`;
+                    const isOverlap = timeCounts[key] > 1;
+                    
+                    if (isOverlap) {
+                        tr.className = 'overlap-row'; 
+                    }
+
+                    let addonsHTML = '';
+                    if (item.selectedAddons && item.selectedAddons.length > 0) {
+                        item.selectedAddons.forEach((addon, index) => {
+                            addonsHTML += `<span class="addon-tag">${index + 1}. ${addon}</span>`;
+                        });
+                    } else {
+                        addonsHTML = '<span style="color:#aaa; font-size:0.85rem;">無</span>';
+                    }
+
+                    tr.innerHTML = `
+                        <td>
+                            <div class="datetime-badge">
+                                <span class="date-item">📅 ${item.bookingDate}</span>
+                                <span class="time-item">${item.bookingTime}</span>
+                                ${isOverlap ? '<span class="overlap-warning">⚠️ 時段重複重疊！</span>' : ''}
+                            </div>
+                        </td>
+                        <td><span class="client-name">${item.clientName || '未填'}</span></td>
+                        <td><strong>${item.clientPhone || '未填'}</strong></td>
+                        <td>${item.selectedStyle || '未選擇'}</td>
+                        <td>${addonsHTML}</td>
+                        <td><span class="total-price">$${item.priceCalculations ? item.priceCalculations.totalPrice.toLocaleString() : '0'}</span></td>
+                        <td><div class="notes-text">${item.notes || '<span style="color:#ccc;">無備註</span>'}</div></td>
+                        <td>
+                            <button class="btn-delete-row">刪除</button>
+                        </td>
+                    `;
+                    
+                    const deleteBtn = tr.querySelector('.btn-delete-row');
+                    deleteBtn.addEventListener('click', () => {
+                        targetDeleteId = item.id;
+                        deleteModal.style.display = 'flex';
+                    });
+
+                    tbody.appendChild(tr);
+                });
+
+                loading.style.display = 'none';
+                table.style.display = 'table';
+
+            } catch (error) {
+                console.error("讀取後台失敗: ", error);
+                loading.innerText = "讀取雲端資料失敗，請確認 Firebase 設定或權限規則。";
+            }
+        }
+
+        let isFirstListeningLoad = true;
+        
+        onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
+            if (isFirstListeningLoad) {
+                isFirstListeningLoad = false;
+                return;
+            }
+            
+            const hasNewBooking = snapshot.docChanges().some(change => change.type === "added");
+            
+            if (hasNewBooking) {
+                document.getElementById('marqueeAlert').style.display = 'flex';
+            }
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', loadBookings);
+        loadBookings();
+    </script>
+</body>
+</html>
