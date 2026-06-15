@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神の指藝 | 後台管理系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --color-bg: #1A1A1A; --color-card: #2A2A2A; --color-gold: #D4AF37; --color-text: #F4F1DE; --color-danger: #8B0000; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Serif TC', serif; background-color: var(--color-bg); color: var(--color-text); padding: 40px 20px; }
+        .container { max-width: 1000px; margin: 0 auto; display: none; }
+        h1 { text-align: center; color: var(--color-gold); letter-spacing: 5px; margin-bottom: 40px; border-bottom: 1px solid var(--color-gold); padding-bottom: 20px; }
+        .admin-section { background-color: var(--color-card); border-radius: 8px; padding: 30px; margin-bottom: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-left: 4px solid var(--color-gold); }
+        .admin-section h2 { color: var(--color-gold); margin-bottom: 20px; font-size: 1.5rem; letter-spacing: 2px; }
+        .form-group { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        input[type="text"], input[type="number"], input[type="password"] { flex: 1; min-width: 200px; padding: 12px 15px; background: #111; border: 1px solid #444; color: white; font-family: inherit; border-radius: 4px; }
+        input:focus { outline: none; border-color: var(--color-gold); }
+        button { padding: 12px 25px; background: var(--color-gold); color: #000; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.3s; font-family: inherit; letter-spacing: 1px; }
+        button:hover { background: #F3E5AB; }
+        button.btn-delete { background: transparent; color: var(--color-danger); border: 1px solid var(--color-danger); padding: 8px 15px; font-size: 0.9rem; }
+        button.btn-delete:hover { background: var(--color-danger); color: white; }
+        .data-list { list-style: none; }
+        .data-item { display: flex; justify-content: space-between; align-items: center; background: #1E1E1E; padding: 15px 20px; margin-bottom: 10px; border-radius: 4px; border-left: 2px solid #555; }
+        .data-info { display: flex; gap: 20px; align-items: center; }
+        .data-img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
+        .loading { color: #888; font-style: italic; }
+
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .login-box {
+            background: var(--color-card); padding: 40px; border-radius: 8px;
+            text-align: center; border: 2px solid var(--color-gold);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); width: 100%; max-width: 400px;
+        }
+        .login-box h2 { color: var(--color-gold); margin-bottom: 20px; letter-spacing: 3px; }
+        .login-box input { width: 100%; margin-bottom: 20px; text-align: center; font-size: 1.2rem; letter-spacing: 5px; }
+        .login-box button { width: 100%; font-size: 1.1rem; }
+        .error-msg { color: var(--color-danger); margin-top: 15px; font-size: 0.9rem; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay">
+        <div class="login-box">
+            <h2>神殿守衛驗證</h2>
+            <p style="margin-bottom: 20px; color: #888; font-size: 0.9rem;">請輸入管理員密碼解鎖後台</p>
+            <input type="password" id="adminPassword" placeholder="輸入密碼" onkeypress="if(event.key === 'Enter') window.checkLogin()">
+            <button onclick="window.checkLogin()">進入後台</button>
+            <p id="errorMessage" class="error-msg">密碼錯誤，請重新輸入！</p>
+        </div>
+    </div>
+
+    <div class="container" id="adminContainer">
+        <h1>神の指藝 ｜ 雲端後台管理系統</h1>
+
+        <div class="admin-section">
+            <h2>1. 款式新增 / 刪除</h2>
+            <div class="form-group">
+                <input type="text" id="galleryName" placeholder="輸入款式名稱 (例: 琉璃貓眼)">
+                <input type="text" id="galleryUrl" placeholder="輸入圖片網址 (URL)">
+                <button onclick="window.addGallery()">新增款式</button>
+            </div>
+            <ul class="data-list" id="galleryList"><li class="loading">連線至資料庫中...</li></ul>
+        </div>
+
+        <div class="admin-section">
+            <h2>2. 服務項目新增 / 刪除</h2>
+            <div class="form-group">
+                <input type="text" id="serviceName" placeholder="輸入服務名稱 (例: 奢華貓眼)">
+                <input type="number" id="servicePrice" placeholder="輸入價格 (純數字, 例: 1600)">
+                <button onclick="window.addService()">新增服務</button>
+            </div>
+            <ul class="data-list" id="serviceList"><li class="loading">連線至資料庫中...</li></ul>
+        </div>
+
+        <div class="admin-section">
+            <h2>3. 聯絡按鈕新增 / 刪除</h2>
+            <div class="form-group">
+                <input type="text" id="contactName" placeholder="按鈕名稱 (例: 官方 LINE)">
+                <input type="text" id="contactLink" placeholder="網址連結 (例: https://line.me/...)">
+                <button onclick="window.addContact()">新增聯絡方式</button>
+            </div>
+            <ul class="data-list" id="contactList"><li class="loading">連線至資料庫中...</li></ul>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
+            authDomain: "beautiful-68dbc.firebaseapp.com",
+            databaseURL: "https://beautiful-68dbc-default-rtdb.firebaseio.com",
+            projectId: "beautiful-68dbc",
+            storageBucket: "beautiful-68dbc.firebasestorage.app",
+            messagingSenderId: "348466975949",
+            appId: "1:348466975949:web:44eb81d962fe957fa34584"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- 🔒 密碼驗證邏輯 ---
+        window.checkLogin = () => {
+            const pwd = document.getElementById('adminPassword').value;
+            const errorMsg = document.getElementById('errorMessage');
+            
+            if (pwd === '000000') {
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContainer').style.display = 'block';
+            } else {
+                errorMsg.style.display = 'block';
+                document.getElementById('adminPassword').value = '';
+            }
+        };
+
+        // --- 1. 款式管理 ---
+        onSnapshot(collection(db, "galleries"), (snapshot) => {
+            const list = document.getElementById('galleryList');
+            list.innerHTML = '';
+            if(snapshot.empty) { list.innerHTML = '<li style="color: #666; padding: 10px;">目前尚無款式資料</li>'; return; }
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                list.innerHTML += `
+                    <li class="data-item">
+                        <div class="data-info">
+                            <img src="${data.url}" class="data-img-preview" onerror="this.src='https://via.placeholder.com/60?text=Error'">
+                            <span>${data.name}</span>
+                        </div>
+                        <button class="btn-delete" onclick="window.deleteData('galleries', '${docSnap.id}')">刪除</button>
+                    </li>
+                `;
+            });
+        }, (error) => {
+            document.getElementById('galleryList').innerHTML = `<li style="color: var(--color-danger);">載入失敗：${error.message}</li>`;
+        });
+
+        window.addGallery = async () => {
+            const name = document.getElementById('galleryName').value;
+            const url = document.getElementById('galleryUrl').value;
+            if(!name || !url) return alert('請填寫完整！');
+            
+            try {
+                await addDoc(collection(db, "galleries"), { name, url, createdAt: serverTimestamp() });
+                document.getElementById('galleryName').value = '';
+                document.getElementById('galleryUrl').value = '';
+                alert('款式新增成功！');
+            } catch (error) {
+                console.error(error);
+                alert('新增失敗，原因：' + error.message);
+            }
+        };
+
+        // --- 2. 服務項目管理 ---
+        onSnapshot(collection(db, "services"), (snapshot) => {
+            const list = document.getElementById('serviceList');
+            list.innerHTML = '';
+            if(snapshot.empty) { list.innerHTML = '<li style="color: #666; padding: 10px;">目前尚無服務資料</li>'; return; }
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                list.innerHTML += `
+                    <li class="data-item">
+                        <div class="data-info">
+                            <span><strong>${data.name}</strong></span>
+                            <span style="color: var(--color-gold);">NT$ ${data.price}</span>
+                        </div>
+                        <button class="btn-delete" onclick="window.deleteData('services', '${docSnap.id}')">刪除</button>
+                    </li>
+                `;
+            });
+        }, (error) => {
+            document.getElementById('serviceList').innerHTML = `<li style="color: var(--color-danger);">載入失敗：${error.message}</li>`;
+        });
+
+        window.addService = async () => {
+            const name = document.getElementById('serviceName').value;
+            const price = document.getElementById('servicePrice').value;
+            if(!name || !price) return alert('請填寫完整！');
+            
+            try {
+                await addDoc(collection(db, "services"), { name, price: Number(price), createdAt: serverTimestamp() });
+                document.getElementById('serviceName').value = '';
+                document.getElementById('servicePrice').value = '';
+                alert('服務新增成功！');
+            } catch (error) {
+                console.error(error);
+                alert('新增失敗，原因：' + error.message);
+            }
+        };
+
+        // --- 3. 聯絡方式管理 ---
+        onSnapshot(collection(db, "contacts"), (snapshot) => {
+            const list = document.getElementById('contactList');
+            list.innerHTML = '';
+            if(snapshot.empty) { list.innerHTML = '<li style="color: #666; padding: 10px;">目前尚無聯絡資料</li>'; return; }
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                list.innerHTML += `
+                    <li class="data-item">
+                        <div class="data-info">
+                            <span><strong>${data.name}</strong></span>
+                            <span style="color: #888; font-size: 0.9em;">(${data.link})</span>
+                        </div>
+                        <button class="btn-delete" onclick="window.deleteData('contacts', '${docSnap.id}')">刪除</button>
+                    </li>
+                `;
+            });
+        }, (error) => {
+            document.getElementById('contactList').innerHTML = `<li style="color: var(--color-danger);">載入失敗：${error.message}</li>`;
+        });
+
+        window.addContact = async () => {
+            const name = document.getElementById('contactName').value;
+            const link = document.getElementById('contactLink').value;
+            if(!name || !link) return alert('請填寫完整！');
+            
+            try {
+                await addDoc(collection(db, "contacts"), { name, link, createdAt: serverTimestamp() });
+                document.getElementById('contactName').value = '';
+                document.getElementById('contactLink').value = '';
+                alert('聯絡方式新增成功！');
+            } catch (error) {
+                console.error(error);
+                alert('新增失敗，原因：' + error.message);
+            }
+        };
+
+        // --- 共用的刪除功能 ---
+        window.deleteData = async (collectionName, docId) => {
+            if(confirm('確定要刪除這筆資料嗎？刪除後前台將同步消失。')) {
+                try {
+                    await deleteDoc(doc(db, collectionName, docId));
+                    alert('資料已成功刪除！');
+                } catch (error) {
+                    console.error(error);
+                    alert('刪除失敗，原因：' + error.message);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
