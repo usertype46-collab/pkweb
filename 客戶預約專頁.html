@@ -292,42 +292,90 @@
 
         .signature-box {
             background: #FFFFFF;
-            border: 1px dashed #C3B4BD;
+            border: 2px dashed #C3B4BD;
             border-radius: 12px;
             padding: 12px;
             position: relative;
             margin-bottom: 14px;
+            transition: var(--transition);
+        }
+
+        /* 鎖定狀態的視覺回饋 */
+        .signature-box.is-locked {
+            border-color: #81C784;
+            background: #F1F8E9;
+        }
+        
+        .signature-box.is-locked::after {
+            content: '🔒 簽名已確認並鎖定';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(76, 175, 80, 0.15);
+            font-size: 1.8rem;
+            font-weight: 900;
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
         }
 
         #sig-canvas {
             width: 100%;
             height: 140px;
-            background: #FFFFFF;
+            background: transparent;
             cursor: crosshair;
-            touch-action: none;
+            touch-action: none; /* 防止觸控時螢幕滾動 */
+            position: relative;
+            z-index: 1;
         }
 
         .sig-tools {
             display: flex;
             justify-content: flex-end;
-            margin-top: 6px;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         .btn-clear-sig {
             background: #F3EDF1;
             color: #666;
             border: none;
-            padding: 4px 14px;
-            font-size: 0.8rem;
+            padding: 6px 14px;
+            font-size: 0.85rem;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             transition: var(--transition);
         }
 
         .btn-clear-sig:hover {
             background: #EEDAE5;
             color: var(--text-dark);
+        }
+
+        /* 新增：確認簽名按鈕樣式 */
+        .btn-confirm-sig {
+            background: #E3F2FD;
+            color: #1976D2;
+            border: 1px solid #BBDEFB;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: var(--transition);
+        }
+
+        .btn-confirm-sig:hover {
+            background: #BBDEFB;
+            color: #1565C0;
+        }
+        
+        .btn-confirm-sig.locked {
+            background: #E8F5E9;
+            color: #2E7D32;
+            border-color: #C8E6C9;
         }
 
         .checkbox-group {
@@ -569,10 +617,11 @@
 
                     <div class="form-group">
                         <label>線上簽名確認（可直接在下方手寫或打字輸入）*</label>
-                        <div class="signature-box">
+                        <div class="signature-box" id="signatureBox">
                             <canvas id="sig-canvas"></canvas>
                             <div class="sig-tools">
-                                <button type="button" class="btn-clear-sig" id="btnClearSig">清除手寫</button>
+                                <button type="button" class="btn-clear-sig" id="btnClearSig">清除重簽</button>
+                                <button type="button" class="btn-confirm-sig" id="btnConfirmSig">📝 確認並鎖定簽名</button>
                             </div>
                         </div>
                         <input type="text" id="typedSignature" class="form-control" placeholder="或在此輸入您的正楷姓名進行數位簽章">
@@ -744,15 +793,26 @@
             return { stylePrice, addonPrice, discount, total };
         }
 
+        // --- 畫布與簽名鎖定邏輯 ---
         const canvas = document.getElementById('sig-canvas');
         const ctx = canvas.getContext('2d');
         const btnClearSig = document.getElementById('btnClearSig');
+        const btnConfirmSig = document.getElementById('btnConfirmSig');
+        const signatureBox = document.getElementById('signatureBox');
         const typedSignature = document.getElementById('typedSignature');
         const agreeTerms = document.getElementById('agreeTerms');
+        
         let isDrawing = false;
         let isCanvasDrawn = false; 
+        let isSignatureLocked = false; // 新增：是否已鎖定簽名
+        let savedImageData = null;     // 新增：暫存圖片以防 resize 清空
 
         function initCanvas() {
+            // 在重置畫布大小前，先暫存當前的筆跡（修復手機滑動消失的 Bug）
+            if (isCanvasDrawn || isSignatureLocked) {
+                savedImageData = canvas.toDataURL();
+            }
+
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
@@ -760,6 +820,15 @@
             ctx.lineWidth = 3;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
+
+            // 若有暫存的筆跡，則在畫布重設尺寸後畫回去
+            if (savedImageData) {
+                const img = new Image();
+                img.src = savedImageData;
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0);
+                };
+            }
         }
         
         window.addEventListener('load', initCanvas);
@@ -773,6 +842,7 @@
         }
 
         function startDrawing(e) {
+            if (isSignatureLocked) return; // 若已鎖定，禁止繼續作畫
             isDrawing = true;
             isCanvasDrawn = true;
             const pos = getMousePos(e);
@@ -782,7 +852,7 @@
         }
 
         function draw(e) {
-            if (!isDrawing) return;
+            if (!isDrawing || isSignatureLocked) return; // 若已鎖定，禁止繼續作畫
             const pos = getMousePos(e);
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
@@ -801,10 +871,40 @@
         canvas.addEventListener('touchmove', draw);
         window.addEventListener('touchend', stopDrawing);
 
+        // 清除按鈕邏輯
         btnClearSig.addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             isCanvasDrawn = false;
+            isSignatureLocked = false;
+            savedImageData = null;
+            
+            // 恢復視覺狀態
+            signatureBox.classList.remove('is-locked');
+            btnConfirmSig.innerText = "📝 確認並鎖定簽名";
+            btnConfirmSig.classList.remove('locked');
+            typedSignature.disabled = false;
         });
+
+        // 新增：確認按鈕邏輯
+        btnConfirmSig.addEventListener('click', () => {
+            if (!isCanvasDrawn) {
+                alert("請先在白色區域手寫簽名後，再點擊確認鎖定！");
+                return;
+            }
+            
+            isSignatureLocked = true;
+            savedImageData = canvas.toDataURL(); // 鎖定當下儲存影像
+            
+            // 變更視覺狀態給予安全感反饋
+            signatureBox.classList.add('is-locked');
+            btnConfirmSig.innerText = "✅ 簽名已鎖定";
+            btnConfirmSig.classList.add('locked');
+            
+            // 如果鎖定了手寫，清空並禁用打字欄位避免混淆
+            typedSignature.value = '';
+            typedSignature.disabled = true;
+        });
+
 
         const bookingForm = document.getElementById('bookingForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -834,8 +934,16 @@
             }
 
             const typedText = typedSignature.value.trim();
-            if (!isCanvasDrawn && !typedText) {
-                errorAlert.innerText = "請完成線上簽名確認（可直接在白板手寫或於下方打字輸入欄填寫）。";
+            
+            // 新增防呆：如果畫了圖但沒按確認
+            if (isCanvasDrawn && !isSignatureLocked && !typedText) {
+                errorAlert.innerText = "⚠️ 您已手寫簽名，請點擊下方的「確認並鎖定簽名」按鈕來完成簽署步驟。";
+                errorAlert.style.display = 'block';
+                return;
+            }
+
+            if (!isSignatureLocked && !typedText) {
+                errorAlert.innerText = "請完成線上簽名確認（可直接在白板手寫並點擊鎖定，或於下方打字輸入欄填寫）。";
                 errorAlert.style.display = 'block';
                 return;
             }
@@ -846,7 +954,7 @@
             let inputName = document.getElementById('clientName').value.trim();
 
             submitBtn.disabled = true;
-            submitBtn.innerText = "正在檢查時段與產生保固截圖..."; // 更新提示文字
+            submitBtn.innerText = "正在檢查時段與產生保固截圖..."; 
 
             try {
                 const timeQuery = query(
@@ -877,23 +985,20 @@
                     finalDbName = `〔初〕${inputName}`;
                 }
 
-                // 核心更新：使用 html2canvas 產生保固與簽名區塊的截圖
                 let warrantyImageBase64 = null;
                 try {
                     const warrantySection = document.getElementById('warrantySection');
-                    // 呼叫 html2canvas，設定背景色與適當比例
                     const canvasImg = await window.html2canvas(warrantySection, {
-                        scale: 1.5, // 降低一點解析度避免 Base64 字串超出資料庫單筆限制
+                        scale: 1.5, 
                         backgroundColor: "#FFF9FA"
                     });
-                    // 轉為 JPEG 以獲得較好的壓縮率
                     warrantyImageBase64 = canvasImg.toDataURL("image/jpeg", 0.85); 
                 } catch (screenshotError) {
                     console.error("截圖產生失敗: ", screenshotError);
-                    // 就算截圖失敗，我們仍允許表單送出（容錯處理）
                 }
 
-                const customerSignature = isCanvasDrawn ? canvas.toDataURL() : `[電子簽章] ${typedText}`;
+                // 判斷是以鎖定後的畫布，還是以打字為主
+                const customerSignature = isSignatureLocked ? canvas.toDataURL() : `[電子簽章] ${typedText}`;
 
                 const bookingData = {
                     clientName: finalDbName, 
@@ -912,7 +1017,7 @@
                     },
                     agreedToTerms: true,         
                     signatureData: customerSignature, 
-                    warrantyScreenshot: warrantyImageBase64, // 新增：存入保固條款及簽名區塊的截圖圖片
+                    warrantyScreenshot: warrantyImageBase64, 
                     createdAt: serverTimestamp()
                 };
 
@@ -921,29 +1026,4 @@
                 if(finalIsFirst) {
                     successModalText.innerHTML = `恭喜獲得初次體驗 95 折優惠！🎉<br>系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
                 } else {
-                    successModalText.innerHTML = `歡迎回來！系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
-                }
-
-                successModal.style.display = 'flex';
-                
-                bookingForm.reset();
-                ctx.clearRect(0, 0, canvas.width, canvas.height); 
-                isCanvasDrawn = false;
-                document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
-                currentSelection.selectedStyle = null;
-                currentSelection.selectedAddons.clear();
-                currentSelection.isFirstBooking = false;
-                calculateTotal();
-
-            } catch (error) {
-                console.error("Firebase Sync Error: ", error);
-                errorAlert.innerText = "雲端儲存失敗，請檢查網路連線或配置。";
-                errorAlert.style.display = 'block';
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerText = "送出預約申請";
-            }
-        });
-    </script>
-</body>
-</html>
+                    successModalText.innerHTML = `歡迎回來！系統預約申請已送出！<br>預估金額：$
