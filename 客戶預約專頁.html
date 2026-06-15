@@ -336,11 +336,10 @@
             font-weight: 500;
         }
 
-        /* 新增：初次預約折扣標籤樣式 */
         .discount-row {
             color: #C5221F;
             font-weight: 700;
-            display: none; /* 預設隱藏，輸入電話偵測後顯示 */
+            display: none;
         }
 
         .price-total {
@@ -382,7 +381,7 @@
             cursor: not-allowed;
         }
 
-        /* --- 系統提示框架 (保留錯誤提示) --- */
+        /* --- 系統提示框架 --- */
         .alert {
             padding: 16px;
             border-radius: 12px;
@@ -400,7 +399,7 @@
 
         /* --- 彈出式對話框 (Modal) 樣式 --- */
         .modal-overlay {
-            display: none; /* 預設隱藏 */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -527,7 +526,6 @@
                     <textarea id="notes" class="form-control" rows="3" placeholder="如有指定美甲師或需卸甲請備註於此..."></textarea>
                 </div>
 
-                <!-- 新增：保固條款與同意勾選區塊 -->
                 <div class="warranty-box">
                     <div class="warranty-title">🛡️ 〔保固條款〕</div>
                     <div class="warranty-subtitle">為確保您有良好售後服務！標示：請詳細閱讀</div>
@@ -552,7 +550,7 @@
                         <span id="summaryAddonPrice">$0</span>
                     </div>
                     <div class="price-row discount-row" id="discountRow">
-                        <span>✨ 新客初次體驗優惠</span>
+                        <span id="discountTitle">✨ 新客初次體驗優惠</span>
                         <span id="summaryDiscount">- $0</span>
                     </div>
                     <div class="price-total">
@@ -577,7 +575,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ===================================================
         // FIREBASE 配置設定
@@ -612,10 +610,17 @@
             { id: 'addon_4', name: '施華洛世奇水鑽(單指)', price: 150 }
         ];
 
+        // 預設全域變數
         let currentSelection = {
             selectedStyle: null,
             selectedAddons: new Set(),
-            isFirstBooking: false // 追蹤是否為新客戶
+            isFirstBooking: false
+        };
+
+        // 新增：儲存後台抓取的折扣資料 (預設 8 折 / 0.8)
+        let dynamicDiscount = {
+            value: 80,   // 用於文字顯示，如 80 或 95
+            ratio: 0.8   // 用於金額計算，如 0.8 或 0.95
         };
 
         // 動態網頁元素生成
@@ -623,6 +628,7 @@
         const addonsList = document.getElementById('addonsList');
         const clientPhoneInput = document.getElementById('clientPhone');
         const discountRow = document.getElementById('discountRow');
+        const discountTitle = document.getElementById('discountTitle');
 
         nailStyles.forEach(style => {
             const card = document.createElement('div');
@@ -650,20 +656,35 @@
             addonsList.appendChild(label);
         });
 
-        // 監聽電話輸入，即時判定是否為初次預約
+        // 格式化折扣文字 (例如將 80 轉成 '8折'，95 轉成 '95折')
+        function formatDiscountText(val) {
+            return (val % 10 === 0) ? (val / 10) + '折' : val + '折';
+        }
+
+        // 監聽電話輸入，即時判定是否為初次預約，並非同步取得後台折扣設定
         clientPhoneInput.addEventListener('blur', async () => {
             const phone = clientPhoneInput.value.trim();
             if (!phone) return;
 
             try {
+                // 1. 驗證是否為新客
                 const q = query(collection(db, "nail_bookings"), where("clientPhone", "==", phone));
                 const querySnapshot = await getDocs(q);
-                
-                // 如果找不到歷史預約，就是初次預約新客戶
                 currentSelection.isFirstBooking = querySnapshot.empty;
+
+                // 2. 如果是新客，就去資料庫抓取系統設定的折扣
+                if (currentSelection.isFirstBooking) {
+                    const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
+                    if (docSnap.exists() && docSnap.data().firstTimeDiscount) {
+                        const configValue = docSnap.data().firstTimeDiscount; // 例如 95 或 80
+                        dynamicDiscount.value = configValue;
+                        dynamicDiscount.ratio = configValue / 100;            // 將 95 轉為 0.95
+                    }
+                }
+                
                 calculateTotal();
             } catch (err) {
-                console.error("無法驗證新客身分: ", err);
+                console.error("無法驗證新客身分或取得設定檔: ", err);
             }
         });
 
@@ -694,10 +715,17 @@
             let total = stylePrice + addonPrice;
             let discount = 0;
 
-            // 計算 8 折優惠 (初次預約)
+            // 依據資料庫抓取的動態比例進行折扣計算
             if (currentSelection.isFirstBooking && total > 0) {
-                discount = Math.round(total * 0.2); // 算出 20% 的折扣金額
-                total = total - discount;           // 實際需付金額
+                // 計算折扣後的應付金額 (例如：總金額 * 0.95)
+                const discountedTotal = Math.round(total * dynamicDiscount.ratio);
+                // 算出被扣除的折扣金額，用於畫面上顯示減去的數字
+                discount = total - discountedTotal; 
+                total = discountedTotal;
+                
+                // 更新畫面顯示文字
+                const discountText = formatDiscountText(dynamicDiscount.value);
+                discountTitle.innerText = `✨ 新客初次體驗優惠 (${discountText})`;
                 discountRow.style.display = 'flex';
                 document.getElementById('summaryDiscount').innerText = `- $${discount.toLocaleString()}`;
             } else {
@@ -793,9 +821,10 @@
 
                 await addDoc(collection(db, "nail_bookings"), bookingData);
                 
-                // 根據狀態客製化彈窗提示語
+                // 根據狀態客製化彈窗提示語與折數
                 if(finalIsFirst) {
-                    successModalText.innerHTML = `恭喜獲得初次體驗 8 折優惠！🎉<br>系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
+                    const finalDiscountText = formatDiscountText(dynamicDiscount.value);
+                    successModalText.innerHTML = `恭喜獲得初次體驗 ${finalDiscountText} 優惠！🎉<br>系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
                 } else {
                     successModalText.innerHTML = `歡迎回來！系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
                 }
