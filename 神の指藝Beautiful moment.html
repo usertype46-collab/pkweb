@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神の指藝 Beautiful moment. | 官方網站</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+TC:wght@300;400;600;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* (這裡的 CSS 完全保留妳原本的設計，未做更動) */
+        :root {
+            --color-ink: #0D0D0D; --color-crimson: #8B0000; --color-gold: #D4AF37; 
+            --color-gold-light: #F3E5AB; --color-paper: #F4F1DE; 
+            --font-primary: 'Noto Serif TC', serif; --font-english: 'Cinzel', serif;
+            --transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-primary); background-color: var(--color-ink); color: var(--color-paper); line-height: 1.8; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--color-ink); }
+        ::-webkit-scrollbar-thumb { background: var(--color-gold); border-radius: 4px; }
+        header { position: fixed; top: 0; width: 100%; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; background: linear-gradient(to bottom, rgba(13,13,13,0.9) 0%, rgba(13,13,13,0) 100%); backdrop-filter: blur(5px); }
+        .logo { font-family: var(--font-english); font-size: 1.5rem; color: var(--color-gold); text-decoration: none; letter-spacing: 2px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .logo-zh { font-family: var(--font-primary); font-weight: 900; font-size: 1.8rem; color: #FFF; text-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+        .menu-btn { position: relative; display: flex; justify-content: center; align-items: center; width: 40px; height: 40px; cursor: pointer; transition: var(--transition); z-index: 101; }
+        .menu-btn-burger { width: 30px; height: 2px; background: var(--color-gold); border-radius: 5px; transition: var(--transition); }
+        .menu-btn-burger::before, .menu-btn-burger::after { content: ''; position: absolute; width: 30px; height: 2px; background: var(--color-gold); border-radius: 5px; transition: var(--transition); }
+        .menu-btn-burger::before { transform: translateY(-10px); }
+        .menu-btn-burger::after { transform: translateY(10px); width: 20px; right: 5px; }
+        .menu-btn.open .menu-btn-burger { transform: translateX(-50px); background: transparent; }
+        .menu-btn.open .menu-btn-burger::before { transform: rotate(45deg) translate(35px, -35px); background: var(--color-paper); }
+        .menu-btn.open .menu-btn-burger::after { transform: rotate(-45deg) translate(35px, 35px); width: 30px; background: var(--color-paper); right: auto; }
+        .nav-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(13, 13, 13, 0.95); backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: var(--transition); z-index: 99; }
+        .nav-overlay.open { opacity: 1; visibility: visible; }
+        .nav-overlay::before { content: ''; position: absolute; width: 1px; height: 70%; background: linear-gradient(to bottom, transparent, var(--color-gold), transparent); left: 50%; transform: translateX(-50%); opacity: 0.3; }
+        .nav-list { list-style: none; text-align: center; }
+        .nav-item { margin: 40px 0; transform: translateY(30px); opacity: 0; transition: var(--transition); }
+        .nav-overlay.open .nav-item { transform: translateY(0); opacity: 1; }
+        .nav-overlay.open .nav-item:nth-child(1) { transition-delay: 0.2s; }
+        .nav-overlay.open .nav-item:nth-child(2) { transition-delay: 0.3s; }
+        .nav-overlay.open .nav-item:nth-child(3) { transition-delay: 0.4s; }
+        .nav-link { font-size: 2.5rem; color: var(--color-paper); text-decoration: none; font-weight: 600; letter-spacing: 5px; position: relative; padding: 10px 20px; transition: var(--transition); }
+        .nav-link::after { content: '✦'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); color: var(--color-crimson); font-size: 4rem; opacity: 0; transition: var(--transition); z-index: -1; }
+        .nav-link:hover { color: var(--color-gold); text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+        .nav-link:hover::after { transform: translate(-50%, -50%) scale(1); opacity: 0.15; }
+        .page-section { display: none; animation: fadeInPage 0.6s ease forwards; }
+        #home.page-section.active { display: flex; }
+        #preview.page-section.active, #services.page-section.active, #contact.page-section.active { display: block; }
+        @keyframes fadeInPage { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .hero { height: 100vh; justify-content: center; align-items: center; position: relative; background: radial-gradient(circle at center, #2A0808 0%, #0D0D0D 70%); overflow: hidden; }
+        .hero-content { display: flex; flex-direction: row-reverse; align-items: center; gap: 80px; z-index: 2; }
+        .hero-title-zh { writing-mode: vertical-rl; text-orientation: upright; font-size: 5.5rem; font-weight: 900; color: transparent; background: linear-gradient(180deg, var(--color-gold-light) 0%, var(--color-gold) 50%, #A67C00 100%); -webkit-background-clip: text; letter-spacing: 15px; text-shadow: 2px 2px 0px rgba(13,13,13,0.8), 0 0 30px rgba(212, 175, 55, 0.3); margin-right: 20px; }
+        .hero-text { text-align: right; border-right: 2px solid var(--color-crimson); padding-right: 30px; }
+        .hero-title-en { font-family: var(--font-english); font-size: 2rem; color: var(--color-paper); letter-spacing: 8px; margin-bottom: 20px; }
+        .hero-desc { font-size: 1.1rem; color: #AAA; letter-spacing: 3px; line-height: 2.2; margin-bottom: 40px; }
+        .btn-reserve { display: inline-block; padding: 16px 40px; background: transparent; color: var(--color-gold); font-size: 1.1rem; font-weight: 700; letter-spacing: 4px; text-decoration: none; border: 1px solid var(--color-gold); position: relative; overflow: hidden; transition: var(--transition); }
+        .btn-reserve::before { content: ''; position: absolute; top: 0; left: 0; width: 0%; height: 100%; background: var(--color-gold); transition: var(--transition); z-index: -1; }
+        .btn-reserve:hover { color: var(--color-ink); box-shadow: 0 0 25px rgba(212, 175, 55, 0.4); }
+        .btn-reserve:hover::before { width: 100%; }
+        .content-section { padding: 120px 10%; position: relative; min-height: calc(100vh - 60px); }
+        .section-title { text-align: center; font-size: 2.5rem; font-weight: 700; color: var(--color-gold); letter-spacing: 6px; margin-bottom: 80px; position: relative; }
+        .section-title::after { content: '✦'; display: block; font-size: 1.5rem; color: var(--color-crimson); margin-top: 15px; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
+        .gallery-item { position: relative; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 4px; overflow: hidden; aspect-ratio: 4/5; cursor: pointer; transition: var(--transition); }
+        .gallery-item:hover { border-color: var(--color-gold); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(139, 0, 0, 0.3); transform: translateY(-10px); }
+        .gallery-img { width: 100%; height: 100%; object-fit: cover; transition: var(--transition); filter: grayscale(20%) contrast(110%); }
+        .gallery-item:hover .gallery-img { filter: grayscale(0%) contrast(120%); transform: scale(1.05); }
+        .gallery-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(transparent, rgba(13,13,13,0.9)); padding: 30px 20px 20px; text-align: center; }
+        .gallery-title { font-size: 1.2rem; color: var(--color-gold-light); letter-spacing: 2px; }
+        #services { background-color: #111; border-top: 1px solid rgba(212, 175, 55, 0.1); border-bottom: 1px solid rgba(212, 175, 55, 0.1); }
+        .service-list { max-width: 800px; margin: 0 auto; }
+        .service-item { display: flex; justify-content: space-between; align-items: center; padding: 25px 0; border-bottom: 1px dashed rgba(212, 175, 55, 0.3); transition: var(--transition); }
+        .service-item:hover { transform: translateX(10px); border-bottom-color: var(--color-gold); }
+        .service-name { font-size: 1.3rem; font-weight: 600; letter-spacing: 3px; color: var(--color-paper); }
+        .service-price { font-family: var(--font-english); font-size: 1.4rem; color: var(--color-gold); font-weight: 700; }
+        #contact { text-align: center; background: radial-gradient(circle at bottom, #2A0808 0%, #0D0D0D 80%); }
+        .contact-box { display: inline-block; border: 2px solid var(--color-gold); padding: 50px 80px; position: relative; background: rgba(13, 13, 13, 0.6); backdrop-filter: blur(5px); }
+        .contact-box::before, .contact-box::after { content: '⛩️'; position: absolute; top: -20px; background: var(--color-ink); padding: 0 10px; font-size: 1.5rem; }
+        .contact-box::before { left: 20px; }
+        .contact-box::after { right: 20px; }
+        .contact-info { font-size: 1.2rem; letter-spacing: 2px; line-height: 2.5; color: #DDD; }
+        .social-links { margin-top: 30px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .social-btn { color: var(--color-ink); background: var(--color-gold); padding: 10px 25px; text-decoration: none; font-weight: 700; letter-spacing: 2px; border-radius: 2px; transition: var(--transition); }
+        .social-btn:hover { background: var(--color-paper); box-shadow: 0 0 15px rgba(244, 241, 222, 0.5); }
+        footer { text-align: center; padding: 20px; font-size: 0.9rem; color: #666; letter-spacing: 2px; font-family: var(--font-english); border-top: 1px solid #222; }
+        @media (max-width: 768px) {
+            .hero-content { flex-direction: column; text-align: center; gap: 30px; }
+            .hero-title-zh { writing-mode: horizontal-tb; font-size: 3.5rem; letter-spacing: 8px; margin-right: 0; }
+            .hero-text { border-right: none; border-top: 2px solid var(--color-crimson); padding-right: 0; padding-top: 30px; text-align: center; }
+            .nav-link { font-size: 1.8rem; }
+            .contact-box { padding: 40px 20px; border-width: 1px; }
+        }
+        .loading { text-align: center; color: var(--color-gold); font-size: 1.2rem; margin: 50px 0; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#home" class="logo" id="logoBtn"><span class="logo-zh">神の指藝</span></a>
+        <div class="menu-btn" id="menuBtn"><div class="menu-btn-burger"></div></div>
+    </header>
+
+    <nav class="nav-overlay" id="navOverlay">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="#preview" class="nav-link">款式預覽</a></li>
+            <li class="nav-item"><a href="#services" class="nav-link">服務項目</a></li>
+            <li class="nav-item"><a href="#contact" class="nav-link">聯絡闆闆</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero page-section active" id="home">
+        <div class="hero-content">
+            <h1 class="hero-title-zh">神の指藝</h1>
+            <div class="hero-text">
+                <div class="hero-title-en">Beautiful moment.</div>
+                <p class="hero-desc">將指尖視為藝術的祭壇<br>以匠人心魂，刻劃專屬於妳的絕美印記</p>
+                <a href="#" class="btn-reserve">御殿預約</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section page-section" id="preview">
+        <h2 class="section-title">款式預覽</h2>
+        <div id="gallery-container" class="gallery-grid">
+            <div class="loading">從神殿讀取款式中...</div>
+        </div>
+    </section>
+
+    <section class="content-section page-section" id="services">
+        <h2 class="section-title">服務項目</h2>
+        <div id="service-list-container" class="service-list">
+            <div class="loading">讀取服務項目中...</div>
+        </div>
+    </section>
+
+    <section class="content-section page-section" id="contact">
+        <h2 class="section-title">聯絡闆闆</h2>
+        <div class="contact-box">
+            <div class="contact-info">
+                營業時間：10:00 - 20:00 (預約制)<br>
+                神殿位置：屏東縣潮州鎮神聖區指藝大道 88 號<br>
+                （到達後請於鳥居前按門鈴）
+            </div>
+            <div id="contact-container" class="social-links">
+                </div>
+        </div>
+    </section>
+
+    <footer>&copy; 2024 神の指藝 Beautiful moment. All Rights Reserved.</footer>
+
+    <script type="module">
+        // 匯入 Firebase 模組
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // ==========================================
+        // ⚠️ 請將下方的 firebaseConfig 換成妳在第一步取得的設定！
+        // ==========================================
+        const firebaseConfig = {
+  apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
+  authDomain: "beautiful-68dbc.firebaseapp.com",
+  databaseURL: "https://beautiful-68dbc-default-rtdb.firebaseio.com",
+  projectId: "beautiful-68dbc",
+  storageBucket: "beautiful-68dbc.firebasestorage.app",
+  messagingSenderId: "348466975949",
+  appId: "1:348466975949:web:44eb81d962fe957fa34584"
+};
+
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 即時監聽：款式預覽
+        onSnapshot(collection(db, "galleries"), (snapshot) => {
+            const container = document.getElementById('gallery-container');
+            container.innerHTML = '';
+            if(snapshot.empty) { container.innerHTML = '<div style="color: #666; text-align: center; width: 100%;">尚無款式資料</div>'; return; }
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                container.innerHTML += `
+                    <div class="gallery-item">
+                        <img src="${data.url}" alt="${data.name}" class="gallery-img">
+                        <div class="gallery-overlay"><div class="gallery-title">${data.name}</div></div>
+                    </div>
+                `;
+            });
+        });
+
+        // 即時監聽：服務項目
+        onSnapshot(collection(db, "services"), (snapshot) => {
+            const container = document.getElementById('service-list-container');
+            container.innerHTML = '';
+            if(snapshot.empty) { container.innerHTML = '<div style="color: #666; text-align: center;">尚無服務資料</div>'; return; }
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                container.innerHTML += `
+                    <div class="service-item">
+                        <span class="service-name">${data.name}</span>
+                        <span class="service-price">$ ${data.price}</span>
+                    </div>
+                `;
+            });
+        });
+
+        // 即時監聽：聯絡方式
+        onSnapshot(collection(db, "contacts"), (snapshot) => {
+            const container = document.getElementById('contact-container');
+            container.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                container.innerHTML += `<a href="${data.link}" target="_blank" class="social-btn">${data.name}</a>`;
+            });
+        });
+
+        // -- SPA 頁面切換邏輯 (保留原功能) --
+        const menuBtn = document.getElementById('menuBtn');
+        const navOverlay = document.getElementById('navOverlay');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.page-section');
+        const logoBtn = document.getElementById('logoBtn');
+
+        menuBtn.addEventListener('click', () => {
+            menuBtn.classList.toggle('open');
+            navOverlay.classList.toggle('open');
+            document.body.style.overflow = navOverlay.classList.contains('open') ? 'hidden' : 'auto';
+        });
+
+        function switchSection(targetId) {
+            sections.forEach(sec => sec.classList.remove('active'));
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) targetSection.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                switchSection(targetId);
+                menuBtn.classList.remove('open');
+                navOverlay.classList.remove('open');
+                document.body.style.overflow = 'auto';
+            });
+        });
+
+        logoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSection('home');
+            menuBtn.classList.remove('open');
+            navOverlay.classList.remove('open');
+            document.body.style.overflow = 'auto';
+        });
+    </script>
+</body>
+</html>
