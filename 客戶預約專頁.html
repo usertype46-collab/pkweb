@@ -6,8 +6,6 @@
     <title>神の指藝預約系統 | Beautiful moment.</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <style>
         /* --- 千變萬化風格變數：炫彩、夢幻且具備光澤感 --- */
         :root {
@@ -292,90 +290,42 @@
 
         .signature-box {
             background: #FFFFFF;
-            border: 2px dashed #C3B4BD;
+            border: 1px dashed #C3B4BD;
             border-radius: 12px;
             padding: 12px;
             position: relative;
             margin-bottom: 14px;
-            transition: var(--transition);
-        }
-
-        /* 鎖定狀態的視覺回饋 */
-        .signature-box.is-locked {
-            border-color: #81C784;
-            background: #F1F8E9;
-        }
-        
-        .signature-box.is-locked::after {
-            content: '🔒 簽名已確認並鎖定';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: rgba(76, 175, 80, 0.15);
-            font-size: 1.8rem;
-            font-weight: 900;
-            pointer-events: none;
-            z-index: 0;
-            white-space: nowrap;
         }
 
         #sig-canvas {
             width: 100%;
             height: 140px;
-            background: transparent;
+            background: #FFFFFF;
             cursor: crosshair;
-            touch-action: none; /* 防止觸控時螢幕滾動 */
-            position: relative;
-            z-index: 1;
+            touch-action: none; /* 阻擋行動裝置原生滾動，確保能滑順手寫 */
         }
 
         .sig-tools {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
-            margin-top: 10px;
+            margin-top: 6px;
         }
 
         .btn-clear-sig {
             background: #F3EDF1;
             color: #666;
             border: none;
-            padding: 6px 14px;
-            font-size: 0.85rem;
+            padding: 4px 14px;
+            font-size: 0.8rem;
             border-radius: 6px;
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 600;
             transition: var(--transition);
         }
 
         .btn-clear-sig:hover {
             background: #EEDAE5;
             color: var(--text-dark);
-        }
-
-        /* 新增：確認簽名按鈕樣式 */
-        .btn-confirm-sig {
-            background: #E3F2FD;
-            color: #1976D2;
-            border: 1px solid #BBDEFB;
-            padding: 6px 14px;
-            font-size: 0.85rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: var(--transition);
-        }
-
-        .btn-confirm-sig:hover {
-            background: #BBDEFB;
-            color: #1565C0;
-        }
-        
-        .btn-confirm-sig.locked {
-            background: #E8F5E9;
-            color: #2E7D32;
-            border-color: #C8E6C9;
         }
 
         .checkbox-group {
@@ -416,10 +366,11 @@
             font-weight: 500;
         }
 
+        /* 新增：初次預約折扣標籤樣式 */
         .discount-row {
             color: #C5221F;
             font-weight: 700;
-            display: none; 
+            display: none; /* 預設隱藏，輸入電話偵測後顯示 */
         }
 
         .price-total {
@@ -461,7 +412,7 @@
             cursor: not-allowed;
         }
 
-        /* --- 系統提示框架 --- */
+        /* --- 系統提示框架 (保留錯誤提示) --- */
         .alert {
             padding: 16px;
             border-radius: 12px;
@@ -477,9 +428,9 @@
             border: 1px solid #FAD2CF;
         }
 
-        /* --- 彈出式對話框 --- */
+        /* --- 彈出式對話框 (Modal) 樣式 --- */
         .modal-overlay {
-            display: none; 
+            display: none; /* 預設隱藏 */
             position: fixed;
             top: 0;
             left: 0;
@@ -606,9 +557,10 @@
                     <textarea id="notes" class="form-control" rows="3" placeholder="如有指定美甲師或需卸甲請備註於此..."></textarea>
                 </div>
 
-                <div class="warranty-container" id="warrantySection">
+                <!-- 新增：保固條款、簽名板與同意勾選區 -->
+                <div class="warranty-container">
                     <div class="warranty-title">〔保固條款〕為確保您有良好售後服務！</div>
-                    <span class="warranty-subtitle">請詳細閱讀</span>
+                    <span class="warranty-subtitle">標示：請詳細閱讀</span>
                     <ol class="warranty-list">
                         <li>如非人為因素，一個月內可至本店免費更換五指山兩座。</li>
                         <li>如經本店評估為人為因素，7天內本店也享有免費修補一次售後服務。</li>
@@ -617,11 +569,10 @@
 
                     <div class="form-group">
                         <label>線上簽名確認（可直接在下方手寫或打字輸入）*</label>
-                        <div class="signature-box" id="signatureBox">
+                        <div class="signature-box">
                             <canvas id="sig-canvas"></canvas>
                             <div class="sig-tools">
-                                <button type="button" class="btn-clear-sig" id="btnClearSig">清除重簽</button>
-                                <button type="button" class="btn-confirm-sig" id="btnConfirmSig">📝 確認並鎖定簽名</button>
+                                <button type="button" class="btn-clear-sig" id="btnClearSig">清除手寫</button>
                             </div>
                         </div>
                         <input type="text" id="typedSignature" class="form-control" placeholder="或在此輸入您的正楷姓名進行數位簽章">
@@ -670,6 +621,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // ===================================================
+        // FIREBASE 配置設定
+        // ===================================================
         const firebaseConfig = {
             apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
             authDomain: "beautiful-68dbc.firebaseapp.com",
@@ -684,6 +638,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // 資料結構定義
         const nailStyles = [
             { id: 'style_1', name: '經典極簡單色凝膠', price: 900 },
             { id: 'style_2', name: '法式優雅氣質漸層', price: 1300 },
@@ -702,9 +657,10 @@
         let currentSelection = {
             selectedStyle: null,
             selectedAddons: new Set(),
-            isFirstBooking: false 
+            isFirstBooking: false // 追蹤是否為新客戶
         };
 
+        // 動態網頁元素生成
         const styleGrid = document.getElementById('styleGrid');
         const addonsList = document.getElementById('addonsList');
         const clientPhoneInput = document.getElementById('clientPhone');
@@ -736,6 +692,7 @@
             addonsList.appendChild(label);
         });
 
+        // 監聽電話輸入，即時判定是否為初次預約
         clientPhoneInput.addEventListener('blur', async () => {
             const phone = clientPhoneInput.value.trim();
             if (!phone) return;
@@ -743,6 +700,8 @@
             try {
                 const q = query(collection(db, "nail_bookings"), where("clientPhone", "==", phone));
                 const querySnapshot = await getDocs(q);
+                
+                // 如果找不到歷史預約，就是初次預約新客戶
                 currentSelection.isFirstBooking = querySnapshot.empty;
                 calculateTotal();
             } catch (err) {
@@ -777,9 +736,10 @@
             let total = stylePrice + addonPrice;
             let discount = 0;
 
+            // 計算 8 折優惠 (初次預約)
             if (currentSelection.isFirstBooking && total > 0) {
-                discount = Math.round(total * 0.05); 
-                total = total - discount;           
+                discount = Math.round(total * 0.2); // 算出 20% 的折扣金額
+                total = total - discount;           // 實際需付金額
                 discountRow.style.display = 'flex';
                 document.getElementById('summaryDiscount').innerText = `- $${discount.toLocaleString()}`;
             } else {
@@ -793,26 +753,19 @@
             return { stylePrice, addonPrice, discount, total };
         }
 
-        // --- 畫布與簽名鎖定邏輯 ---
+        // ===================================================
+        // 簽名板 (Canvas) 核心控制邏輯
+        // ===================================================
         const canvas = document.getElementById('sig-canvas');
         const ctx = canvas.getContext('2d');
         const btnClearSig = document.getElementById('btnClearSig');
-        const btnConfirmSig = document.getElementById('btnConfirmSig');
-        const signatureBox = document.getElementById('signatureBox');
         const typedSignature = document.getElementById('typedSignature');
         const agreeTerms = document.getElementById('agreeTerms');
-        
         let isDrawing = false;
-        let isCanvasDrawn = false; 
-        let isSignatureLocked = false; // 新增：是否已鎖定簽名
-        let savedImageData = null;     // 新增：暫存圖片以防 resize 清空
+        let isCanvasDrawn = false; // 用來記錄畫布是否真有被塗鴉過
 
+        // 初始化高畫質 Canvas 尺寸
         function initCanvas() {
-            // 在重置畫布大小前，先暫存當前的筆跡（修復手機滑動消失的 Bug）
-            if (isCanvasDrawn || isSignatureLocked) {
-                savedImageData = canvas.toDataURL();
-            }
-
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width;
             canvas.height = rect.height;
@@ -820,29 +773,24 @@
             ctx.lineWidth = 3;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-
-            // 若有暫存的筆跡，則在畫布重設尺寸後畫回去
-            if (savedImageData) {
-                const img = new Image();
-                img.src = savedImageData;
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0);
-                };
-            }
         }
         
+        // 頁面加載或視窗大小改變時重設大小
         window.addEventListener('load', initCanvas);
         window.addEventListener('resize', initCanvas);
 
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
+            // 兼容滑鼠與手機觸控事件
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX - rect.left, y: clientY - rect.top };
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
         }
 
         function startDrawing(e) {
-            if (isSignatureLocked) return; // 若已鎖定，禁止繼續作畫
             isDrawing = true;
             isCanvasDrawn = true;
             const pos = getMousePos(e);
@@ -852,7 +800,7 @@
         }
 
         function draw(e) {
-            if (!isDrawing || isSignatureLocked) return; // 若已鎖定，禁止繼續作畫
+            if (!isDrawing) return;
             const pos = getMousePos(e);
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
@@ -863,49 +811,24 @@
             isDrawing = false;
         }
 
+        // 綁定滑鼠事件
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
         window.addEventListener('mouseup', stopDrawing);
 
+        // 綁定行動裝置觸控事件
         canvas.addEventListener('touchstart', startDrawing);
         canvas.addEventListener('touchmove', draw);
         window.addEventListener('touchend', stopDrawing);
 
-        // 清除按鈕邏輯
+        // 清除畫布
         btnClearSig.addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             isCanvasDrawn = false;
-            isSignatureLocked = false;
-            savedImageData = null;
-            
-            // 恢復視覺狀態
-            signatureBox.classList.remove('is-locked');
-            btnConfirmSig.innerText = "📝 確認並鎖定簽名";
-            btnConfirmSig.classList.remove('locked');
-            typedSignature.disabled = false;
-        });
-
-        // 新增：確認按鈕邏輯
-        btnConfirmSig.addEventListener('click', () => {
-            if (!isCanvasDrawn) {
-                alert("請先在白色區域手寫簽名後，再點擊確認鎖定！");
-                return;
-            }
-            
-            isSignatureLocked = true;
-            savedImageData = canvas.toDataURL(); // 鎖定當下儲存影像
-            
-            // 變更視覺狀態給予安全感反饋
-            signatureBox.classList.add('is-locked');
-            btnConfirmSig.innerText = "✅ 簽名已鎖定";
-            btnConfirmSig.classList.add('locked');
-            
-            // 如果鎖定了手寫，清空並禁用打字欄位避免混淆
-            typedSignature.value = '';
-            typedSignature.disabled = true;
         });
 
 
+        // 表單提交與雲端庫重疊即時阻擋核心邏輯
         const bookingForm = document.getElementById('bookingForm');
         const submitBtn = document.getElementById('submitBtn');
         const errorAlert = document.getElementById('errorAlert');
@@ -921,29 +844,24 @@
             e.preventDefault();
             errorAlert.style.display = 'none';
 
+            // 核心校驗 1：必須選擇基礎款式
             if (!currentSelection.selectedStyle) {
                 errorAlert.innerText = "請先選擇一項主要核心美甲款式！";
                 errorAlert.style.display = 'block';
                 return;
             }
 
+            // 核心校驗 2：勾選同意條款
             if (!agreeTerms.checked) {
                 errorAlert.innerText = "您必須勾選同意保固條款才能送出預約申請。";
                 errorAlert.style.display = 'block';
                 return;
             }
 
+            // 核心校驗 3：確認有進行簽名 (手寫或打字擇一即可)
             const typedText = typedSignature.value.trim();
-            
-            // 新增防呆：如果畫了圖但沒按確認
-            if (isCanvasDrawn && !isSignatureLocked && !typedText) {
-                errorAlert.innerText = "⚠️ 您已手寫簽名，請點擊下方的「確認並鎖定簽名」按鈕來完成簽署步驟。";
-                errorAlert.style.display = 'block';
-                return;
-            }
-
-            if (!isSignatureLocked && !typedText) {
-                errorAlert.innerText = "請完成線上簽名確認（可直接在白板手寫並點擊鎖定，或於下方打字輸入欄填寫）。";
+            if (!isCanvasDrawn && !typedText) {
+                errorAlert.innerText = "請完成線上簽名確認（可直接在白板手寫或於下方打字輸入欄填寫）。";
                 errorAlert.style.display = 'block';
                 return;
             }
@@ -954,9 +872,10 @@
             let inputName = document.getElementById('clientName').value.trim();
 
             submitBtn.disabled = true;
-            submitBtn.innerText = "正在檢查時段與產生保固截圖..."; 
+            submitBtn.innerText = "正在檢查時段預約狀態...";
 
             try {
+                // 1. 重疊時間段檢查
                 const timeQuery = query(
                     collection(db, "nail_bookings"), 
                     where("bookingDate", "==", chosenDate), 
@@ -972,6 +891,7 @@
                     return;
                 }
 
+                // 2. 再次確保客戶狀態 (防跨裝置防禦)
                 const phoneQuery = query(collection(db, "nail_bookings"), where("clientPhone", "==", inputPhone));
                 const phoneSnapshot = await getDocs(phoneQuery);
                 const finalIsFirst = phoneSnapshot.empty;
@@ -980,25 +900,14 @@
                 currentSelection.isFirstBooking = finalIsFirst;
                 const prices = calculateTotal();
 
+                // 3. 自動偵測：若為首次預約，在名稱前方加入紅字標記 (加在字串內讓闆闆後台一眼看出)
                 let finalDbName = inputName;
                 if (finalIsFirst) {
                     finalDbName = `〔初〕${inputName}`;
                 }
 
-                let warrantyImageBase64 = null;
-                try {
-                    const warrantySection = document.getElementById('warrantySection');
-                    const canvasImg = await window.html2canvas(warrantySection, {
-                        scale: 1.5, 
-                        backgroundColor: "#FFF9FA"
-                    });
-                    warrantyImageBase64 = canvasImg.toDataURL("image/jpeg", 0.85); 
-                } catch (screenshotError) {
-                    console.error("截圖產生失敗: ", screenshotError);
-                }
-
-                // 判斷是以鎖定後的畫布，還是以打字為主
-                const customerSignature = isSignatureLocked ? canvas.toDataURL() : `[電子簽章] ${typedText}`;
+                // 提取簽名封裝資料 (若有手寫則轉為 Base64 圖片編碼，若無則提取打字內容)
+                const customerSignature = isCanvasDrawn ? canvas.toDataURL() : `[電子簽章] ${typedText}`;
 
                 const bookingData = {
                     clientName: finalDbName, 
@@ -1015,15 +924,42 @@
                         discountPrice: prices.discount,
                         totalPrice: prices.total
                     },
-                    agreedToTerms: true,         
-                    signatureData: customerSignature, 
-                    warrantyScreenshot: warrantyImageBase64, 
+                    agreedToTerms: true,         // 新增：記錄顧客已勾選同意條款
+                    signatureData: customerSignature, // 新增：存入顧客的手寫圖片或打字簽名內容
                     createdAt: serverTimestamp()
                 };
 
                 await addDoc(collection(db, "nail_bookings"), bookingData);
                 
+                // 根據狀態客製化彈窗提示語
                 if(finalIsFirst) {
-                    successModalText.innerHTML = `恭喜獲得初次體驗 95 折優惠！🎉<br>系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
+                    successModalText.innerHTML = `恭喜獲得初次體驗 8 折優惠！🎉<br>系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
                 } else {
-                    successModalText.innerHTML = `歡迎回來！系統預約申請已送出！<br>預估金額：$
+                    successModalText.innerHTML = `歡迎回來！系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
+                }
+
+                // 顯示彈出式成功提示
+                successModal.style.display = 'flex';
+                
+                // 清空表單與還原畫面
+                bookingForm.reset();
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空畫布
+                isCanvasDrawn = false;
+                document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
+                currentSelection.selectedStyle = null;
+                currentSelection.selectedAddons.clear();
+                currentSelection.isFirstBooking = false;
+                calculateTotal();
+
+            } catch (error) {
+                console.error("Firebase Sync Error: ", error);
+                errorAlert.innerText = "雲端儲存失敗，請檢查 Firebase 配置。";
+                errorAlert.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "送出預約申請";
+            }
+        });
+    </script>
+</body>
+</html>
