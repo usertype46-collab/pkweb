@@ -291,6 +291,63 @@
             color: #D14760;
         }
 
+        /* --- 新增：保固條款精美外框 --- */
+        .warranty-container {
+            background-color: #FFF5F7;
+            border: 1px solid #FFD3DB;
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 26px;
+            font-size: 0.9rem;
+            color: #5D464A;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.1);
+        }
+
+        .warranty-title {
+            font-weight: 700;
+            color: var(--accent-purple);
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .warranty-sub {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: block;
+            letter-spacing: 1px;
+        }
+
+        .warranty-list {
+            list-style-type: none;
+            margin-bottom: 18px;
+        }
+
+        .warranty-list li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+            position: relative;
+            padding-left: 5px;
+        }
+
+        .warranty-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--text-dark);
+            cursor: pointer;
+            user-select: none;
+            padding-top: 12px;
+            border-top: 1px dashed #FFD3DB;
+        }
+
+        .warranty-checkbox-label input {
+            accent-color: var(--accent-purple);
+            transform: scale(1.25);
+            cursor: pointer;
+        }
+
         /* --- 提交按鈕 --- */
         .btn-submit {
             width: 100%;
@@ -481,6 +538,21 @@
                         <span>預估總金額</span>
                         <span id="summaryTotalPrice">$0</span>
                     </div>
+                </div>
+
+                <!-- 新增：保固條款容器與勾選狀態 -->
+                <div class="warranty-container">
+                    <div class="warranty-title">〔保固條款〕為確保您有良好售後服務！</div>
+                    <span class="warranty-sub">標示：請詳細閱讀</span>
+                    <ul class="warranty-list">
+                        <li>1. 如非人為因素，一個月內可至本店免費更換五指山兩座</li>
+                        <li>2. 如經本店評估為人為因素，7天內本店也享有免費修補一次售後服務</li>
+                        <li>3. 經本店評估後為人為因素，且無法修補，那就勞煩您帶著您的五金財寶袋，再度蒞臨本店，享受至高無上的服務喔！</li>
+                    </ul>
+                    <label class="warranty-checkbox-label">
+                        <input type="checkbox" id="warrantyCheck" required>
+                        <span>我已詳細閱讀並同意上述保固條款 *</span>
+                    </label>
                 </div>
 
                 <button type="submit" class="btn-submit" id="submitBtn">送出預約申請</button>
@@ -710,6 +782,7 @@
                         discountPrice: prices.discount,
                         totalPrice: prices.total
                     },
+                    agreedToWarranty: true, // 後台記錄顧客已同意條款
                     createdAt: serverTimestamp()
                 };
 
@@ -725,7 +798,7 @@
                 // 顯示彈出式成功提示
                 successModal.style.display = 'flex';
                 
-                // 清空表單與還原畫面
+                // 清空表單與還原畫面 (reset會連同勾選框一併恢復未勾選狀態)
                 bookingForm.reset();
                 document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
                 currentSelection.selectedStyle = null;
