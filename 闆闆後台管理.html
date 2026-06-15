@@ -15,6 +15,8 @@
             --danger-bg: #FFF5F5;
             --shadow: 0 8px 24px rgba(0,0,0,0.05);
             --transition: all 0.3s ease;
+            /* 新增新客標籤專用亮粉色 */
+            --new-client-pink: #FF477E; 
         }
 
         * {
@@ -72,7 +74,7 @@
             transform: translateY(-1px);
         }
 
-        /* --- 新增：滑入式彈出提示視窗樣式 --- */
+        /* --- 滑入式彈出提示視窗樣式 --- */
         .toast-notification {
             position: fixed;
             top: 25px;
@@ -83,7 +85,7 @@
             border-radius: 12px;
             padding: 20px;
             z-index: 2000;
-            display: none; /* 初始隱藏 */
+            display: none; 
             flex-direction: column;
             gap: 12px;
             max-width: 380px;
@@ -216,10 +218,22 @@
             width: fit-content;
         }
 
+        /* 預設老客名稱樣式 */
         .client-name {
             font-weight: 700;
             color: var(--accent-purple);
             font-size: 1.05rem;
+        }
+
+        /* 新增：新客〔初〕專用視覺高亮紅字樣式 */
+        .client-name.new-guest {
+            color: var(--new-client-pink) !important;
+            font-weight: 800;
+            background-color: #FFF0F3;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+            border: 1px solid #FFCCD5;
         }
 
         .addon-tag {
@@ -236,6 +250,21 @@
         .total-price {
             font-weight: 700;
             color: #2196F3;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        /* 新增：折扣明細小字樣式 */
+        .price-detail-sub {
+            font-size: 0.75rem;
+            color: #999;
+            font-weight: 500;
+        }
+        .price-discount-tag {
+            color: var(--new-client-pink);
+            font-size: 0.75rem;
+            font-weight: 700;
         }
 
         .notes-text {
@@ -251,7 +280,7 @@
             color: var(--danger-red) !important;
         }
 
-        tr.overlap-row .client-name,
+        tr.overlap-row .client-name:not(.new-guest),
         tr.overlap-row .total-price,
         tr.overlap-row .date-item {
             color: var(--danger-red) !important;
@@ -401,7 +430,6 @@
         <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
     </div>
 
-    <!-- 新增：右上方彈出式提醒視窗 -->
     <div id="toastAlert" class="toast-notification">
         <div class="toast-header">🔔 系統即時通知</div>
         <div class="toast-body">偵測到雲端資料庫有全新的客戶預約進來囉！請更新頁面以載入最新清單。</div>
@@ -472,17 +500,14 @@
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         
-        // 彈出提示相關 DOM
         const toastAlert = document.getElementById('toastAlert');
         const closeToastBtn = document.getElementById('closeToastBtn');
         const updateToastBtn = document.getElementById('updateToastBtn');
 
-        // 關閉彈出提示
         closeToastBtn.addEventListener('click', () => {
             toastAlert.style.display = 'none';
         });
 
-        // 點擊彈出提示中的立即更新
         updateToastBtn.addEventListener('click', () => {
             toastAlert.style.display = 'none';
             loadBookings();
@@ -514,7 +539,6 @@
             }
         });
 
-        // 新增：高質感多聲調電子提示音發聲技術 (免外部載入音檔)
         function playNotificationChime() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -522,7 +546,6 @@
                 const ctx = new AudioContext();
                 const now = ctx.currentTime;
 
-                // 第一聲：溫柔的高音 (E5)
                 const osc1 = ctx.createOscillator();
                 const gain1 = ctx.createGain();
                 osc1.type = 'sine';
@@ -534,7 +557,6 @@
                 osc1.start(now);
                 osc1.stop(now + 0.3);
 
-                // 第二聲：和弦高音 (A5) 在 0.1 秒後疊加，清脆和諧
                 const osc2 = ctx.createOscillator();
                 const gain2 = ctx.createGain();
                 osc2.type = 'sine';
@@ -555,8 +577,7 @@
             const loading = document.getElementById('loading');
             const table = document.getElementById('bookingTable');
             
-            toastAlert.style.display = 'none'; // 重整時確保提示框隱藏
-            
+            toastAlert.style.display = 'none'; 
             loading.style.display = 'block';
             table.style.display = 'none';
             tbody.innerHTML = '';
@@ -605,6 +626,43 @@
                         addonsHTML = '<span style="color:#aaa; font-size:0.85rem;">無</span>';
                     }
 
+                    // --- 核心修改：判斷是否為初次預約新客，並設定動態樣式 ---
+                    // 為了確保不論是用 isFirstTime 旗標或字串判定都能完美支援：
+                    const isNewGuest = item.isFirstTime === true || (item.clientName && item.clientName.includes('〔初〕'));
+                    
+                    let nameHTML = '';
+                    if (isNewGuest) {
+                        // 確保字串中不會重複出現兩個〔初〕，並綁定新客專用紅字 class
+                        let cleanName = item.clientName ? item.clientName.replace('〔初〕', '') : '未填';
+                        nameHTML = `<span class="client-name new-guest">〔初〕${cleanName}</span>`;
+                    } else {
+                        nameHTML = `<span class="client-name">${item.clientName || '未填'}</span>`;
+                    }
+
+                    // --- 核心修改：計價與折扣明細渲染 ---
+                    let priceHTML = '';
+                    if (item.priceCalculations) {
+                        const total = item.priceCalculations.totalPrice.toLocaleString();
+                        const base = item.priceCalculations.basePrice;
+                        const addon = item.priceCalculations.addonPrice;
+                        const discount = item.priceCalculations.discountPrice || 0;
+
+                        if (isNewGuest && discount > 0) {
+                            // 如果是新客且有折扣金額，顯示原價與折扣小字
+                            const originalSum = base + addon;
+                            priceHTML = `
+                                <span class="total-price">$${total}
+                                    <span class="price-discount-tag">現折 8 折 (-$${discount.toLocaleString()})</span>
+                                    <span class="price-detail-sub">原價: $${originalSum.toLocaleString()}</span>
+                                </span>`;
+                        } else {
+                            // 老客一般原價顯示
+                            priceHTML = `<span class="total-price">$${total}</span>`;
+                        }
+                    } else {
+                        priceHTML = `<span class="total-price">$0</span>`;
+                    }
+
                     tr.innerHTML = `
                         <td>
                             <div class="datetime-badge">
@@ -613,11 +671,11 @@
                                 ${isOverlap ? '<span class="overlap-warning">⚠️ 時段重複重疊！</span>' : ''}
                             </div>
                         </td>
-                        <td><span class="client-name">${item.clientName || '未填'}</span></td>
+                        <td>${nameHTML}</td>
                         <td><strong>${item.clientPhone || '未填'}</strong></td>
                         <td>${item.selectedStyle || '未選擇'}</td>
                         <td>${addonsHTML}</td>
-                        <td><span class="total-price">$${item.priceCalculations ? item.priceCalculations.totalPrice.toLocaleString() : '0'}</span></td>
+                        <td>${priceHTML}</td>
                         <td><div class="notes-text">${item.notes || '<span style="color:#ccc;">無備註</span>'}</div></td>
                         <td>
                             <button class="btn-delete-row">刪除</button>
@@ -653,9 +711,7 @@
             const hasNewBooking = snapshot.docChanges().some(change => change.type === "added");
             
             if (hasNewBooking) {
-                // 1. 彈出滑入式視窗提醒
                 toastAlert.style.display = 'flex';
-                // 2. 觸發悅耳提示音效
                 playNotificationChime();
             }
         });
