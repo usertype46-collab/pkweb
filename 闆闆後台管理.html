@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>神の指藝 | 闆闆專屬預約管理後台</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --bg-color: #F8F9FA;
             --text-dark: #2B2D42;
             --accent-purple: #6C5CE7;
+            --success-green: #10B981;
             --danger-red: #D63031;
             --danger-bg: #FFF5F5;
             --shadow: 0 8px 24px rgba(0,0,0,0.05);
@@ -32,7 +33,7 @@
         }
 
         .dashboard-header {
-            max-width: 1400px; /* 稍微放寬以容納新欄位 */
+            max-width: 1400px;
             margin: 0 auto 20px auto;
             display: flex;
             justify-content: space-between;
@@ -101,27 +102,11 @@
             font-size: 1.05rem;
         }
 
-        .toast-body {
-            font-size: 0.9rem;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .toast-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 5px;
-        }
-
+        .toast-body { font-size: 0.9rem; color: #666; line-height: 1.5; }
+        .toast-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 5px; }
+        
         .btn-toast-update, .btn-toast-close {
-            border: none;
-            padding: 6px 14px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: var(--transition);
+            border: none; padding: 6px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; cursor: pointer; transition: var(--transition);
         }
         .btn-toast-update { background-color: var(--accent-purple); color: white; }
         .btn-toast-close { background-color: #EBEAEF; color: #4A4E69; }
@@ -138,43 +123,12 @@
             padding: 20px;
         }
 
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .loading-status { text-align: center; padding: 40px; font-size: 1.2rem; color: #888; font-weight: 500; }
 
-        .loading-status {
-            text-align: center;
-            padding: 40px;
-            font-size: 1.2rem;
-            color: #888;
-            font-weight: 500;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.95rem;
-            min-width: 1250px;
-        }
-
-        th {
-            background-color: #F1EFF5;
-            color: #4A4E69;
-            padding: 15px;
-            font-weight: 700;
-            border-bottom: 2px solid #E2E0E7;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 18px 15px;
-            border-bottom: 1px solid #EBEAEF;
-            vertical-align: middle;
-        }
-
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; min-width: 1250px; }
+        th { background-color: #F1EFF5; color: #4A4E69; padding: 15px; font-weight: 700; border-bottom: 2px solid #E2E0E7; white-space: nowrap; }
+        td { padding: 18px 15px; border-bottom: 1px solid #EBEAEF; vertical-align: middle; }
         tr:hover { background-color: #FAF9FC; }
 
         .datetime-badge { display: inline-flex; flex-direction: column; gap: 4px; }
@@ -196,99 +150,96 @@
         tr.overlap-row .time-item { background-color: #FFD2D2 !important; color: var(--danger-red) !important; }
         .overlap-warning { display: block; color: white; background-color: var(--danger-red); font-size: 0.75rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 5px; text-align: center; width: fit-content; }
 
-        /* 按鈕群組 */
-        .action-btns {
-            display: flex;
-            gap: 8px;
-            flex-direction: column;
-        }
+        /* 狀態標籤 */
+        .status-completed { display: inline-block; background-color: #D1FAE5; color: #065F46; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; border: 1px solid #A7F3D0; }
 
-        .btn-view-img {
-            background-color: #E8F0FE;
-            color: #1967D2;
-            border: 1px solid #D2E3FC;
+        /* 按鈕群組 */
+        .action-btns { display: flex; gap: 8px; flex-direction: column; }
+
+        .btn-complete-row {
+            background-color: #ECFDF5;
+            color: var(--success-green);
+            border: 1px solid #A7F3D0;
             padding: 6px 10px;
             border-radius: 6px;
             font-size: 0.8rem;
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
+        }
+        .btn-complete-row:hover { background-color: var(--success-green); color: white; }
+
+        .btn-view-img {
+            background-color: #E8F0FE; color: #1967D2; border: 1px solid #D2E3FC; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition);
         }
         .btn-view-img:hover { background-color: #1967D2; color: white; }
 
         .btn-delete-row {
-            background-color: white;
-            color: var(--danger-red);
-            border: 1px solid #FAD2CF;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
+            background-color: white; color: var(--danger-red); border: 1px solid #FAD2CF; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition);
         }
         .btn-delete-row:hover { background-color: var(--danger-red); color: white; border-color: var(--danger-red); }
 
         /* --- 彈窗 Modal 共用與專屬樣式 --- */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(43, 45, 66, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(43, 45, 66, 0.7); backdrop-filter: blur(5px);
+            z-index: 1000; justify-content: center; align-items: center;
             animation: fadeIn 0.3s ease;
         }
 
         .modal-content {
-            background: #FFFFFF;
-            padding: 35px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.3s ease;
-            position: relative;
+            background: #FFFFFF; padding: 35px; border-radius: 20px; text-align: center;
+            max-width: 400px; width: 90%; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease; position: relative;
         }
 
-        /* 圖片預覽彈窗調整（讓它寬一點以看清合約） */
-        .img-modal-content {
-            max-width: 600px !important;
-            padding: 30px;
-        }
+        /* 圖片預覽彈窗調整 */
+        .img-modal-content { max-width: 600px !important; padding: 30px; }
+        .preview-img-container { width: 100%; max-height: 60vh; overflow-y: auto; border: 2px dashed #E2E0E7; border-radius: 12px; margin-bottom: 20px; background: #FAFAFC; }
+        .preview-img-container img { width: 100%; height: auto; display: block; }
 
-        .preview-img-container {
-            width: 100%;
-            max-height: 60vh;
-            overflow-y: auto;
-            border: 2px dashed #E2E0E7;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            background: #FAFAFC;
+        /* 完成服務對話框專屬樣式 */
+        .complete-modal-content { max-width: 650px !important; padding: 30px; }
+        .complete-modal-content h3 { color: var(--success-green) !important; font-size: 1.5rem; margin-bottom: 15px; }
+        
+        .completion-text {
+            font-size: 1.05rem; color: #4A4E69; line-height: 1.6; text-align: left;
+            margin-bottom: 15px; background: #F8F9FA; padding: 15px; border-radius: 10px;
         }
+        .completion-text strong { color: var(--accent-purple); display: block; margin-top: 10px; font-size: 1.1rem; text-align: center; }
 
-        .preview-img-container img {
-            width: 100%;
-            height: auto;
-            display: block;
+        .signature-area {
+            position: relative; width: 100%; height: 220px;
+            border: 2px dashed #C4C4C4; border-radius: 12px; margin-bottom: 10px;
+            background: #FFFFFF; cursor: crosshair; touch-action: none;
         }
+        #signatureCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
+        
+        .signature-input-wrapper { margin-bottom: 20px; }
+        .signature-input {
+            width: 100%; padding: 12px; font-size: 1.1rem;
+            border: 1px solid #E2E0E7; border-radius: 8px; text-align: center;
+            transition: var(--transition); outline: none;
+        }
+        .signature-input:focus { border-color: var(--success-green); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
 
         .modal-icon { font-size: 3.5rem; margin-bottom: 10px; }
         .modal-content h3 { color: var(--danger-red); font-size: 1.4rem; margin-bottom: 10px; }
-        .img-modal-content h3 { color: var(--accent-purple); }
+        .img-modal-content h3 { color: var(--accent-purple) !important; }
 
-        .modal-actions { display: flex; gap: 15px; justify-content: center; }
+        .modal-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
         
         .btn-modal { padding: 10px 24px; font-size: 1rem; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; transition: var(--transition); }
         .btn-cancel { background-color: #EBEAEF; color: #4A4E69; }
         .btn-cancel:hover { background-color: #D6D5DB; }
         .btn-confirm-delete { background-color: var(--danger-red); color: white; box-shadow: 0 4px 12px rgba(214, 48, 49, 0.2); }
         .btn-confirm-delete:hover { background-color: #B92021; transform: translateY(-1px); }
-        .btn-download-img { background-color: var(--accent-purple); color: white; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2); }
-        .btn-download-img:hover { background-color: #5A49C9; transform: translateY(-1px); }
+        .btn-download-img { background-color: var(--accent-purple); color: white; }
+        .btn-download-img:hover { background-color: #5A49C9; }
+        .btn-confirm-success { background-color: var(--success-green); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .btn-confirm-success:hover { background-color: #059669; transform: translateY(-1px); }
+        .btn-clear { background-color: #FFF0F3; color: var(--danger-red); border: 1px solid #FFCCD5; }
+        .btn-clear:hover { background-color: #FFE4E8; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -337,6 +288,7 @@
         </div>
     </div>
 
+    <!-- 刪除確認彈窗 -->
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-icon">⚠️</div>
@@ -349,6 +301,7 @@
         </div>
     </div>
 
+    <!-- 圖片預覽彈窗 -->
     <div id="imageModal" class="modal-overlay">
         <div class="modal-content img-modal-content">
             <h3>📑 顧客保固與簽名紀錄</h3>
@@ -362,9 +315,37 @@
         </div>
     </div>
 
+    <!-- 服務完成確認與簽名彈窗 -->
+    <div id="completionModal" class="modal-overlay">
+        <div class="modal-content complete-modal-content">
+            <h3>✨ 服務完成確認 ✨</h3>
+            <div class="completion-text">
+                請確認今日服務之項目是否符合您的需求。<br>
+                如對此次服務給與肯定請在此處簽上水水們的大名：
+                <strong>「在次感謝您的蒞臨，希望還有機會在此為您獻上兩座五指山！」</strong>
+            </div>
+            
+            <!-- 簽名畫布區 (手寫) -->
+            <div class="signature-area" id="signatureContainer">
+                <canvas id="signatureCanvas"></canvas>
+            </div>
+            
+            <!-- 鍵盤輸入區 (打字) -->
+            <div class="signature-input-wrapper">
+                <input type="text" id="signatureInput" class="signature-input" placeholder="⌨️ 若不便手寫，亦可點擊此處使用鍵盤輸入姓名...">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="cancelCompletionBtn">返回修改</button>
+                <button class="btn-modal btn-clear" id="clearSignatureBtn">清除重寫</button>
+                <button class="btn-modal btn-confirm-success" id="confirmCompletionBtn">✅ 確認送出</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ===================================================
         // FIREBASE 配置設定
@@ -385,7 +366,8 @@
 
         // --- 全域變數 ---
         let targetDeleteId = null;
-        const screenshotsMap = new Map(); // 用來暫存 Base64 截圖，避免把龐大字串塞在 HTML 標籤裡
+        let targetCompleteId = null;
+        const screenshotsMap = new Map(); 
         let currentViewingImgData = null;
         let currentViewingClientName = '';
 
@@ -399,9 +381,131 @@
         const downloadImgBtn = document.getElementById('downloadImgBtn');
         const previewImage = document.getElementById('previewImage');
 
+        const completionModal = document.getElementById('completionModal');
+        const cancelCompletionBtn = document.getElementById('cancelCompletionBtn');
+        const confirmCompletionBtn = document.getElementById('confirmCompletionBtn');
+        const clearSignatureBtn = document.getElementById('clearSignatureBtn');
+        const signatureCanvas = document.getElementById('signatureCanvas');
+        const signatureInput = document.getElementById('signatureInput');
+        const signatureContainer = document.getElementById('signatureContainer');
+        const ctx = signatureCanvas.getContext('2d');
+        let isDrawing = false;
+        let hasDrawn = false; // 追蹤畫布是否有內容
+
         const toastAlert = document.getElementById('toastAlert');
         const closeToastBtn = document.getElementById('closeToastBtn');
         const updateToastBtn = document.getElementById('updateToastBtn');
+
+        // --- 畫布(Canvas) 簽名邏輯 ---
+        function resizeCanvas() {
+            signatureCanvas.width = signatureContainer.offsetWidth;
+            signatureCanvas.height = signatureContainer.offsetHeight;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#2B2D42';
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            hasDrawn = true;
+            signatureInput.value = ''; // 開始手寫時清空輸入框，避免混淆
+            draw(e);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault(); // 阻止手機在畫布上滑動時捲動頁面
+            let clientX, clientY;
+            
+            if (e.type.includes('touch')) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            const rect = signatureCanvas.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        signatureCanvas.addEventListener('mousedown', startDrawing);
+        signatureCanvas.addEventListener('mousemove', draw);
+        signatureCanvas.addEventListener('mouseup', stopDrawing);
+        signatureCanvas.addEventListener('mouseout', stopDrawing);
+
+        signatureCanvas.addEventListener('touchstart', startDrawing, {passive: false});
+        signatureCanvas.addEventListener('touchmove', draw, {passive: false});
+        signatureCanvas.addEventListener('touchend', stopDrawing);
+
+        clearSignatureBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            signatureInput.value = '';
+            hasDrawn = false;
+        });
+
+        // 當使用者使用鍵盤輸入時，視同放棄手寫，清空畫布
+        signatureInput.addEventListener('input', () => {
+            if (hasDrawn) {
+                ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+                hasDrawn = false;
+            }
+        });
+
+        // --- 關閉完成確認對話框邏輯 ---
+        cancelCompletionBtn.addEventListener('click', () => {
+            completionModal.style.display = 'none';
+            targetCompleteId = null;
+        });
+
+        // --- 送出完成確認邏輯 ---
+        confirmCompletionBtn.addEventListener('click', async () => {
+            if (!targetCompleteId) return;
+
+            const typedName = signatureInput.value.trim();
+            const signatureDataUrl = signatureCanvas.toDataURL('image/png');
+            
+            // 確保有手寫或打字
+            if (!hasDrawn && typedName === '') {
+                alert('請水水在畫布上簽名，或在下方輸入框打上姓名唷！');
+                return;
+            }
+
+            try {
+                confirmCompletionBtn.innerText = "儲存更新中...";
+                confirmCompletionBtn.disabled = true;
+
+                // 將完成狀態與簽名資料更新回 Firebase
+                await updateDoc(doc(db, "nail_bookings", targetCompleteId), {
+                    status: "completed",
+                    clientSignature: hasDrawn ? signatureDataUrl : null,
+                    clientTypedName: typedName || null,
+                    completedAt: new Date().toISOString()
+                });
+
+                completionModal.style.display = 'none';
+                alert("✅ 感謝水水！已完成服務並儲存紀錄。");
+                await loadBookings(); // 重新載入更新畫面
+            } catch (error) {
+                console.error("更新完成狀態失敗: ", error);
+                alert("儲存失敗，請檢查網路連線！");
+            } finally {
+                confirmCompletionBtn.innerText = "✅ 確認送出";
+                confirmCompletionBtn.disabled = false;
+                targetCompleteId = null;
+            }
+        });
 
         // --- 提醒吐司控制 ---
         closeToastBtn.addEventListener('click', () => toastAlert.style.display = 'none');
@@ -444,12 +548,23 @@
 
         // 監聽表格內的點擊事件 (Event Delegation)，抓取按鈕點擊
         document.getElementById('bookingListTbody').addEventListener('click', (e) => {
+            // 處理「✅ 服務完成」按鈕
+            if (e.target.classList.contains('btn-complete-row')) {
+                targetCompleteId = e.target.getAttribute('data-id');
+                completionModal.style.display = 'flex';
+                
+                // 延遲重設 Canvas 大小，確保 Modal 已顯示並抓得到寬高
+                setTimeout(resizeCanvas, 50); 
+                ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+                signatureInput.value = '';
+                hasDrawn = false;
+            }
+
             // 處理預覽截圖按鈕
             if (e.target.classList.contains('btn-view-img')) {
                 const id = e.target.getAttribute('data-id');
                 const rawName = e.target.getAttribute('data-name');
                 
-                // 清理名稱中的標籤，供下載檔名使用
                 currentViewingClientName = rawName ? rawName.replace(/〔初〕/g, '').trim() : '客戶';
                 currentViewingImgData = screenshotsMap.get(id);
 
@@ -469,8 +584,6 @@
         // 圖片下載功能
         downloadImgBtn.addEventListener('click', () => {
             if (!currentViewingImgData) return;
-            
-            // 建立虛擬超連結來觸發下載
             const link = document.createElement('a');
             link.href = currentViewingImgData;
             link.download = `${currentViewingClientName}_保固簽名紀錄.jpg`;
@@ -486,14 +599,12 @@
                 if (!AudioContext) return;
                 const ctx = new AudioContext();
                 const now = ctx.currentTime;
-
                 const osc1 = ctx.createOscillator();
                 const gain1 = ctx.createGain();
                 osc1.type = 'sine'; osc1.frequency.setValueAtTime(659.25, now);
                 gain1.gain.setValueAtTime(0.2, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
                 osc1.connect(gain1); gain1.connect(ctx.destination);
                 osc1.start(now); osc1.stop(now + 0.3);
-
                 const osc2 = ctx.createOscillator();
                 const gain2 = ctx.createGain();
                 osc2.type = 'sine'; osc2.frequency.setValueAtTime(880.00, now + 0.1);
@@ -515,7 +626,7 @@
             loading.style.display = 'block';
             table.style.display = 'none';
             tbody.innerHTML = '';
-            screenshotsMap.clear(); // 清空舊的圖片暫存
+            screenshotsMap.clear(); 
 
             try {
                 const querySnapshot = await getDocs(collection(db, "nail_bookings"));
@@ -535,7 +646,6 @@
                     const key = `${item.bookingDate}_${item.bookingTime}`;
                     timeCounts[key] = (timeCounts[key] || 0) + 1;
                     
-                    // 將有截圖的資料存入 Map 備用
                     if (item.warrantyScreenshot) {
                         screenshotsMap.set(item.id, item.warrantyScreenshot);
                     }
@@ -563,7 +673,7 @@
                         addonsHTML = '<span style="color:#aaa; font-size:0.85rem;">無</span>';
                     }
 
-                    // 顧客名稱處理 (初次判斷)
+                    // 顧客名稱處理
                     const isNewGuest = item.isFirstTime === true || (item.clientName && item.clientName.includes('〔初〕'));
                     let nameHTML = '';
                     if (isNewGuest) {
@@ -571,6 +681,12 @@
                         nameHTML = `<span class="client-name new-guest">〔初〕${cleanName}</span>`;
                     } else {
                         nameHTML = `<span class="client-name">${item.clientName || '未填'}</span>`;
+                    }
+
+                    // 如果狀態為已完成，加上提示標籤
+                    const isCompleted = item.status === "completed";
+                    if (isCompleted) {
+                        nameHTML += `<br><span class="status-completed" style="margin-top: 5px;">✅ 服務已完成</span>`;
                     }
 
                     // 價格運算與顯示
@@ -595,13 +711,18 @@
                         priceHTML = `<span class="total-price">$0</span>`;
                     }
 
-                    // 截圖查看按鈕 HTML (若該筆資料有截圖，則產生按鈕)
+                    // 截圖查看按鈕 HTML
                     let screenshotHTML = '';
                     if (item.warrantyScreenshot) {
                         screenshotHTML = `<button class="btn-view-img" data-id="${item.id}" data-name="${item.clientName || '客戶'}">👁️ 查看紀錄</button>`;
                     } else {
                         screenshotHTML = `<span style="color:#aaa; font-size:0.85rem;">無電子紀錄</span>`;
                     }
+
+                    // 產生管理按鈕 (如果已完成，隱藏完成鈕)
+                    let completeBtnHTML = isCompleted 
+                        ? '' 
+                        : `<button class="btn-complete-row" data-id="${item.id}">✅ 完成</button>`;
 
                     // 組裝該列資料
                     tr.innerHTML = `
@@ -620,7 +741,8 @@
                         <td style="text-align:center;">${screenshotHTML}</td> <td><div class="notes-text">${item.notes || '<span style="color:#ccc;">無備註</span>'}</div></td>
                         <td>
                             <div class="action-btns">
-                                <button class="btn-delete-row" data-id="${item.id}">刪除</button>
+                                ${completeBtnHTML}
+                                <button class="btn-delete-row" data-id="${item.id}">🗑️ 刪除</button>
                             </div>
                         </td>
                     `;
