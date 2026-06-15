@@ -511,13 +511,17 @@
                     </div>
                     <div class="form-group">
                         <label for="bookingTime">預約時段 *</label>
-                        <select id="bookingTime" class="form-control" required>
-                            <option value="">請選擇時段</option>
-                            <option value="10:00">10:00 AM</option>
-                            <option value="13:00">01:00 PM</option>
-                            <option value="15:30">03:30 PM</option>
-                            <option value="18:00">06:00 PM</option>
-                        </select>
+                        onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
+    if (docSnap.exists()) {
+        const timeSelect = document.getElementById('bookingTime');
+        timeSelect.innerHTML = '<option value="">請選擇時段</option>'; // 清空預設
+        const slots = docSnap.data().timeSlots || [];
+        slots.sort().forEach(slot => {
+            timeSelect.innerHTML += `<option value="${slot}">${slot}</option>`;
+        });
+    }
+});
+
                     </div>
                 </div>
 
