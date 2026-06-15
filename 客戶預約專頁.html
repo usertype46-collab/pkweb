@@ -273,6 +273,13 @@
             font-weight: 500;
         }
 
+        /* 新增：初次預約折扣標籤樣式 */
+        .discount-row {
+            color: #C5221F;
+            font-weight: 700;
+            display: none; /* 預設隱藏，輸入電話偵測後顯示 */
+        }
+
         .price-total {
             display: flex;
             justify-content: space-between;
@@ -466,6 +473,10 @@
                         <span>附加服務小計</span>
                         <span id="summaryAddonPrice">$0</span>
                     </div>
+                    <div class="price-row discount-row" id="discountRow">
+                        <span>✨ 新客初次體驗優惠</span>
+                        <span id="summaryDiscount">- $0</span>
+                    </div>
                     <div class="price-total">
                         <span>預估總金額</span>
                         <span id="summaryTotalPrice">$0</span>
@@ -481,7 +492,7 @@
         <div class="modal-content">
             <div class="modal-icon">✨</div>
             <h3>預約成功！</h3>
-            <p>系統預約申請已送出！<br>我們將會發送簡訊與您確認後續事宜。</p>
+            <p id="successModalText">系統預約申請已送出！<br>我們將會發送簡訊與您確認後續事宜。</p>
             <button id="modalConfirmBtn" class="btn-modal-confirm">確認並關閉</button>
         </div>
     </div>
@@ -525,12 +536,15 @@
 
         let currentSelection = {
             selectedStyle: null,
-            selectedAddons: new Set()
+            selectedAddons: new Set(),
+            isFirstBooking: false // 追蹤是否為新客戶
         };
 
         // 動態網頁元素生成
         const styleGrid = document.getElementById('styleGrid');
         const addonsList = document.getElementById('addonsList');
+        const clientPhoneInput = document.getElementById('clientPhone');
+        const discountRow = document.getElementById('discountRow');
 
         nailStyles.forEach(style => {
             const card = document.createElement('div');
@@ -558,6 +572,23 @@
             addonsList.appendChild(label);
         });
 
+        // 監聽電話輸入，即時判定是否為初次預約
+        clientPhoneInput.addEventListener('blur', async () => {
+            const phone = clientPhoneInput.value.trim();
+            if (!phone) return;
+
+            try {
+                const q = query(collection(db, "nail_bookings"), where("clientPhone", "==", phone));
+                const querySnapshot = await getDocs(q);
+                
+                // 如果找不到歷史預約，就是初次預約新客戶
+                currentSelection.isFirstBooking = querySnapshot.empty;
+                calculateTotal();
+            } catch (err) {
+                console.error("無法驗證新客身分: ", err);
+            }
+        });
+
         function selectStyle(style) {
             document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
             currentSelection.selectedStyle = style;
@@ -581,13 +612,25 @@
             const stylePrice = currentSelection.selectedStyle ? currentSelection.selectedStyle.price : 0;
             let addonPrice = 0;
             currentSelection.selectedAddons.forEach(item => addonPrice += item.price);
-            const total = stylePrice + addonPrice;
+            
+            let total = stylePrice + addonPrice;
+            let discount = 0;
+
+            // 計算 8 折優惠 (初次預約)
+            if (currentSelection.isFirstBooking && total > 0) {
+                discount = Math.round(total * 0.2); // 算出 20% 的折扣金額
+                total = total - discount;           // 實際需付金額
+                discountRow.style.display = 'flex';
+                document.getElementById('summaryDiscount').innerText = `- $${discount.toLocaleString()}`;
+            } else {
+                discountRow.style.display = 'none';
+            }
 
             document.getElementById('summaryStylePrice').innerText = `$${stylePrice.toLocaleString()}`;
             document.getElementById('summaryAddonPrice').innerText = `$${addonPrice.toLocaleString()}`;
             document.getElementById('summaryTotalPrice').innerText = `$${total.toLocaleString()}`;
 
-            return { stylePrice, addonPrice, total };
+            return { stylePrice, addonPrice, discount, total };
         }
 
         // 表單提交與雲端庫重疊即時阻擋核心邏輯
@@ -596,8 +639,8 @@
         const errorAlert = document.getElementById('errorAlert');
         const successModal = document.getElementById('successModal');
         const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const successModalText = document.getElementById('successModalText');
 
-        // 綁定彈窗確認按鈕事件
         modalConfirmBtn.addEventListener('click', () => {
             successModal.style.display = 'none';
         });
@@ -614,21 +657,22 @@
 
             const chosenDate = document.getElementById('bookingDate').value;
             const chosenTime = document.getElementById('bookingTime').value;
+            const inputPhone = clientPhoneInput.value.trim();
+            let inputName = document.getElementById('clientName').value.trim();
 
             submitBtn.disabled = true;
             submitBtn.innerText = "正在檢查時段預約狀態...";
 
             try {
-                // 自動重疊檢查邏輯
-                const q = query(
+                // 1. 重疊時間段檢查
+                const timeQuery = query(
                     collection(db, "nail_bookings"), 
                     where("bookingDate", "==", chosenDate), 
                     where("bookingTime", "==", chosenTime)
                 );
-                const querySnapshot = await getDocs(q);
+                const timeSnapshot = await getDocs(timeQuery);
 
-                // 若該時段已存在資料，立即中斷流程，並給予貼心通知
-                if (!querySnapshot.empty) {
+                if (!timeSnapshot.empty) {
                     errorAlert.innerHTML = "⚠️ 系統通知：該時段已有其他客戶預約囉！<br>如有特殊情況請聯絡闆闆哦 ✨";
                     errorAlert.style.display = 'block';
                     submitBtn.disabled = false;
@@ -636,11 +680,25 @@
                     return;
                 }
 
+                // 2. 再次確保客戶狀態 (防跨裝置防禦)
+                const phoneQuery = query(collection(db, "nail_bookings"), where("clientPhone", "==", inputPhone));
+                const phoneSnapshot = await getDocs(phoneQuery);
+                const finalIsFirst = phoneSnapshot.empty;
+
                 submitBtn.innerText = "資料建立與儲存中...";
+                currentSelection.isFirstBooking = finalIsFirst;
                 const prices = calculateTotal();
+
+                // 3. 自動偵測：若為首次預約，在名稱前方加入紅字標記 (加在字串內讓闆闆後台一眼看出)
+                let finalDbName = inputName;
+                if (finalIsFirst) {
+                    finalDbName = `〔初〕${inputName}`;
+                }
+
                 const bookingData = {
-                    clientName: document.getElementById('clientName').value.trim(),
-                    clientPhone: document.getElementById('clientPhone').value.trim(),
+                    clientName: finalDbName, // 帶有〔初〕字標記的姓名
+                    isFirstTime: finalIsFirst, // 新增：布林值旗標，更方便後台系統作條件篩選(如紅字高亮)
+                    clientPhone: inputPhone,
                     bookingDate: chosenDate,
                     bookingTime: chosenTime,
                     notes: document.getElementById('notes').value.trim(),
@@ -649,6 +707,7 @@
                     priceCalculations: {
                         basePrice: prices.stylePrice,
                         addonPrice: prices.addonPrice,
+                        discountPrice: prices.discount,
                         totalPrice: prices.total
                     },
                     createdAt: serverTimestamp()
@@ -656,7 +715,14 @@
 
                 await addDoc(collection(db, "nail_bookings"), bookingData);
                 
-                // --- 顯示彈出式成功提示 ---
+                // 根據狀態客製化彈窗提示語
+                if(finalIsFirst) {
+                    successModalText.innerHTML = `恭喜獲得初次體驗 8 折優惠！🎉<br>系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
+                } else {
+                    successModalText.innerHTML = `歡迎回來！系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
+                }
+
+                // 顯示彈出式成功提示
                 successModal.style.display = 'flex';
                 
                 // 清空表單與還原畫面
@@ -664,6 +730,7 @@
                 document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
                 currentSelection.selectedStyle = null;
                 currentSelection.selectedAddons.clear();
+                currentSelection.isFirstBooking = false;
                 calculateTotal();
 
             } catch (error) {
