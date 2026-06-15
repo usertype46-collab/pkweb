@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>後台管理系統 | 神の指藝 Beautiful moment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 40%, #A1C4FD 70%, #C2E9FB 100%);
+            --primary-color: #FF6B8B;  
+            --accent-purple: #7B2CBF;   
+            --bg-color: #F4F4F9;       
+            --text-dark: #333333;     
+            --card-bg: #FFFFFF;
+            --shadow: 0 8px 25px rgba(123, 44, 191, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+        }
+
+        /* --- 登入驗證畫面 --- */
+        #loginOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary-gradient);
+            background-size: 300% 300%;
+            animation: gradientMove 10s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-card h2 {
+            font-family: 'Cinzel', 'Noto Sans TC', serif;
+            color: var(--accent-purple);
+            margin-bottom: 20px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #EEDAE5;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(90deg, #FF6B8B 0%, #7B2CBF 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        #loginError {
+            color: #C5221F;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+
+        /* --- 後台主畫面 (隱藏狀態) --- */
+        #adminDashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        /* --- 頂部導覽列 --- */
+        header {
+            background: #FFF;
+            padding: 20px 40px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-family: 'Cinzel', 'Noto Sans TC', serif;
+            font-size: 1.5rem;
+            color: var(--accent-purple);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 20px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #888;
+            cursor: pointer;
+            padding: 10px 15px;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-purple);
+            border-bottom-color: var(--accent-purple);
+        }
+
+        /* --- 主要內容區 --- */
+        .container {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- 表格設計 --- */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #EEE;
+        }
+
+        th {
+            background-color: #FAF5FF;
+            color: var(--accent-purple);
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+        }
+
+        tbody tr:hover {
+            background-color: #FFF0F5;
+        }
+
+        .badge-first {
+            background: #FFE4E1;
+            color: #C5221F;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        /* --- 操作按鈕 --- */
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: var(--transition);
+            margin-right: 5px;
+        }
+
+        .btn-edit { background-color: #E3F2FD; color: #1565C0; }
+        .btn-edit:hover { background-color: #BBDEFB; }
+        
+        .btn-delete { background-color: #FFEBEE; color: #C62828; }
+        .btn-delete:hover { background-color: #FFCDD2; }
+
+        /* --- 系統設定區塊 --- */
+        .settings-group {
+            max-width: 500px;
+            margin-bottom: 25px;
+        }
+
+        .settings-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-purple);
+        }
+
+        .settings-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #CCC;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-save {
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-save:hover { opacity: 0.9; }
+
+        /* --- 編輯彈窗 (Modal) --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #FFF;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: var(--accent-purple);
+            border-bottom: 2px solid #EEE;
+            padding-bottom: 10px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem;}
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px; border: 1px solid #CCC; border-radius: 6px;
+        }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-cancel { background: #CCC; color: #333; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;}
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loginOverlay">
+        <div class="login-card">
+            <h2>✦ 神の指藝 系統管理 ✦</h2>
+            <p style="margin-bottom: 20px; color: #666; font-size: 0.9rem;">請輸入管理員密碼以進入後台</p>
+            <input type="password" id="adminPassword" class="login-input" placeholder="請輸入管理密碼">
+            <button class="btn-login" id="loginBtn">登入系統</button>
+            <div id="loginError">密碼錯誤，請重新輸入！</div>
+        </div>
+    </div>
+
+    <div id="adminDashboard">
+        <header>
+            <h1>神の指藝 Admin.</h1>
+            <div class="nav-tabs">
+                <button class="tab-btn active" data-target="tab-bookings">📅 預約管理</button>
+                <button class="tab-btn" data-target="tab-settings">⚙️ 系統設定</button>
+                <button class="tab-btn" id="logoutBtn">🚪 登出</button>
+            </div>
+        </header>
+
+        <div class="container">
+            <div id="tab-bookings" class="tab-content active">
+                <h2 style="color: var(--accent-purple); margin-bottom: 15px;">近期預約清單</h2>
+                <div class="table-responsive">
+                    <table id="bookingsTable">
+                        <thead>
+                            <tr>
+                                <th>預約日期</th>
+                                <th>時間</th>
+                                <th>顧客姓名</th>
+                                <th>聯絡電話</th>
+                                <th>主要款式</th>
+                                <th>總計金額</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="7" style="text-align: center;">資料載入中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-settings" class="tab-content">
+                <h2 style="color: var(--accent-purple); margin-bottom: 25px;">整體行銷與參數設定</h2>
+                
+                <div class="settings-group">
+                    <label for="firstTimeDiscountInput">新客初次體驗折扣數值 (例如：輸入 80 代表 8 折，輸入 95 代表 95 折)</label>
+                    <input type="number" id="firstTimeDiscountInput" placeholder="讀取中...">
+                </div>
+                
+                <button class="btn-save" id="saveSettingsBtn">儲存設定</button>
+                <span id="settingsMsg" style="margin-left: 15px; color: green; font-weight: bold; display: none;">✔ 儲存成功！前端將同步更新。</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>編輯預約資料</h3>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>顧客姓名</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="form-group">
+                    <label>聯絡電話</label>
+                    <input type="text" id="editPhone" required>
+                </div>
+                <div class="form-group">
+                    <label>預約日期</label>
+                    <input type="date" id="editDate" required>
+                </div>
+                <div class="form-group">
+                    <label>預約時間</label>
+                    <select id="editTime" required>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="13:00">01:00 PM</option>
+                        <option value="15:30">03:30 PM</option>
+                        <option value="18:00">06:00 PM</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>總計金額 ($)</label>
+                    <input type="number" id="editTotal" required>
+                </div>
+                <div class="form-group">
+                    <label>備註需求</label>
+                    <textarea id="editNotes" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" id="closeModalBtn">取消</button>
+                    <button type="submit" class="btn-save">確認修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ===================================================
+        // FIREBASE 配置 (與前端完全相同)
+        // ===================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
+            authDomain: "beautiful-68dbc.firebaseapp.com",
+            databaseURL: "https://beautiful-68dbc-default-rtdb.firebaseio.com",
+            projectId: "beautiful-68dbc",
+            storageBucket: "beautiful-68dbc.firebasestorage.app",
+            messagingSenderId: "348466975949",
+            appId: "1:348466975949:web:44eb81d962fe957fa34584",
+            measurementId: "G-3V4FDPJCQ0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ===================================================
+        // 登入驗證邏輯
+        // ===================================================
+        const ADMIN_PASSWORD = "AMQ5600";
+        const loginOverlay = document.getElementById('loginOverlay');
+        const adminDashboard = document.getElementById('adminDashboard');
+        const passwordInput = document.getElementById('adminPassword');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+
+        // 檢查 Session Storage 是否已登入
+        if(sessionStorage.getItem('isAdminLoggedIn') === 'true') {
+            showDashboard();
+        }
+
+        loginBtn.addEventListener('click', attemptLogin);
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptLogin(); });
+
+        function attemptLogin() {
+            if (passwordInput.value === ADMIN_PASSWORD) {
+                sessionStorage.setItem('isAdminLoggedIn', 'true');
+                showDashboard();
+            } else {
+                loginError.style.display = 'block';
+                passwordInput.value = '';
+            }
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            sessionStorage.removeItem('isAdminLoggedIn');
+            location.reload();
+        });
+
+        function showDashboard() {
+            loginOverlay.style.opacity = '0';
+            setTimeout(() => {
+                loginOverlay.style.display = 'none';
+                adminDashboard.style.display = 'block';
+                // 登入成功後開始載入資料
+                loadBookings();
+                loadSystemSettings();
+            }, 500);
+        }
+
+        // ===================================================
+        // 頁籤切換邏輯
+        // ===================================================
+        document.querySelectorAll('.tab-btn:not(#logoutBtn)').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                e.target.classList.add('active');
+                document.getElementById(e.target.dataset.target).classList.add('active');
+            });
+        });
+
+        // ===================================================
+        // 核心功能：讀取預約資料
+        // ===================================================
+        const tbody = document.querySelector('#bookingsTable tbody');
+        let currentBookings = {}; // 快取當前載入的資料以便編輯時取用
+
+        async function loadBookings() {
+            try {
+                // 依照預約日期進行排序
+                const q = query(collection(db, "nail_bookings"), orderBy("bookingDate", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                tbody.innerHTML = ''; // 清空表格
+
+                if (querySnapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">目前沒有任何預約資料</td></tr>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const id = docSnap.id;
+                    currentBookings[id] = data; // 存入快取
+                    
+                    // 判斷是否為新客，給予標籤
+                    let nameDisplay = data.clientName;
+                    if(data.isFirstTime) {
+                        nameDisplay += ' <span class="badge-first">新客</span>';
+                    }
+
+                    // 處理舊版資料可能沒有 priceCalculations 的相容性
+                    const totalPrice = data.priceCalculations ? data.priceCalculations.totalPrice : 'N/A';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight:bold;">${data.bookingDate}</td>
+                        <td>${data.bookingTime}</td>
+                        <td>${nameDisplay}</td>
+                        <td>${data.clientPhone}</td>
+                        <td>${data.selectedStyle || '無紀錄'}</td>
+                        <td style="color:#D14760; font-weight:bold;">$${totalPrice}</td>
+                        <td>
+                            <button class="action-btn btn-edit" onclick="window.editBooking('${id}')">修改</button>
+                            <button class="action-btn btn-delete" onclick="window.deleteBooking('${id}')">刪除</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("讀取預約失敗:", error);
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">資料庫讀取失敗，請檢查網路狀態。</td></tr>';
+            }
+        }
+
+        // ===================================================
+        // 核心功能：刪除預約資料
+        // ===================================================
+        window.deleteBooking = async function(id) {
+            if(confirm("⚠️ 確定要刪除這筆預約紀錄嗎？此動作無法復原。")) {
+                try {
+                    await deleteDoc(doc(db, "nail_bookings", id));
+                    alert("✅ 預約已成功刪除！");
+                    loadBookings(); // 重新整理表格
+                } catch (error) {
+                    console.error("刪除失敗:", error);
+                    alert("刪除失敗，請稍後再試。");
+                }
+            }
+        };
+
+        // ===================================================
+        // 核心功能：編輯預約資料
+        // ===================================================
+        const editModal = document.getElementById('editModal');
+        const editForm = document.getElementById('editForm');
+
+        window.editBooking = function(id) {
+            const data = currentBookings[id];
+            if(!data) return;
+
+            // 填入表單
+            document.getElementById('editId').value = id;
+            
+            // 過濾掉名字前面的 〔初〕 字樣以利編輯
+            let cleanName = data.clientName;
+            if (cleanName.startsWith('〔初〕')) {
+                cleanName = cleanName.replace('〔初〕', '');
+            }
+            document.getElementById('editName').value = cleanName;
+            
+            document.getElementById('editPhone').value = data.clientPhone;
+            document.getElementById('editDate').value = data.bookingDate;
+            document.getElementById('editTime').value = data.bookingTime;
+            document.getElementById('editTotal').value = data.priceCalculations ? data.priceCalculations.totalPrice : 0;
+            document.getElementById('editNotes').value = data.notes || '';
+
+            editModal.style.display = 'flex';
+        };
+
+        document.getElementById('closeModalBtn').addEventListener('click', () => {
+            editModal.style.display = 'none';
+        });
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const originData = currentBookings[id]; // 取出原始資料保留未修改的部分
+            
+            // 處理名字若原本是新客，儲存時把標記加回去
+            let newName = document.getElementById('editName').value.trim();
+            if(originData.isFirstTime && !newName.startsWith('〔初〕')) {
+                newName = `〔初〕${newName}`;
+            }
+
+            try {
+                await updateDoc(doc(db, "nail_bookings", id), {
+                    clientName: newName,
+                    clientPhone: document.getElementById('editPhone').value,
+                    bookingDate: document.getElementById('editDate').value,
+                    bookingTime: document.getElementById('editTime').value,
+                    notes: document.getElementById('editNotes').value,
+                    // 為了相容舊資料結構，強制更新或建立 priceCalculations 物件
+                    priceCalculations: {
+                        ...originData.priceCalculations,
+                        totalPrice: parseInt(document.getElementById('editTotal').value)
+                    }
+                });
+                
+                alert("✅ 修改成功！");
+                editModal.style.display = 'none';
+                loadBookings(); // 重新整理表格
+            } catch (error) {
+                console.error("更新失敗:", error);
+                alert("更新失敗。");
+            }
+        });
+
+        // ===================================================
+        // 核心功能：讀取與更新系統設定 (折扣)
+        // ===================================================
+        const discountInput = document.getElementById('firstTimeDiscountInput');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const settingsMsg = document.getElementById('settingsMsg');
+
+        async function loadSystemSettings() {
+            try {
+                const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
+                if (docSnap.exists() && docSnap.data().firstTimeDiscount) {
+                    discountInput.value = docSnap.data().firstTimeDiscount;
+                } else {
+                    discountInput.value = 80; // 預設 8 折
+                }
+            } catch (error) {
+                console.error("讀取系統設定失敗:", error);
+            }
+        }
+
+        saveSettingsBtn.addEventListener('click', async () => {
+            const val = parseInt(discountInput.value);
+            if(isNaN(val) || val <= 0 || val >= 100) {
+                alert("請輸入正確的折扣數值（例如：80 或 95）。");
+                return;
+            }
+
+            saveSettingsBtn.innerText = "儲存中...";
+            try {
+                // 使用 setDoc 配合 merge: true，確保文件不存在時會自動建立
+                await setDoc(doc(db, "system_settings", "booking_config"), {
+                    firstTimeDiscount: val
+                }, { merge: true });
+
+                settingsMsg.style.display = 'inline';
+                setTimeout(() => settingsMsg.style.display = 'none', 3000);
+            } catch (error) {
+                console.error("設定儲存失敗:", error);
+                alert("儲存失敗，請檢查權限設定。");
+            } finally {
+                saveSettingsBtn.innerText = "儲存設定";
+            }
+        });
+
+    </script>
+</body>
+</html>
