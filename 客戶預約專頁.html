@@ -7,6 +7,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
+        import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// 動態替換前端的 Title 門面文案
+onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
+    if (docSnap.exists()) {
+        const config = docSnap.data();
+        document.querySelector('header h1').innerText = config.title;
+        document.querySelector('header p').innerText = config.subtitle;
+        // 動態折扣比例更換 (如：後台設定 85，代表 0.85 比例)
+        if (config.firstTimeDiscount) {
+            dynamicDiscount.value = config.firstTimeDiscount;
+            dynamicDiscount.ratio = config.firstTimeDiscount / 100;
+        }
+    }
+});
+
         /* --- 千變萬化風格變數：炫彩、夢幻且具備光澤感 --- */
         :root {
             --primary-gradient: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 40%, #A1C4FD 70%, #C2E9FB 100%);
