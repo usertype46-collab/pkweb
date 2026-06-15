@@ -74,6 +74,76 @@
             transform: translateY(-1px);
         }
 
+        /* --- 新增：營運政策設定欄位樣式 --- */
+        .settings-card {
+            max-width: 1400px;
+            margin: 0 auto 20px auto;
+            background: white;
+            padding: 18px 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .settings-title {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .settings-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-discount {
+            width: 80px;
+            padding: 8px 12px;
+            border: 2px solid #E2E0E7;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .input-discount:focus {
+            border-color: var(--accent-purple);
+        }
+
+        .btn-save-setting {
+            background-color: var(--success-green);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+
+        .btn-save-setting:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-save-setting:disabled {
+            background-color: #A7F3D0;
+            cursor: not-allowed;
+        }
+
         /* --- 滑入式彈出提示視窗樣式 --- */
         .toast-notification {
             position: fixed;
@@ -140,6 +210,7 @@
 
         .addon-tag { display: inline-block; background-color: #F0E6FF; color: #5A32A3; font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; margin: 2px; font-weight: 500; }
         .total-price { font-weight: 700; color: #2196F3; display: flex; flex-direction: column; gap: 2px; }
+        .price-detail-sub">原價: $${originalSum.toLocaleString()}</span>
         .price-detail-sub { font-size: 0.75rem; color: #999; font-weight: 500; }
         .price-discount-tag { color: var(--new-client-pink); font-size: 0.75rem; font-weight: 700; }
         .notes-text { font-size: 0.85rem; color: #666; max-width: 200px; word-break: break-all; }
@@ -256,6 +327,17 @@
         <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
     </div>
 
+    <div class="settings-card">
+        <div class="settings-title">⚙️ 營運政策與行銷設定</div>
+        <div class="settings-input-group">
+            <label for="discountConfigInput" style="font-size: 0.95rem; font-weight: 500; color: #4A4E69;">新客初次預約優惠：</label>
+            <input type="number" id="discountConfigInput" class="input-discount" min="10" max="99" value="95">
+            <span style="font-weight: 700; color: #2B2D42;">折</span>
+            <span style="font-size: 0.85rem; color: #888;">(例如輸入 90 代表 9 折，85 代表 85 折)</span>
+        </div>
+        <button class="btn-save-setting" id="saveDiscountBtn">確認修改折扣</button>
+    </div>
+
     <div id="toastAlert" class="toast-notification">
         <div class="toast-header">🔔 系統即時通知</div>
         <div class="toast-body">偵測到雲端資料庫有全新的客戶預約進來囉！請更新頁面以載入最新清單。</div>
@@ -288,7 +370,6 @@
         </div>
     </div>
 
-    <!-- 刪除確認彈窗 -->
     <div id="deleteModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-icon">⚠️</div>
@@ -301,7 +382,6 @@
         </div>
     </div>
 
-    <!-- 圖片預覽彈窗 -->
     <div id="imageModal" class="modal-overlay">
         <div class="modal-content img-modal-content">
             <h3>📑 顧客保固與簽名紀錄</h3>
@@ -315,7 +395,6 @@
         </div>
     </div>
 
-    <!-- 服務完成確認與簽名彈窗 -->
     <div id="completionModal" class="modal-overlay">
         <div class="modal-content complete-modal-content">
             <h3>✨ 服務完成確認 ✨</h3>
@@ -325,12 +404,10 @@
                 <strong>「在次感謝您的蒞臨，希望還有機會在此為您獻上兩座五指山！」</strong>
             </div>
             
-            <!-- 簽名畫布區 (手寫) -->
             <div class="signature-area" id="signatureContainer">
                 <canvas id="signatureCanvas"></canvas>
             </div>
             
-            <!-- 鍵盤輸入區 (打字) -->
             <div class="signature-input-wrapper">
                 <input type="text" id="signatureInput" class="signature-input" placeholder="⌨️ 若不便手寫，亦可點擊此處使用鍵盤輸入姓名...">
             </div>
@@ -345,7 +422,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // 新增引用：getDoc 與 setDoc 處理全域折扣設定
+        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, onSnapshot, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ===================================================
         // FIREBASE 配置設定
@@ -370,6 +448,7 @@
         const screenshotsMap = new Map(); 
         let currentViewingImgData = null;
         let currentViewingClientName = '';
+        let globalDiscount = 95; // 預設 95 折，會從資料庫動態載入
 
         // --- DOM 元素抓取 ---
         const deleteModal = document.getElementById('deleteModal');
@@ -616,6 +695,53 @@
             }
         }
 
+        // --- 新增：自雲端讀取全域折扣設定 ---
+        async function fetchDiscountConfig() {
+            try {
+                const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.firstTimeDiscount) {
+                        globalDiscount = data.firstTimeDiscount;
+                        document.getElementById('discountConfigInput').value = globalDiscount;
+                    }
+                }
+            } catch (error) {
+                console.error("讀取折扣設定失敗: ", error);
+            }
+        }
+
+        // --- 新增：確認修改並儲存全域折扣設定至雲端 ---
+        document.getElementById('saveDiscountBtn').addEventListener('click', async () => {
+            const inputVal = parseInt(document.getElementById('discountConfigInput').value);
+            if (isNaN(inputVal) || inputVal < 10 || inputVal > 99) {
+                alert("請輸入有效的折數（介於 10 到 99 之間，例如 95 代表 95 折）");
+                return;
+            }
+
+            const btn = document.getElementById('saveDiscountBtn');
+            try {
+                btn.innerText = "變更儲存中...";
+                btn.disabled = true;
+
+                // 寫入 Firebase 資料庫
+                await setDoc(doc(db, "system_settings", "booking_config"), {
+                    firstTimeDiscount: inputVal,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+
+                globalDiscount = inputVal;
+                alert(`🎉 折扣已成功修改為 ${globalDiscount} 折！列表將同步重新載入。`);
+                await loadBookings();
+            } catch (error) {
+                console.error("儲存折扣失敗: ", error);
+                alert("儲存雲端失敗，請確認網路連線與權限設定！");
+            } finally {
+                btn.innerText = "確認修改折扣";
+                btn.disabled = false;
+            }
+        });
+
         // --- 核心資料載入與渲染 ---
         async function loadBookings() {
             const tbody = document.getElementById('bookingListTbody');
@@ -627,6 +753,9 @@
             table.style.display = 'none';
             tbody.innerHTML = '';
             screenshotsMap.clear(); 
+
+            // 先載入最新折扣政策
+            await fetchDiscountConfig();
 
             try {
                 const querySnapshot = await getDocs(collection(db, "nail_bookings"));
@@ -701,7 +830,7 @@
                             const originalSum = base + addon;
                             priceHTML = `
                                 <span class="total-price">$${total}
-                                    <span class="price-discount-tag">現折 95 折 (-$${discount.toLocaleString()})</span>
+                                    <span class="price-discount-tag">現折 ${globalDiscount} 折 (-$${discount.toLocaleString()})</span>
                                     <span class="price-detail-sub">原價: $${originalSum.toLocaleString()}</span>
                                 </span>`;
                         } else {
