@@ -560,7 +560,7 @@
                 <!-- 新增：保固條款、簽名板與同意勾選區 -->
                 <div class="warranty-container">
                     <div class="warranty-title">〔保固條款〕為確保您有良好售後服務！</div>
-                    <span class="warranty-subtitle">標示：請詳細閱讀</span>
+                    <span class="warranty-subtitle">請詳細閱讀</span>
                     <ol class="warranty-list">
                         <li>如非人為因素，一個月內可至本店免費更換五指山兩座。</li>
                         <li>如經本店評估為人為因素，7天內本店也享有免費修補一次售後服務。</li>
@@ -736,9 +736,9 @@
             let total = stylePrice + addonPrice;
             let discount = 0;
 
-            // 計算 8 折優惠 (初次預約)
+            // 計算 95 折優惠 (初次預約)
             if (currentSelection.isFirstBooking && total > 0) {
-                discount = Math.round(total * 0.2); // 算出 20% 的折扣金額
+                discount = Math.round(total * 0.05); // 算出 5% 的折扣金額
                 total = total - discount;           // 實際需付金額
                 discountRow.style.display = 'flex';
                 document.getElementById('summaryDiscount').innerText = `- $${discount.toLocaleString()}`;
