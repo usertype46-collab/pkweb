@@ -7,22 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-// 動態替換前端的 Title 門面文案
-onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
-    if (docSnap.exists()) {
-        const config = docSnap.data();
-        document.querySelector('header h1').innerText = config.title;
-        document.querySelector('header p').innerText = config.subtitle;
-        // 動態折扣比例更換 (如：後台設定 85，代表 0.85 比例)
-        if (config.firstTimeDiscount) {
-            dynamicDiscount.value = config.firstTimeDiscount;
-            dynamicDiscount.ratio = config.firstTimeDiscount / 100;
-        }
-    }
-});
-
         /* --- 千變萬化風格變數：炫彩、夢幻且具備光澤感 --- */
         :root {
             --primary-gradient: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 40%, #A1C4FD 70%, #C2E9FB 100%);
@@ -492,7 +476,7 @@ onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
 
     <header>
         <h1>神の指藝Beautiful moment.</h1>
-        <p>✦【千變萬化客製凝膠｜專屬預約制】✦</p>
+        <p>✦【千變萬化客製凝膠｜專專屬預約制】✦</p>
     </header>
 
     <div class="container">
@@ -527,17 +511,9 @@ onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
                     </div>
                     <div class="form-group">
                         <label for="bookingTime">預約時段 *</label>
-                        onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
-    if (docSnap.exists()) {
-        const timeSelect = document.getElementById('bookingTime');
-        timeSelect.innerHTML = '<option value="">請選擇時段</option>'; // 清空預設
-        const slots = docSnap.data().timeSlots || [];
-        slots.sort().forEach(slot => {
-            timeSelect.innerHTML += `<option value="${slot}">${slot}</option>`;
-        });
-    }
-});
-
+                        <select id="bookingTime" class="form-control" required>
+                            <option value="">讀取預約時段中...</option>
+                        </select>
                     </div>
                 </div>
 
@@ -549,7 +525,7 @@ onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
                 <div class="warranty-box">
                     <div class="warranty-title">🛡️ 〔保固條款〕</div>
                     <div class="warranty-subtitle">為確保您有良好售後服務！標示：請詳細閱讀</div>
-                    <ul class="warranty-list">
+                    <ul class="warranty-list" id="warrantyTermsList">
                         <li>如非人為因素，一個月內可至本店免費更換五指山兩座</li>
                         <li>如經本店評估為人為因素，7天內本店也享有免費修補一次售後服務</li>
                         <li>經本店評估後為人為因素，且無法修補，那就勞煩您帶著您的五金財寶袋，再度蒞臨本店，享受至高無上的服務喔！</li>
@@ -595,7 +571,8 @@ onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // 修正：在主要 import 注入 onSnapshot 函式
+        import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ===================================================
         // FIREBASE 配置設定
@@ -674,6 +651,45 @@ onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
             `;
             label.querySelector('input').addEventListener('change', (e) => toggleAddon(e, addon));
             addonsList.appendChild(label);
+        });
+
+        // ===================================================
+        // 修正：將所有動態監聽 Firebase 的功能正確放在 Script 區塊內
+        // ===================================================
+        onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
+            if (docSnap.exists()) {
+                const config = docSnap.data();
+                
+                // 1. 動態替換前端的 Title 門面文案
+                if(config.title) document.querySelector('header h1').innerText = config.title;
+                if(config.subtitle) document.querySelector('header p').innerText = config.subtitle;
+                
+                // 2. 動態折扣比例更換 (如：後台設定 85，代表 0.85 比例)
+                if (config.firstTimeDiscount) {
+                    dynamicDiscount.value = config.firstTimeDiscount;
+                    dynamicDiscount.ratio = config.firstTimeDiscount / 100;
+                    calculateTotal(); // 重新計算最新折扣
+                }
+
+                // 3. 動態渲染前端下拉預約時段
+                const timeSelect = document.getElementById('bookingTime');
+                if (timeSelect) {
+                    timeSelect.innerHTML = '<option value="">請選擇時段</option>'; // 清空
+                    const slots = config.timeSlots || [];
+                    slots.sort().forEach(slot => {
+                        timeSelect.innerHTML += `<option value="${slot}">${slot}</option>`;
+                    });
+                }
+
+                // 4. 動態同步售後保固免責條款文案
+                const warrantyUl = document.getElementById('warrantyTermsList');
+                if (warrantyUl && config.warrantyTerms && config.warrantyTerms.length > 0) {
+                    warrantyUl.innerHTML = ''; // 清空預設靜態字
+                    config.warrantyTerms.forEach(term => {
+                        warrantyUl.innerHTML += `<li>${term}</li>`;
+                    });
+                }
+            }
         });
 
         // 格式化折扣文字 (例如將 80 轉成 '8折'，95 轉成 '95折')
@@ -785,6 +801,12 @@ onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
             const chosenTime = document.getElementById('bookingTime').value;
             const inputPhone = clientPhoneInput.value.trim();
             let inputName = document.getElementById('clientName').value.trim();
+
+            if(!chosenTime) {
+                errorAlert.innerText = "請選擇預約時段！";
+                errorAlert.style.display = 'block';
+                return;
+            }
 
             submitBtn.disabled = true;
             submitBtn.innerText = "正在檢查時段預約狀態...";
