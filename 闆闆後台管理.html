@@ -15,7 +15,6 @@
             --danger-bg: #FFF5F5;
             --shadow: 0 8px 24px rgba(0,0,0,0.05);
             --transition: all 0.3s ease;
-            /* 新增新客標籤專用亮粉色 */
             --new-client-pink: #FF477E; 
         }
 
@@ -33,7 +32,7 @@
         }
 
         .dashboard-header {
-            max-width: 1300px;
+            max-width: 1400px; /* 稍微放寬以容納新欄位 */
             margin: 0 auto 20px auto;
             display: flex;
             justify-content: space-between;
@@ -115,9 +114,7 @@
             margin-top: 5px;
         }
 
-        .btn-toast-update {
-            background-color: var(--accent-purple);
-            color: white;
+        .btn-toast-update, .btn-toast-close {
             border: none;
             padding: 6px 14px;
             font-size: 0.85rem;
@@ -126,24 +123,13 @@
             cursor: pointer;
             transition: var(--transition);
         }
-
-        .btn-toast-close {
-            background-color: #EBEAEF;
-            color: #4A4E69;
-            border: none;
-            padding: 6px 14px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
+        .btn-toast-update { background-color: var(--accent-purple); color: white; }
+        .btn-toast-close { background-color: #EBEAEF; color: #4A4E69; }
         .btn-toast-update:hover { opacity: 0.9; }
         .btn-toast-close:hover { background-color: #D6D5DB; }
 
         .container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 16px;
@@ -171,7 +157,7 @@
             border-collapse: collapse;
             text-align: left;
             font-size: 0.95rem;
-            min-width: 1150px;
+            min-width: 1250px;
         }
 
         th {
@@ -186,153 +172,70 @@
         td {
             padding: 18px 15px;
             border-bottom: 1px solid #EBEAEF;
-            vertical-align: top;
+            vertical-align: middle;
         }
 
-        tr:hover {
-            background-color: #FAF9FC;
-        }
+        tr:hover { background-color: #FAF9FC; }
 
-        /* --- 日期與時間專用圖章 --- */
-        .datetime-badge {
-            display: inline-flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+        .datetime-badge { display: inline-flex; flex-direction: column; gap: 4px; }
+        .date-item { font-weight: 700; color: #333; display: flex; align-items: center; gap: 6px; }
+        .time-item { display: inline-block; background-color: #E0E1DD; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; width: fit-content; }
 
-        .date-item {
-            font-weight: 700;
-            color: #333;
+        .client-name { font-weight: 700; color: var(--accent-purple); font-size: 1.05rem; }
+        .client-name.new-guest { color: var(--new-client-pink) !important; font-weight: 800; background-color: #FFF0F3; padding: 4px 10px; border-radius: 6px; display: inline-block; border: 1px solid #FFCCD5; }
+
+        .addon-tag { display: inline-block; background-color: #F0E6FF; color: #5A32A3; font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; margin: 2px; font-weight: 500; }
+        .total-price { font-weight: 700; color: #2196F3; display: flex; flex-direction: column; gap: 2px; }
+        .price-detail-sub { font-size: 0.75rem; color: #999; font-weight: 500; }
+        .price-discount-tag { color: var(--new-client-pink); font-size: 0.75rem; font-weight: 700; }
+        .notes-text { font-size: 0.85rem; color: #666; max-width: 200px; word-break: break-all; }
+
+        /* 重疊警示 */
+        tr.overlap-row { background-color: var(--danger-bg) !important; color: var(--danger-red) !important; }
+        tr.overlap-row .client-name:not(.new-guest), tr.overlap-row .total-price, tr.overlap-row .date-item { color: var(--danger-red) !important; }
+        tr.overlap-row .time-item { background-color: #FFD2D2 !important; color: var(--danger-red) !important; }
+        .overlap-warning { display: block; color: white; background-color: var(--danger-red); font-size: 0.75rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 5px; text-align: center; width: fit-content; }
+
+        /* 按鈕群組 */
+        .action-btns {
             display: flex;
-            align-items: center;
-            gap: 6px;
+            gap: 8px;
+            flex-direction: column;
         }
 
-        .time-item {
-            display: inline-block;
-            background-color: #E0E1DD;
-            padding: 2px 8px;
+        .btn-view-img {
+            background-color: #E8F0FE;
+            color: #1967D2;
+            border: 1px solid #D2E3FC;
+            padding: 6px 10px;
             border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            width: fit-content;
-        }
-
-        /* 預設老客名稱樣式 */
-        .client-name {
-            font-weight: 700;
-            color: var(--accent-purple);
-            font-size: 1.05rem;
-        }
-
-        /* 新增：新客〔初〕專用視覺高亮紅字樣式 */
-        .client-name.new-guest {
-            color: var(--new-client-pink) !important;
-            font-weight: 800;
-            background-color: #FFF0F3;
-            padding: 4px 10px;
-            border-radius: 6px;
-            display: inline-block;
-            border: 1px solid #FFCCD5;
-        }
-
-        .addon-tag {
-            display: inline-block;
-            background-color: #F0E6FF;
-            color: #5A32A3;
             font-size: 0.8rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin: 2px;
-            font-weight: 500;
-        }
-
-        .total-price {
-            font-weight: 700;
-            color: #2196F3;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        /* 新增：折扣明細小字樣式 */
-        .price-detail-sub {
-            font-size: 0.75rem;
-            color: #999;
-            font-weight: 500;
-        }
-        .price-discount-tag {
-            color: var(--new-client-pink);
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        .notes-text {
-            font-size: 0.85rem;
-            color: #666;
-            max-width: 200px;
-            word-break: break-all;
-        }
-
-        /* --- 重疊警示樣式 --- */
-        tr.overlap-row {
-            background-color: var(--danger-bg) !important;
-            color: var(--danger-red) !important;
-        }
-
-        tr.overlap-row .client-name:not(.new-guest),
-        tr.overlap-row .total-price,
-        tr.overlap-row .date-item {
-            color: var(--danger-red) !important;
-        }
-
-        tr.overlap-row .time-item {
-            background-color: #FFD2D2 !important;
-            color: var(--danger-red) !important;
-        }
-
-        .overlap-warning {
-            display: block;
-            color: white;
-            background-color: var(--danger-red);
-            font-size: 0.75rem;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-top: 5px;
-            text-align: center;
-            width: fit-content;
-        }
-
-        /* --- 刪除按鈕樣式 --- */
-        .btn-delete-row {
-            background-color: white;
-            color: var(--danger-red);
-            border: 1px solid #FAD2CF;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
             font-weight: 700;
             cursor: pointer;
             transition: var(--transition);
         }
+        .btn-view-img:hover { background-color: #1967D2; color: white; }
 
-        .btn-delete-row:hover {
-            background-color: var(--danger-red);
-            color: white;
-            border-color: var(--danger-red);
+        .btn-delete-row {
+            background-color: white;
+            color: var(--danger-red);
+            border: 1px solid #FAD2CF;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
         }
+        .btn-delete-row:hover { background-color: var(--danger-red); color: white; border-color: var(--danger-red); }
 
-        /* --- 刪除確認彈窗 Modal 樣式 --- */
+        /* --- 彈窗 Modal 共用與專屬樣式 --- */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(43, 45, 66, 0.6);
-            backdrop-filter: blur(4px);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(43, 45, 66, 0.7);
+            backdrop-filter: blur(5px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -348,76 +251,48 @@
             width: 90%;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             animation: slideUp 0.3s ease;
+            position: relative;
         }
 
-        .modal-icon {
-            font-size: 3.5rem;
-            margin-bottom: 10px;
+        /* 圖片預覽彈窗調整（讓它寬一點以看清合約） */
+        .img-modal-content {
+            max-width: 600px !important;
+            padding: 30px;
         }
 
-        .modal-content h3 {
-            color: var(--danger-red);
-            font-size: 1.4rem;
-            margin-bottom: 10px;
+        .preview-img-container {
+            width: 100%;
+            max-height: 60vh;
+            overflow-y: auto;
+            border: 2px dashed #E2E0E7;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            background: #FAFAFC;
         }
 
-        .modal-content p {
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 0.95rem;
-            line-height: 1.6;
+        .preview-img-container img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
-        .modal-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
+        .modal-icon { font-size: 3.5rem; margin-bottom: 10px; }
+        .modal-content h3 { color: var(--danger-red); font-size: 1.4rem; margin-bottom: 10px; }
+        .img-modal-content h3 { color: var(--accent-purple); }
 
-        .btn-modal {
-            padding: 10px 24px;
-            font-size: 1rem;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            border: none;
-            transition: var(--transition);
-        }
+        .modal-actions { display: flex; gap: 15px; justify-content: center; }
+        
+        .btn-modal { padding: 10px 24px; font-size: 1rem; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; transition: var(--transition); }
+        .btn-cancel { background-color: #EBEAEF; color: #4A4E69; }
+        .btn-cancel:hover { background-color: #D6D5DB; }
+        .btn-confirm-delete { background-color: var(--danger-red); color: white; box-shadow: 0 4px 12px rgba(214, 48, 49, 0.2); }
+        .btn-confirm-delete:hover { background-color: #B92021; transform: translateY(-1px); }
+        .btn-download-img { background-color: var(--accent-purple); color: white; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2); }
+        .btn-download-img:hover { background-color: #5A49C9; transform: translateY(-1px); }
 
-        .btn-cancel {
-            background-color: #EBEAEF;
-            color: #4A4E69;
-        }
-
-        .btn-cancel:hover {
-            background-color: #D6D5DB;
-        }
-
-        .btn-confirm-delete {
-            background-color: var(--danger-red);
-            color: white;
-            box-shadow: 0 4px 12px rgba(214, 48, 49, 0.2);
-        }
-
-        .btn-confirm-delete:hover {
-            background-color: #B92021;
-            transform: translateY(-1px);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -452,8 +327,9 @@
                         <th>選擇核心款式</th>
                         <th>附加服務項目</th>
                         <th>實收總額</th>
-                        <th>客戶備註需求</th>
-                        <th>操作管理</th> </tr>
+                        <th>保固與簽名</th> <th>客戶備註需求</th>
+                        <th>操作管理</th>
+                    </tr>
                 </thead>
                 <tbody id="bookingListTbody">
                 </tbody>
@@ -469,6 +345,19 @@
             <div class="modal-actions">
                 <button class="btn-modal btn-cancel" id="cancelDeleteBtn">取消保留</button>
                 <button class="btn-modal btn-confirm-delete" id="confirmDeleteBtn">確認刪除</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="imageModal" class="modal-overlay">
+        <div class="modal-content img-modal-content">
+            <h3>📑 顧客保固與簽名紀錄</h3>
+            <div class="preview-img-container">
+                <img id="previewImage" src="" alt="保固合約與簽名截圖">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeImgModalBtn">關閉視窗</button>
+                <button class="btn-modal btn-download-img" id="downloadImgBtn">📥 下載存檔</button>
             </div>
         </div>
     </div>
@@ -494,25 +383,34 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- 全域變數 ---
         let targetDeleteId = null;
+        const screenshotsMap = new Map(); // 用來暫存 Base64 截圖，避免把龐大字串塞在 HTML 標籤裡
+        let currentViewingImgData = null;
+        let currentViewingClientName = '';
 
+        // --- DOM 元素抓取 ---
         const deleteModal = document.getElementById('deleteModal');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         
+        const imageModal = document.getElementById('imageModal');
+        const closeImgModalBtn = document.getElementById('closeImgModalBtn');
+        const downloadImgBtn = document.getElementById('downloadImgBtn');
+        const previewImage = document.getElementById('previewImage');
+
         const toastAlert = document.getElementById('toastAlert');
         const closeToastBtn = document.getElementById('closeToastBtn');
         const updateToastBtn = document.getElementById('updateToastBtn');
 
-        closeToastBtn.addEventListener('click', () => {
-            toastAlert.style.display = 'none';
-        });
-
+        // --- 提醒吐司控制 ---
+        closeToastBtn.addEventListener('click', () => toastAlert.style.display = 'none');
         updateToastBtn.addEventListener('click', () => {
             toastAlert.style.display = 'none';
             loadBookings();
         });
 
+        // --- 刪除控制邏輯 ---
         cancelDeleteBtn.addEventListener('click', () => {
             deleteModal.style.display = 'none';
             targetDeleteId = null;
@@ -520,13 +418,10 @@
 
         confirmDeleteBtn.addEventListener('click', async () => {
             if (!targetDeleteId) return;
-
             try {
                 confirmDeleteBtn.innerText = "刪除中...";
                 confirmDeleteBtn.disabled = true;
-
                 await deleteDoc(doc(db, "nail_bookings", targetDeleteId));
-                
                 deleteModal.style.display = 'none';
                 await loadBookings();
             } catch (error) {
@@ -539,6 +434,52 @@
             }
         });
 
+        // --- 圖片預覽與下載控制邏輯 ---
+        closeImgModalBtn.addEventListener('click', () => {
+            imageModal.style.display = 'none';
+            previewImage.src = '';
+            currentViewingImgData = null;
+            currentViewingClientName = '';
+        });
+
+        // 監聽表格內的點擊事件 (Event Delegation)，抓取按鈕點擊
+        document.getElementById('bookingListTbody').addEventListener('click', (e) => {
+            // 處理預覽截圖按鈕
+            if (e.target.classList.contains('btn-view-img')) {
+                const id = e.target.getAttribute('data-id');
+                const rawName = e.target.getAttribute('data-name');
+                
+                // 清理名稱中的標籤，供下載檔名使用
+                currentViewingClientName = rawName ? rawName.replace(/〔初〕/g, '').trim() : '客戶';
+                currentViewingImgData = screenshotsMap.get(id);
+
+                if (currentViewingImgData) {
+                    previewImage.src = currentViewingImgData;
+                    imageModal.style.display = 'flex';
+                }
+            }
+
+            // 處理刪除按鈕
+            if (e.target.classList.contains('btn-delete-row')) {
+                targetDeleteId = e.target.getAttribute('data-id');
+                deleteModal.style.display = 'flex';
+            }
+        });
+
+        // 圖片下載功能
+        downloadImgBtn.addEventListener('click', () => {
+            if (!currentViewingImgData) return;
+            
+            // 建立虛擬超連結來觸發下載
+            const link = document.createElement('a');
+            link.href = currentViewingImgData;
+            link.download = `${currentViewingClientName}_保固簽名紀錄.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // --- 音效提示 ---
         function playNotificationChime() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -548,30 +489,23 @@
 
                 const osc1 = ctx.createOscillator();
                 const gain1 = ctx.createGain();
-                osc1.type = 'sine';
-                osc1.frequency.setValueAtTime(659.25, now);
-                gain1.gain.setValueAtTime(0.2, now);
-                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc1.connect(gain1);
-                gain1.connect(ctx.destination);
-                osc1.start(now);
-                osc1.stop(now + 0.3);
+                osc1.type = 'sine'; osc1.frequency.setValueAtTime(659.25, now);
+                gain1.gain.setValueAtTime(0.2, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc1.connect(gain1); gain1.connect(ctx.destination);
+                osc1.start(now); osc1.stop(now + 0.3);
 
                 const osc2 = ctx.createOscillator();
                 const gain2 = ctx.createGain();
-                osc2.type = 'sine';
-                osc2.frequency.setValueAtTime(880.00, now + 0.1);
-                gain2.gain.setValueAtTime(0.2, now + 0.1);
-                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-                osc2.connect(gain2);
-                gain2.connect(ctx.destination);
-                osc2.start(now + 0.1);
-                osc2.stop(now + 0.5);
+                osc2.type = 'sine'; osc2.frequency.setValueAtTime(880.00, now + 0.1);
+                gain2.gain.setValueAtTime(0.2, now + 0.1); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                osc2.connect(gain2); gain2.connect(ctx.destination);
+                osc2.start(now + 0.1); osc2.stop(now + 0.5);
             } catch (e) {
                 console.warn("瀏覽器尚未授權音效播放: ", e);
             }
         }
 
+        // --- 核心資料載入與渲染 ---
         async function loadBookings() {
             const tbody = document.getElementById('bookingListTbody');
             const loading = document.getElementById('loading');
@@ -581,6 +515,7 @@
             loading.style.display = 'block';
             table.style.display = 'none';
             tbody.innerHTML = '';
+            screenshotsMap.clear(); // 清空舊的圖片暫存
 
             try {
                 const querySnapshot = await getDocs(collection(db, "nail_bookings"));
@@ -591,9 +526,7 @@
                 });
 
                 rawList.sort((a, b) => {
-                    if (a.bookingDate !== b.bookingDate) {
-                        return a.bookingDate.localeCompare(b.bookingDate);
-                    }
+                    if (a.bookingDate !== b.bookingDate) return a.bookingDate.localeCompare(b.bookingDate);
                     return a.bookingTime.localeCompare(b.bookingTime);
                 });
 
@@ -601,6 +534,11 @@
                 rawList.forEach(item => {
                     const key = `${item.bookingDate}_${item.bookingTime}`;
                     timeCounts[key] = (timeCounts[key] || 0) + 1;
+                    
+                    // 將有截圖的資料存入 Map 備用
+                    if (item.warrantyScreenshot) {
+                        screenshotsMap.set(item.id, item.warrantyScreenshot);
+                    }
                 });
 
                 if(rawList.length === 0) {
@@ -613,10 +551,9 @@
                     const key = `${item.bookingDate}_${item.bookingTime}`;
                     const isOverlap = timeCounts[key] > 1;
                     
-                    if (isOverlap) {
-                        tr.className = 'overlap-row'; 
-                    }
+                    if (isOverlap) tr.className = 'overlap-row'; 
 
+                    // 附加項目
                     let addonsHTML = '';
                     if (item.selectedAddons && item.selectedAddons.length > 0) {
                         item.selectedAddons.forEach((addon, index) => {
@@ -626,20 +563,17 @@
                         addonsHTML = '<span style="color:#aaa; font-size:0.85rem;">無</span>';
                     }
 
-                    // --- 核心修改：判斷是否為初次預約新客，並設定動態樣式 ---
-                    // 為了確保不論是用 isFirstTime 旗標或字串判定都能完美支援：
+                    // 顧客名稱處理 (初次判斷)
                     const isNewGuest = item.isFirstTime === true || (item.clientName && item.clientName.includes('〔初〕'));
-                    
                     let nameHTML = '';
                     if (isNewGuest) {
-                        // 確保字串中不會重複出現兩個〔初〕，並綁定新客專用紅字 class
                         let cleanName = item.clientName ? item.clientName.replace('〔初〕', '') : '未填';
                         nameHTML = `<span class="client-name new-guest">〔初〕${cleanName}</span>`;
                     } else {
                         nameHTML = `<span class="client-name">${item.clientName || '未填'}</span>`;
                     }
 
-                    // --- 核心修改：計價與折扣明細渲染 ---
+                    // 價格運算與顯示
                     let priceHTML = '';
                     if (item.priceCalculations) {
                         const total = item.priceCalculations.totalPrice.toLocaleString();
@@ -648,7 +582,6 @@
                         const discount = item.priceCalculations.discountPrice || 0;
 
                         if (isNewGuest && discount > 0) {
-                            // 如果是新客且有折扣金額，顯示原價與折扣小字
                             const originalSum = base + addon;
                             priceHTML = `
                                 <span class="total-price">$${total}
@@ -656,13 +589,21 @@
                                     <span class="price-detail-sub">原價: $${originalSum.toLocaleString()}</span>
                                 </span>`;
                         } else {
-                            // 老客一般原價顯示
                             priceHTML = `<span class="total-price">$${total}</span>`;
                         }
                     } else {
                         priceHTML = `<span class="total-price">$0</span>`;
                     }
 
+                    // 截圖查看按鈕 HTML (若該筆資料有截圖，則產生按鈕)
+                    let screenshotHTML = '';
+                    if (item.warrantyScreenshot) {
+                        screenshotHTML = `<button class="btn-view-img" data-id="${item.id}" data-name="${item.clientName || '客戶'}">👁️ 查看紀錄</button>`;
+                    } else {
+                        screenshotHTML = `<span style="color:#aaa; font-size:0.85rem;">無電子紀錄</span>`;
+                    }
+
+                    // 組裝該列資料
                     tr.innerHTML = `
                         <td>
                             <div class="datetime-badge">
@@ -676,18 +617,13 @@
                         <td>${item.selectedStyle || '未選擇'}</td>
                         <td>${addonsHTML}</td>
                         <td>${priceHTML}</td>
-                        <td><div class="notes-text">${item.notes || '<span style="color:#ccc;">無備註</span>'}</div></td>
+                        <td style="text-align:center;">${screenshotHTML}</td> <td><div class="notes-text">${item.notes || '<span style="color:#ccc;">無備註</span>'}</div></td>
                         <td>
-                            <button class="btn-delete-row">刪除</button>
+                            <div class="action-btns">
+                                <button class="btn-delete-row" data-id="${item.id}">刪除</button>
+                            </div>
                         </td>
                     `;
-                    
-                    const deleteBtn = tr.querySelector('.btn-delete-row');
-                    deleteBtn.addEventListener('click', () => {
-                        targetDeleteId = item.id;
-                        deleteModal.style.display = 'flex';
-                    });
-
                     tbody.appendChild(tr);
                 });
 
@@ -700,16 +636,14 @@
             }
         }
 
+        // --- Firebase 即時監聽 ---
         let isFirstListeningLoad = true;
-        
         onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
             if (isFirstListeningLoad) {
                 isFirstListeningLoad = false;
                 return;
             }
-            
             const hasNewBooking = snapshot.docChanges().some(change => change.type === "added");
-            
             if (hasNewBooking) {
                 toastAlert.style.display = 'flex';
                 playNotificationChime();
