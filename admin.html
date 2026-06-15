@@ -8,7 +8,7 @@
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 40%, #A1C4FD 70%, #C2E9FB 100%);
-            --sidebar-bg: #2B2129;
+            --header-bg: #2B2129;
             --main-bg: #F4F6FA;
             --card-bg: #FFFFFF;
             --accent-purple: #7B2CBF;
@@ -22,7 +22,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--main-bg); color: var(--text-dark); display: flex; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--main-bg); color: var(--text-dark); display: block; min-height: 100vh; overflow-x: hidden; }
 
         /* --- 驗證登入鎖定遮罩 --- */
         #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #2B2129 0%, #1A1118 100%); z-index: 9999; display: flex; justify-content: center; align-items: center; }
@@ -34,26 +34,26 @@
         .auth-btn { width: 100%; background: linear-gradient(90deg, #FF6B8B, #7B2CBF); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: var(--transition); }
         .auth-btn:hover { opacity: 0.95; transform: translateY(-2px); }
 
-        /* --- 後台核心佈局 --- */
-        #adminContainer { display: none; width: 100%; }
+        /* --- 後台核心佈局 (上方導覽 + 下方內容) --- */
+        #adminContainer { display: none; width: 100%; flex-direction: column; }
         
-        /* 側邊欄 */
-        sidebar { width: 260px; background-color: var(--sidebar-bg); color: white; padding: 30px 20px; display: flex; flex-direction: column; fixed: top left; height: 100vh; position: fixed; }
-        .logo-area { text-align: center; padding-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px; }
-        .logo-area h1 { font-family: 'Cinzel', serif; font-size: 1.4rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-area p { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 5px; }
-        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .nav-item { padding: 14px 18px; border-radius: 12px; cursor: pointer; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.7); transition: var(--transition); }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
-        .nav-item.active { background: linear-gradient(90deg, #FF6B8B, #7B2CBF); }
+        /* 上方獨立框架 (Header) */
+        header { width: 100%; background-color: var(--header-bg); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px; }
+        .logo-area { display: flex; align-items: baseline; gap: 15px; }
+        .logo-area h1 { font-family: 'Cinzel', serif; font-size: 1.6rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+        .logo-area p { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin: 0; }
+        .nav-menu { list-style: none; display: flex; flex-direction: row; gap: 12px; flex-wrap: wrap; }
+        .nav-item { padding: 10px 18px; border-radius: 20px; cursor: pointer; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.7); transition: var(--transition); }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: linear-gradient(90deg, #FF6B8B, #7B2CBF); color: white; box-shadow: 0 4px 10px rgba(123,44,191,0.3); }
 
-        /* 主內容區 */
-        main { margin-left: 260px; padding: 40px; width: calc(100% - 260px); min-height: 100vh; }
+        /* 下方主內容區 */
+        main { margin-top: 80px; padding: 40px; width: 100%; min-height: calc(100vh - 80px); }
         .content-section { display: none; animation: fadeIn 0.4s ease; }
         .content-section.active { display: block; }
         
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .section-title { font-size: 1.6rem; font-weight: 700; color: var(--sidebar-bg); position: relative; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        .section-title { font-size: 1.6rem; font-weight: 700; color: var(--header-bg); position: relative; }
         .section-title::after { content: ''; display: block; width: 40px; height: 4px; background: var(--primary-color); border-radius: 2px; margin-top: 8px; }
 
         /* --- 常用組件樣式 --- */
@@ -62,11 +62,14 @@
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(123, 44, 191, 0.3); }
         .btn-danger { background: #FFEBEB; color: var(--danger); }
         .btn-danger:hover { background: var(--danger); color: white; }
-        .btn-edit { background: #EBF3FF; color: var(--accent-purple); margin-right: 8px; }
+        .btn-edit { background: #EBF3FF; color: var(--accent-purple); }
         .btn-edit:hover { background: var(--accent-purple); color: white; }
+        
+        /* 操作按鈕群組 */
+        .action-group { display: flex; gap: 8px; }
 
         /* 卡片與表單 */
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
         .card { background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: var(--shadow); border: 1px solid rgba(238, 218, 229, 0.3); margin-bottom: 30px; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-dark); }
@@ -76,7 +79,7 @@
         /* 資料數據表格 */
         .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.02); }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
-        th { background: #FAF8FA; padding: 16px 20px; font-weight: 700; color: var(--sidebar-bg); border-bottom: 2px solid #EFE6EC; }
+        th { background: #FAF8FA; padding: 16px 20px; font-weight: 700; color: var(--header-bg); border-bottom: 2px solid #EFE6EC; white-space: nowrap; }
         td { padding: 16px 20px; border-bottom: 1px solid #F5EFF3; color: #554852; vertical-align: middle; }
         tr:last-child td { border-bottom: none; }
         
@@ -97,6 +100,13 @@
         .metric-value { font-size: 1.8rem; font-weight: 700; color: var(--text-dark); margin-top: 5px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            header { flex-direction: column; padding: 15px 20px; }
+            main { margin-top: 130px; padding: 20px; min-height: calc(100vh - 130px); }
+            .nav-menu { justify-content: center; }
+        }
     </style>
 </head>
 <body>
@@ -112,10 +122,10 @@
     </div>
 
     <div id="adminContainer">
-        <sidebar>
+        <header>
             <div class="logo-area">
                 <h1>神の指藝</h1>
-                <p>Management Dashboard v1.0</p>
+                <p>Management Dashboard v1.1</p>
             </div>
             <ul class="nav-menu">
                 <li class="nav-item active" onclick="switchTab('ordersSection', this)">📊 預約訂單即時看板</li>
@@ -123,7 +133,7 @@
                 <li class="nav-item" onclick="switchTab('addonsSection', this)">✨ 附加服務項目管理</li>
                 <li class="nav-item" onclick="switchTab('configSection', this)">⚙️ 系統基本條款配置</li>
             </ul>
-        </sidebar>
+        </header>
 
         <main>
             
@@ -171,7 +181,7 @@
                             <tr>
                                 <th>核心項目款式名稱</th>
                                 <th>基本定價</th>
-                                <th>操作功能</th>
+                                <th>操作功能 (修改/刪除)</th>
                             </tr>
                         </thead>
                         <tbody id="stylesTableBody"></tbody>
@@ -190,7 +200,7 @@
                             <tr>
                                 <th>附加延伸服務項目</th>
                                 <th>追加費用金額</th>
-                                <th>操作功能</th>
+                                <th>操作功能 (修改/刪除)</th>
                             </tr>
                         </thead>
                         <tbody id="addonsTableBody"></tbody>
@@ -214,7 +224,7 @@
                             <input type="text" id="cfgSubtitle" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label>新客初次體驗折扣 (請填 10-99 正整數，例如 85 代表 85 折)</label>
+                            <label>新客初次體驗折扣 (例如填 85 代表 85 折)</label>
                             <input type="number" id="cfgDiscount" class="form-control">
                         </div>
                         <button class="btn-action btn-primary" style="width:100%; justify-content:center;" onclick="saveGeneralConfig()">儲存文案配置</button>
@@ -234,7 +244,7 @@
                     <h3 style="margin-bottom:15px; color:var(--accent-purple);">🛡️ 售後保固免責條款條目編輯</h3>
                     <div style="display:flex; gap:10px; margin-bottom:20px;">
                         <input type="text" id="newWarrantyTerm" class="form-control" placeholder="請輸入欲條列的保固承諾或規範文案...">
-                        <button class="btn-action btn-primary" style="white-space:nowrap;" onclick="addWarrantyTerm()">追加條款</button>
+                        <button class="btn-action btn-primary" style="white-space:nowrap;" onclick="addWarrantyTerm()">追加新增條款</button>
                     </div>
                     <div id="warrantyTermsContainer"></div>
                 </div>
@@ -247,7 +257,7 @@
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // ===================================================
-        // 帶入與原系統完全對應之 FIREBASE 配置設定
+        // FIREBASE 配置設定
         // ===================================================
         const firebaseConfig = {
             apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
@@ -269,7 +279,7 @@
             if(pwd === "AMQ5600") {
                 document.getElementById('authOverlay').style.display = 'none';
                 document.getElementById('adminContainer').style.display = 'flex';
-                initializeDashboardListeners(); // 驗證成功後開始即時監聽資料庫
+                initializeDashboardListeners();
             } else {
                 document.getElementById('authError').style.display = 'block';
             }
@@ -288,7 +298,7 @@
         // ===================================================
         function initializeDashboardListeners() {
             
-            // 1. 即時監聽客戶預約訂單 (即時更新看塊)
+            // 1. 即時監聽客戶預約訂單
             const bookingsQuery = query(collection(db, "nail_bookings"), orderBy("createdAt", "desc"));
             onSnapshot(bookingsQuery, (snapshot) => {
                 const tbody = document.getElementById('ordersTableBody');
@@ -326,38 +336,45 @@
                 document.getElementById('metricTotalRevenue').innerText = `$${totalRevenue.toLocaleString()}`;
             });
 
-            // 2. 即時監聽核心美甲款式 (CRUD)
+            // 2. 即時監聽核心美甲款式
             onSnapshot(collection(db, "nail_styles"), (snapshot) => {
                 const tbody = document.getElementById('stylesTableBody');
                 tbody.innerHTML = '';
                 snapshot.forEach(doc => {
                     const style = doc.data();
+                    // 針對引號做跳脫處理，避免 HTML 屬性解析錯誤
+                    const safeName = style.name.replace(/'/g, "\\'"); 
                     tbody.innerHTML += `
                         <tr>
                             <td style="font-weight:600;">${style.name}</td>
                             <td style="color:var(--primary-color); font-weight:700;">$${style.price}</td>
                             <td>
-                                <button class="btn-action btn-edit" onclick="editStyle('${doc.id}', '${style.name}', ${style.price})">修改價格</button>
-                                <button class="btn-action btn-danger" onclick="deleteData('nail_styles', '${doc.id}')">刪除</button>
+                                <div class="action-group">
+                                    <button class="btn-action btn-edit" onclick="editStyle('${doc.id}', '${safeName}', ${style.price})">✎ 修改項目</button>
+                                    <button class="btn-action btn-danger" onclick="deleteData('nail_styles', '${doc.id}')">🗑 刪除</button>
+                                </div>
                             </td>
                         </tr>
                     `;
                 });
             });
 
-            // 3. 即時監聽附加服務 (CRUD)
+            // 3. 即時監聽附加服務
             onSnapshot(collection(db, "addon_services"), (snapshot) => {
                 const tbody = document.getElementById('addonsTableBody');
                 tbody.innerHTML = '';
                 snapshot.forEach(doc => {
                     const addon = doc.data();
+                    const safeName = addon.name.replace(/'/g, "\\'");
                     tbody.innerHTML += `
                         <tr>
                             <td style="font-weight:600;">${addon.name}</td>
                             <td style="color:var(--primary-color); font-weight:700;">+$${addon.price}</td>
                             <td>
-                                <button class="btn-action btn-edit" onclick="editAddon('${doc.id}', '${addon.name}', ${addon.price})">修改價格</button>
-                                <button class="btn-action btn-danger" onclick="deleteData('addon_services', '${doc.id}')">刪除</button>
+                                <div class="action-group">
+                                    <button class="btn-action btn-edit" onclick="editAddon('${doc.id}', '${safeName}', ${addon.price})">✎ 修改項目</button>
+                                    <button class="btn-action btn-danger" onclick="deleteData('addon_services', '${doc.id}')">🗑 刪除</button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -372,9 +389,7 @@
                     document.getElementById('cfgSubtitle').value = config.subtitle || '✦【千變萬化客製凝膠｜專屬預約制】✦';
                     document.getElementById('cfgDiscount').value = config.firstTimeDiscount || 80;
                     
-                    // 渲染時段
                     renderTimeSlots(config.timeSlots || []);
-                    // 渲染保固
                     renderWarrantyTerms(config.warrantyTerms || []);
                 }
             });
@@ -392,37 +407,49 @@
             }
         }
 
-        // 款式 CRUD
+        // --- 款式 CRUD ---
         window.openStyleModal = async function() {
-            const name = prompt("請輸入新美甲款式名稱：");
-            const price = parseInt(prompt("請輸入基本定價金額："), 10);
-            if (name && !isNaN(price)) {
+            const name = prompt("【新增】請輸入新美甲款式名稱：");
+            if (!name) return;
+            const price = parseInt(prompt("【新增】請輸入基本定價金額："), 10);
+            if (!isNaN(price)) {
                 await addDoc(collection(db, "nail_styles"), { name, price });
             }
         }
+        
         window.editStyle = async function(id, currentName, currentPrice) {
-            const newPrice = parseInt(prompt(`正在修改「${currentName}」的價格\n請輸入全新定價金額：`, currentPrice), 10);
+            // 帶入舊資料讓使用者編輯
+            const newName = prompt(`修改款式名稱 (目前名稱：${currentName})`, currentName);
+            if (newName === null || newName.trim() === '') return;
+            
+            const newPrice = parseInt(prompt(`修改「${newName}」的定價金額 (目前價格：${currentPrice})`, currentPrice), 10);
             if (!isNaN(newPrice)) {
-                await updateDoc(doc(db, "nail_styles", id), { price: newPrice });
+                await updateDoc(doc(db, "nail_styles", id), { name: newName.trim(), price: newPrice });
             }
         }
 
-        // 附加項目 CRUD
+        // --- 附加項目 CRUD ---
         window.openAddonModal = async function() {
-            const name = prompt("請輸入全新衍生加選項目名稱（如：法式手繪）：");
-            const price = parseInt(prompt("請輸入追加費用金額："), 10);
-            if (name && !isNaN(price)) {
+            const name = prompt("【新增】請輸入全新衍生加選項目名稱（如：法式手繪）：");
+            if (!name) return;
+            const price = parseInt(prompt("【新增】請輸入追加費用金額："), 10);
+            if (!isNaN(price)) {
                 await addDoc(collection(db, "addon_services"), { name, price });
             }
         }
+        
         window.editAddon = async function(id, currentName, currentPrice) {
-            const newPrice = parseInt(prompt(`正在修改附加服務「${currentName}」的加購價\n請輸入全新追加費用金額：`, currentPrice), 10);
+            // 帶入舊資料讓使用者編輯
+            const newName = prompt(`修改附加項目名稱 (目前名稱：${currentName})`, currentName);
+            if (newName === null || newName.trim() === '') return;
+
+            const newPrice = parseInt(prompt(`修改「${newName}」的追加費用 (目前價格：${currentPrice})`, currentPrice), 10);
             if (!isNaN(newPrice)) {
-                await updateDoc(doc(db, "addon_services", id), { price: newPrice });
+                await updateDoc(doc(db, "addon_services", id), { name: newName.trim(), price: newPrice });
             }
         }
 
-        // 儲存文字檔系統設定
+        // --- 儲存文字檔系統設定 ---
         window.saveGeneralConfig = async function() {
             const title = document.getElementById('cfgTitle').value;
             const subtitle = document.getElementById('cfgSubtitle').value;
@@ -436,7 +463,6 @@
                 });
                 alert("✨ 全域文案與折扣檔已成功部署並儲存！");
             } catch (e) {
-                // 防止因文檔不存在造成更新失敗，若不存在則進行複寫覆蓋建立
                 await setDoc(doc(db, "system_settings", "booking_config"), {
                     title: title, subtitle: subtitle, firstTimeDiscount: discount, timeSlots: [], warrantyTerms: []
                 }, { merge: true });
@@ -444,7 +470,7 @@
             }
         }
 
-        // 開放預約時段動態控制
+        // --- 開放預約時段動態控制 ---
         function renderTimeSlots(slots) {
             const container = document.getElementById('timeSlotsContainer');
             container.innerHTML = '';
@@ -452,7 +478,7 @@
                 container.innerHTML += `
                     <div class="list-item-manage">
                         <span style="font-weight:700; color: var(--accent-purple)">⏰ ${slot}</span>
-                        <button class="btn-action btn-danger" style="padding:6px 12px; font-size:0.8rem;" onclick="removeTimeSlot('${slot}')">移除</button>
+                        <button class="btn-action btn-danger" style="padding:6px 12px; font-size:0.8rem;" onclick="removeTimeSlot('${slot}')">🗑 移除</button>
                     </div>
                 `;
             });
@@ -473,19 +499,24 @@
         }
 
         window.removeTimeSlot = async function(slotToRemove) {
+            if(!confirm(`確定要移除「${slotToRemove}」時段嗎？`)) return;
             let updatedSlots = (window.currentAvailableSlots || []).filter(s => s !== slotToRemove);
             await updateDoc(doc(db, "system_settings", "booking_config"), { timeSlots: updatedSlots });
         }
 
-        // 保固條款內容動態編輯控制
+        // --- 保固條款內容動態編輯控制 ---
         function renderWarrantyTerms(terms) {
             const container = document.getElementById('warrantyTermsContainer');
             container.innerHTML = '';
             terms.forEach((term, index) => {
+                const safeTerm = term.replace(/'/g, "\\'");
                 container.innerHTML += `
-                    <div class="list-item-manage">
-                        <span style="font-size:0.9rem; font-weight:500; padding-right:15px; line-height:1.4;">✦ ${term}</span>
-                        <button class="btn-action btn-danger" style="padding:6px 12px; font-size:0.8rem; white-space:nowrap;" onclick="removeWarrantyTerm(${index})">刪除條目</button>
+                    <div class="list-item-manage" style="flex-wrap: wrap; gap: 10px;">
+                        <span style="font-size:0.9rem; font-weight:500; padding-right:15px; line-height:1.4; flex:1; min-width: 250px;">✦ ${term}</span>
+                        <div class="action-group">
+                            <button class="btn-action btn-edit" style="padding:6px 12px; font-size:0.8rem; white-space:nowrap;" onclick="editWarrantyTerm(${index}, '${safeTerm}')">✎ 修改</button>
+                            <button class="btn-action btn-danger" style="padding:6px 12px; font-size:0.8rem; white-space:nowrap;" onclick="removeWarrantyTerm(${index})">🗑 刪除</button>
+                        </div>
                     </div>
                 `;
             });
@@ -503,7 +534,18 @@
             termInput.value = '';
         }
 
+        // 新增的保固條款編輯功能 (確認鍵機制)
+        window.editWarrantyTerm = async function(index, currentText) {
+            const newText = prompt("修改保固條款：", currentText);
+            if (newText !== null && newText.trim() !== '' && newText !== currentText) {
+                let updatedTerms = [...(window.currentWarrantyTerms || [])];
+                updatedTerms[index] = newText.trim();
+                await updateDoc(doc(db, "system_settings", "booking_config"), { warrantyTerms: updatedTerms });
+            }
+        }
+
         window.removeWarrantyTerm = async function(indexToRemove) {
+            if(!confirm("確定要刪除此條保固條款嗎？")) return;
             let updatedTerms = (window.currentWarrantyTerms || []).filter((_, idx) => idx !== indexToRemove);
             await updateDoc(doc(db, "system_settings", "booking_config"), { warrantyTerms: updatedTerms });
         }
