@@ -6,6 +6,8 @@
     <title>神の指藝預約系統 | Beautiful moment.</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
         /* --- 千變萬化風格變數：炫彩、夢幻且具備光澤感 --- */
         :root {
@@ -302,7 +304,7 @@
             height: 140px;
             background: #FFFFFF;
             cursor: crosshair;
-            touch-action: none; /* 阻擋行動裝置原生滾動，確保能滑順手寫 */
+            touch-action: none;
         }
 
         .sig-tools {
@@ -366,11 +368,10 @@
             font-weight: 500;
         }
 
-        /* 新增：初次預約折扣標籤樣式 */
         .discount-row {
             color: #C5221F;
             font-weight: 700;
-            display: none; /* 預設隱藏，輸入電話偵測後顯示 */
+            display: none; 
         }
 
         .price-total {
@@ -412,7 +413,7 @@
             cursor: not-allowed;
         }
 
-        /* --- 系統提示框架 (保留錯誤提示) --- */
+        /* --- 系統提示框架 --- */
         .alert {
             padding: 16px;
             border-radius: 12px;
@@ -428,9 +429,9 @@
             border: 1px solid #FAD2CF;
         }
 
-        /* --- 彈出式對話框 (Modal) 樣式 --- */
+        /* --- 彈出式對話框 --- */
         .modal-overlay {
-            display: none; /* 預設隱藏 */
+            display: none; 
             position: fixed;
             top: 0;
             left: 0;
@@ -557,8 +558,7 @@
                     <textarea id="notes" class="form-control" rows="3" placeholder="如有指定美甲師或需卸甲請備註於此..."></textarea>
                 </div>
 
-                <!-- 新增：保固條款、簽名板與同意勾選區 -->
-                <div class="warranty-container">
+                <div class="warranty-container" id="warrantySection">
                     <div class="warranty-title">〔保固條款〕為確保您有良好售後服務！</div>
                     <span class="warranty-subtitle">請詳細閱讀</span>
                     <ol class="warranty-list">
@@ -621,9 +621,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ===================================================
-        // FIREBASE 配置設定
-        // ===================================================
         const firebaseConfig = {
             apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
             authDomain: "beautiful-68dbc.firebaseapp.com",
@@ -638,7 +635,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 資料結構定義
         const nailStyles = [
             { id: 'style_1', name: '經典極簡單色凝膠', price: 900 },
             { id: 'style_2', name: '法式優雅氣質漸層', price: 1300 },
@@ -657,10 +653,9 @@
         let currentSelection = {
             selectedStyle: null,
             selectedAddons: new Set(),
-            isFirstBooking: false // 追蹤是否為新客戶
+            isFirstBooking: false 
         };
 
-        // 動態網頁元素生成
         const styleGrid = document.getElementById('styleGrid');
         const addonsList = document.getElementById('addonsList');
         const clientPhoneInput = document.getElementById('clientPhone');
@@ -692,7 +687,6 @@
             addonsList.appendChild(label);
         });
 
-        // 監聽電話輸入，即時判定是否為初次預約
         clientPhoneInput.addEventListener('blur', async () => {
             const phone = clientPhoneInput.value.trim();
             if (!phone) return;
@@ -700,8 +694,6 @@
             try {
                 const q = query(collection(db, "nail_bookings"), where("clientPhone", "==", phone));
                 const querySnapshot = await getDocs(q);
-                
-                // 如果找不到歷史預約，就是初次預約新客戶
                 currentSelection.isFirstBooking = querySnapshot.empty;
                 calculateTotal();
             } catch (err) {
@@ -736,10 +728,9 @@
             let total = stylePrice + addonPrice;
             let discount = 0;
 
-            // 計算 95 折優惠 (初次預約)
             if (currentSelection.isFirstBooking && total > 0) {
-                discount = Math.round(total * 0.05); // 算出 5% 的折扣金額
-                total = total - discount;           // 實際需付金額
+                discount = Math.round(total * 0.05); 
+                total = total - discount;           
                 discountRow.style.display = 'flex';
                 document.getElementById('summaryDiscount').innerText = `- $${discount.toLocaleString()}`;
             } else {
@@ -753,18 +744,14 @@
             return { stylePrice, addonPrice, discount, total };
         }
 
-        // ===================================================
-        // 簽名板 (Canvas) 核心控制邏輯
-        // ===================================================
         const canvas = document.getElementById('sig-canvas');
         const ctx = canvas.getContext('2d');
         const btnClearSig = document.getElementById('btnClearSig');
         const typedSignature = document.getElementById('typedSignature');
         const agreeTerms = document.getElementById('agreeTerms');
         let isDrawing = false;
-        let isCanvasDrawn = false; // 用來記錄畫布是否真有被塗鴉過
+        let isCanvasDrawn = false; 
 
-        // 初始化高畫質 Canvas 尺寸
         function initCanvas() {
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width;
@@ -775,19 +762,14 @@
             ctx.lineJoin = 'round';
         }
         
-        // 頁面加載或視窗大小改變時重設大小
         window.addEventListener('load', initCanvas);
         window.addEventListener('resize', initCanvas);
 
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
-            // 兼容滑鼠與手機觸控事件
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
-            };
+            return { x: clientX - rect.left, y: clientY - rect.top };
         }
 
         function startDrawing(e) {
@@ -811,24 +793,19 @@
             isDrawing = false;
         }
 
-        // 綁定滑鼠事件
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
         window.addEventListener('mouseup', stopDrawing);
 
-        // 綁定行動裝置觸控事件
         canvas.addEventListener('touchstart', startDrawing);
         canvas.addEventListener('touchmove', draw);
         window.addEventListener('touchend', stopDrawing);
 
-        // 清除畫布
         btnClearSig.addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             isCanvasDrawn = false;
         });
 
-
-        // 表單提交與雲端庫重疊即時阻擋核心邏輯
         const bookingForm = document.getElementById('bookingForm');
         const submitBtn = document.getElementById('submitBtn');
         const errorAlert = document.getElementById('errorAlert');
@@ -844,21 +821,18 @@
             e.preventDefault();
             errorAlert.style.display = 'none';
 
-            // 核心校驗 1：必須選擇基礎款式
             if (!currentSelection.selectedStyle) {
                 errorAlert.innerText = "請先選擇一項主要核心美甲款式！";
                 errorAlert.style.display = 'block';
                 return;
             }
 
-            // 核心校驗 2：勾選同意條款
             if (!agreeTerms.checked) {
                 errorAlert.innerText = "您必須勾選同意保固條款才能送出預約申請。";
                 errorAlert.style.display = 'block';
                 return;
             }
 
-            // 核心校驗 3：確認有進行簽名 (手寫或打字擇一即可)
             const typedText = typedSignature.value.trim();
             if (!isCanvasDrawn && !typedText) {
                 errorAlert.innerText = "請完成線上簽名確認（可直接在白板手寫或於下方打字輸入欄填寫）。";
@@ -872,10 +846,9 @@
             let inputName = document.getElementById('clientName').value.trim();
 
             submitBtn.disabled = true;
-            submitBtn.innerText = "正在檢查時段預約狀態...";
+            submitBtn.innerText = "正在檢查時段與產生保固截圖..."; // 更新提示文字
 
             try {
-                // 1. 重疊時間段檢查
                 const timeQuery = query(
                     collection(db, "nail_bookings"), 
                     where("bookingDate", "==", chosenDate), 
@@ -891,7 +864,6 @@
                     return;
                 }
 
-                // 2. 再次確保客戶狀態 (防跨裝置防禦)
                 const phoneQuery = query(collection(db, "nail_bookings"), where("clientPhone", "==", inputPhone));
                 const phoneSnapshot = await getDocs(phoneQuery);
                 const finalIsFirst = phoneSnapshot.empty;
@@ -900,13 +872,27 @@
                 currentSelection.isFirstBooking = finalIsFirst;
                 const prices = calculateTotal();
 
-                // 3. 自動偵測：若為首次預約，在名稱前方加入紅字標記 (加在字串內讓闆闆後台一眼看出)
                 let finalDbName = inputName;
                 if (finalIsFirst) {
                     finalDbName = `〔初〕${inputName}`;
                 }
 
-                // 提取簽名封裝資料 (若有手寫則轉為 Base64 圖片編碼，若無則提取打字內容)
+                // 核心更新：使用 html2canvas 產生保固與簽名區塊的截圖
+                let warrantyImageBase64 = null;
+                try {
+                    const warrantySection = document.getElementById('warrantySection');
+                    // 呼叫 html2canvas，設定背景色與適當比例
+                    const canvasImg = await window.html2canvas(warrantySection, {
+                        scale: 1.5, // 降低一點解析度避免 Base64 字串超出資料庫單筆限制
+                        backgroundColor: "#FFF9FA"
+                    });
+                    // 轉為 JPEG 以獲得較好的壓縮率
+                    warrantyImageBase64 = canvasImg.toDataURL("image/jpeg", 0.85); 
+                } catch (screenshotError) {
+                    console.error("截圖產生失敗: ", screenshotError);
+                    // 就算截圖失敗，我們仍允許表單送出（容錯處理）
+                }
+
                 const customerSignature = isCanvasDrawn ? canvas.toDataURL() : `[電子簽章] ${typedText}`;
 
                 const bookingData = {
@@ -924,26 +910,24 @@
                         discountPrice: prices.discount,
                         totalPrice: prices.total
                     },
-                    agreedToTerms: true,         // 新增：記錄顧客已勾選同意條款
-                    signatureData: customerSignature, // 新增：存入顧客的手寫圖片或打字簽名內容
+                    agreedToTerms: true,         
+                    signatureData: customerSignature, 
+                    warrantyScreenshot: warrantyImageBase64, // 新增：存入保固條款及簽名區塊的截圖圖片
                     createdAt: serverTimestamp()
                 };
 
                 await addDoc(collection(db, "nail_bookings"), bookingData);
                 
-                // 根據狀態客製化彈窗提示語
                 if(finalIsFirst) {
                     successModalText.innerHTML = `恭喜獲得初次體驗 95 折優惠！🎉<br>系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
                 } else {
                     successModalText.innerHTML = `歡迎回來！系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
                 }
 
-                // 顯示彈出式成功提示
                 successModal.style.display = 'flex';
                 
-                // 清空表單與還原畫面
                 bookingForm.reset();
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // 清空畫布
+                ctx.clearRect(0, 0, canvas.width, canvas.height); 
                 isCanvasDrawn = false;
                 document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
                 currentSelection.selectedStyle = null;
@@ -953,7 +937,7 @@
 
             } catch (error) {
                 console.error("Firebase Sync Error: ", error);
-                errorAlert.innerText = "雲端儲存失敗，請檢查 Firebase 配置。";
+                errorAlert.innerText = "雲端儲存失敗，請檢查網路連線或配置。";
                 errorAlert.style.display = 'block';
             } finally {
                 submitBtn.disabled = false;
