@@ -74,7 +74,7 @@
             transform: translateY(-1px);
         }
 
-        /* --- 新增：營運政策設定欄位樣式 --- */
+        /* 營運政策設定欄位樣式 */
         .settings-card {
             max-width: 1400px;
             margin: 0 auto 20px auto;
@@ -144,7 +144,7 @@
             cursor: not-allowed;
         }
 
-        /* --- 滑入式彈出提示視窗樣式 --- */
+        /* 滑入式彈出提示視窗樣式 */
         .toast-notification {
             position: fixed;
             top: 25px;
@@ -210,7 +210,6 @@
 
         .addon-tag { display: inline-block; background-color: #F0E6FF; color: #5A32A3; font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; margin: 2px; font-weight: 500; }
         .total-price { font-weight: 700; color: #2196F3; display: flex; flex-direction: column; gap: 2px; }
-        .price-detail-sub">原價: $${originalSum.toLocaleString()}</span>
         .price-detail-sub { font-size: 0.75rem; color: #999; font-weight: 500; }
         .price-discount-tag { color: var(--new-client-pink); font-size: 0.75rem; font-weight: 700; }
         .notes-text { font-size: 0.85rem; color: #666; max-width: 200px; word-break: break-all; }
@@ -250,7 +249,7 @@
         }
         .btn-delete-row:hover { background-color: var(--danger-red); color: white; border-color: var(--danger-red); }
 
-        /* --- 彈窗 Modal 共用與專屬樣式 --- */
+        /* 彈窗 Modal 共用與專屬樣式 */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(43, 45, 66, 0.7); backdrop-filter: blur(5px);
@@ -401,7 +400,7 @@
             <div class="completion-text">
                 請確認今日服務之項目是否符合您的需求。<br>
                 如對此次服務給與肯定請在此處簽上水水們的大名：
-                <strong>「在次感謝您的蒞臨，希望還有機會在此為您獻上兩座五指山！」</strong>
+                <strong>「在此感謝您的蒞臨，希望還有機會在此為您獻上兩座五指山！」</strong>
             </div>
             
             <div class="signature-area" id="signatureContainer">
@@ -422,8 +421,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        // 新增引用：getDoc 與 setDoc 處理全域折扣設定
         import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, onSnapshot, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        // 引入 html2canvas 支援對話框內容高畫質數位截圖功能
+        import html2canvas from "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm";
 
         // ===================================================
         // FIREBASE 配置設定
@@ -448,7 +448,7 @@
         const screenshotsMap = new Map(); 
         let currentViewingImgData = null;
         let currentViewingClientName = '';
-        let globalDiscount = 95; // 預設 95 折，會從資料庫動態載入
+        let globalDiscount = 95; 
 
         // --- DOM 元素抓取 ---
         const deleteModal = document.getElementById('deleteModal');
@@ -469,11 +469,7 @@
         const signatureContainer = document.getElementById('signatureContainer');
         const ctx = signatureCanvas.getContext('2d');
         let isDrawing = false;
-        let hasDrawn = false; // 追蹤畫布是否有內容
-
-        const toastAlert = document.getElementById('toastAlert');
-        const closeToastBtn = document.getElementById('closeToastBtn');
-        const updateToastBtn = document.getElementById('updateToastBtn');
+        let hasDrawn = false; 
 
         // --- 畫布(Canvas) 簽名邏輯 ---
         function resizeCanvas() {
@@ -487,7 +483,7 @@
         function startDrawing(e) {
             isDrawing = true;
             hasDrawn = true;
-            signatureInput.value = ''; // 開始手寫時清空輸入框，避免混淆
+            signatureInput.value = ''; 
             draw(e);
         }
 
@@ -498,7 +494,7 @@
 
         function draw(e) {
             if (!isDrawing) return;
-            e.preventDefault(); // 阻止手機在畫布上滑動時捲動頁面
+            e.preventDefault(); 
             let clientX, clientY;
             
             if (e.type.includes('touch')) {
@@ -534,7 +530,6 @@
             hasDrawn = false;
         });
 
-        // 當使用者使用鍵盤輸入時，視同放棄手寫，清空畫布
         signatureInput.addEventListener('input', () => {
             if (hasDrawn) {
                 ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
@@ -548,37 +543,63 @@
             targetCompleteId = null;
         });
 
-        // --- 送出完成確認邏輯 ---
+        // --- 送出完成確認 + 自動化視窗內容截圖儲存邏輯 ---
         confirmCompletionBtn.addEventListener('click', async () => {
             if (!targetCompleteId) return;
 
             const typedName = signatureInput.value.trim();
             const signatureDataUrl = signatureCanvas.toDataURL('image/png');
             
-            // 確保有手寫或打字
             if (!hasDrawn && typedName === '') {
                 alert('請水水在畫布上簽名，或在下方輸入框打上姓名唷！');
                 return;
             }
 
             try {
-                confirmCompletionBtn.innerText = "儲存更新中...";
+                confirmCompletionBtn.innerText = "保固圖檔上傳中...";
                 confirmCompletionBtn.disabled = true;
 
-                // 將完成狀態與簽名資料更新回 Firebase
+                // 1. 暫時隱藏下方的按鈕操作列，避免干擾截圖畫面美觀
+                const modalActions = completionModal.querySelector('.modal-actions');
+                modalActions.style.display = 'none';
+
+                // 2. 擷取對話框元素內容
+                const modalContent = completionModal.querySelector('.complete-modal-content');
+                let finalScreenshotUrl = "";
+                
+                try {
+                    const capturedCanvas = await html2canvas(modalContent, {
+                        backgroundColor: '#FFFFFF',
+                        scale: 2, // 2倍高畫質提升字體解析度
+                        logging: false,
+                        useCORS: true
+                    });
+                    finalScreenshotUrl = capturedCanvas.toDataURL('image/jpeg', 0.85);
+                } catch (screenshotError) {
+                    console.error("對話框擷取失敗，改採純簽名備份: ", screenshotError);
+                    finalScreenshotUrl = signatureDataUrl; 
+                }
+
+                // 3. 還原按鈕原先顯示
+                modalActions.style.display = 'flex';
+
+                // 4. 將完成狀態與截圖資料同步回傳至雲端
                 await updateDoc(doc(db, "nail_bookings", targetCompleteId), {
                     status: "completed",
                     clientSignature: hasDrawn ? signatureDataUrl : null,
                     clientTypedName: typedName || null,
+                    warrantyScreenshot: finalScreenshotUrl, // 將產生的對話框截圖存入對應欄位
                     completedAt: new Date().toISOString()
                 });
 
                 completionModal.style.display = 'none';
-                alert("✅ 感謝水水！已完成服務並儲存紀錄。");
-                await loadBookings(); // 重新載入更新畫面
+                alert("✅ 感謝水水！已完成服務並為您建立保固截圖紀錄。");
+                await loadBookings(); 
             } catch (error) {
-                console.error("更新完成狀態失敗: ", error);
+                console.error("更新完成狀態與截圖失敗: ", error);
                 alert("儲存失敗，請檢查網路連線！");
+                const modalActions = completionModal.querySelector('.modal-actions');
+                if (modalActions) modalActions.style.display = 'flex';
             } finally {
                 confirmCompletionBtn.innerText = "✅ 確認送出";
                 confirmCompletionBtn.disabled = false;
@@ -625,21 +646,17 @@
             currentViewingClientName = '';
         });
 
-        // 監聽表格內的點擊事件 (Event Delegation)，抓取按鈕點擊
         document.getElementById('bookingListTbody').addEventListener('click', (e) => {
-            // 處理「✅ 服務完成」按鈕
             if (e.target.classList.contains('btn-complete-row')) {
                 targetCompleteId = e.target.getAttribute('data-id');
                 completionModal.style.display = 'flex';
                 
-                // 延遲重設 Canvas 大小，確保 Modal 已顯示並抓得到寬高
                 setTimeout(resizeCanvas, 50); 
                 ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
                 signatureInput.value = '';
                 hasDrawn = false;
             }
 
-            // 處理預覽截圖按鈕
             if (e.target.classList.contains('btn-view-img')) {
                 const id = e.target.getAttribute('data-id');
                 const rawName = e.target.getAttribute('data-name');
@@ -653,14 +670,12 @@
                 }
             }
 
-            // 處理刪除按鈕
             if (e.target.classList.contains('btn-delete-row')) {
                 targetDeleteId = e.target.getAttribute('data-id');
                 deleteModal.style.display = 'flex';
             }
         });
 
-        // 圖片下載功能
         downloadImgBtn.addEventListener('click', () => {
             if (!currentViewingImgData) return;
             const link = document.createElement('a');
@@ -695,7 +710,7 @@
             }
         }
 
-        // --- 新增：自雲端讀取全域折扣設定 ---
+        // --- 自雲端讀取全域折扣設定 ---
         async function fetchDiscountConfig() {
             try {
                 const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
@@ -711,7 +726,7 @@
             }
         }
 
-        // --- 新增：確認修改並儲存全域折扣設定至雲端 ---
+        // --- 確認修改並儲存全域折扣設定至雲端（已與預約專頁共用同一個資料路徑） ---
         document.getElementById('saveDiscountBtn').addEventListener('click', async () => {
             const inputVal = parseInt(document.getElementById('discountConfigInput').value);
             if (isNaN(inputVal) || inputVal < 10 || inputVal > 99) {
@@ -724,14 +739,13 @@
                 btn.innerText = "變更儲存中...";
                 btn.disabled = true;
 
-                // 寫入 Firebase 資料庫
                 await setDoc(doc(db, "system_settings", "booking_config"), {
                     firstTimeDiscount: inputVal,
                     updatedAt: new Date().toISOString()
                 }, { merge: true });
 
                 globalDiscount = inputVal;
-                alert(`🎉 折扣已成功修改為 ${globalDiscount} 折！列表將同步重新載入。`);
+                alert(`🎉 折扣已成功修改為 ${globalDiscount} 折！列表與預約專頁將即時連動。`);
                 await loadBookings();
             } catch (error) {
                 console.error("儲存折扣失敗: ", error);
@@ -754,7 +768,6 @@
             tbody.innerHTML = '';
             screenshotsMap.clear(); 
 
-            // 先載入最新折扣政策
             await fetchDiscountConfig();
 
             try {
@@ -792,7 +805,6 @@
                     
                     if (isOverlap) tr.className = 'overlap-row'; 
 
-                    // 附加項目
                     let addonsHTML = '';
                     if (item.selectedAddons && item.selectedAddons.length > 0) {
                         item.selectedAddons.forEach((addon, index) => {
@@ -802,7 +814,6 @@
                         addonsHTML = '<span style="color:#aaa; font-size:0.85rem;">無</span>';
                     }
 
-                    // 顧客名稱處理
                     const isNewGuest = item.isFirstTime === true || (item.clientName && item.clientName.includes('〔初〕'));
                     let nameHTML = '';
                     if (isNewGuest) {
@@ -812,13 +823,11 @@
                         nameHTML = `<span class="client-name">${item.clientName || '未填'}</span>`;
                     }
 
-                    // 如果狀態為已完成，加上提示標籤
                     const isCompleted = item.status === "completed";
                     if (isCompleted) {
                         nameHTML += `<br><span class="status-completed" style="margin-top: 5px;">✅ 服務已完成</span>`;
                     }
 
-                    // 價格運算與顯示
                     let priceHTML = '';
                     if (item.priceCalculations) {
                         const total = item.priceCalculations.totalPrice.toLocaleString();
@@ -840,7 +849,6 @@
                         priceHTML = `<span class="total-price">$0</span>`;
                     }
 
-                    // 截圖查看按鈕 HTML
                     let screenshotHTML = '';
                     if (item.warrantyScreenshot) {
                         screenshotHTML = `<button class="btn-view-img" data-id="${item.id}" data-name="${item.clientName || '客戶'}">👁️ 查看紀錄</button>`;
@@ -848,12 +856,10 @@
                         screenshotHTML = `<span style="color:#aaa; font-size:0.85rem;">無電子紀錄</span>`;
                     }
 
-                    // 產生管理按鈕 (如果已完成，隱藏完成鈕)
                     let completeBtnHTML = isCompleted 
                         ? '' 
                         : `<button class="btn-complete-row" data-id="${item.id}">✅ 完成</button>`;
 
-                    // 組裝該列資料
                     tr.innerHTML = `
                         <td>
                             <div class="datetime-badge">
