@@ -35,10 +35,10 @@
         .auth-btn:hover { opacity: 0.95; transform: translateY(-2px); }
 
         /* --- 後台核心佈局 (上方導覽 + 下方內容) --- */
-        #adminContainer { display: none; width: 100%; flex-direction: column; }
+        #adminContainer { display: none; width: 100%; flex-direction: column; min-height: 100vh; }
         
-        /* 上方獨立框架 (Header) */
-        header { width: 100%; background-color: var(--header-bg); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px; }
+        /* 上方獨立框架 (Header) - 改用 sticky 解決遮擋問題 */
+        header { width: 100%; background-color: var(--header-bg); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px; }
         .logo-area { display: flex; align-items: baseline; gap: 15px; }
         .logo-area h1 { font-family: 'Cinzel', serif; font-size: 1.6rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
         .logo-area p { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin: 0; }
@@ -48,7 +48,7 @@
         .nav-item.active { background: linear-gradient(90deg, #FF6B8B, #7B2CBF); color: white; box-shadow: 0 4px 10px rgba(123,44,191,0.3); }
 
         /* 下方主內容區 */
-        main { margin-top: 80px; padding: 40px; width: 100%; min-height: calc(100vh - 80px); }
+        main { padding: 40px; width: 100%; flex-grow: 1; }
         .content-section { display: none; animation: fadeIn 0.4s ease; }
         .content-section.active { display: block; }
         
@@ -104,7 +104,7 @@
         /* 響應式調整 */
         @media (max-width: 768px) {
             header { flex-direction: column; padding: 15px 20px; }
-            main { margin-top: 130px; padding: 20px; min-height: calc(100vh - 130px); }
+            main { padding: 20px; }
             .nav-menu { justify-content: center; }
         }
     </style>
