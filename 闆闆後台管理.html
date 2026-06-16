@@ -17,6 +17,7 @@
             --shadow: 0 8px 24px rgba(0,0,0,0.05);
             --transition: all 0.3s ease;
             --new-client-pink: #FF477E; 
+            --warning-orange: #F39C12;
         }
 
         * {
@@ -62,6 +63,7 @@
         .header-actions {
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .btn-refresh {
@@ -99,6 +101,27 @@
 
         .btn-report:hover {
             background-color: #D6D5DB;
+            transform: translateY(-1px);
+        }
+
+        /* 新增：耗材與電費按鈕 */
+        .btn-expense {
+            background-color: var(--warning-orange);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-expense:hover {
+            opacity: 0.9;
             transform: translateY(-1px);
         }
 
@@ -271,16 +294,16 @@
         .modal-content {
             background: #FFFFFF; padding: 35px; border-radius: 20px; text-align: center;
             max-width: 400px; width: 90%; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.3s ease; position: relative;
+            animation: slideUp 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto;
         }
 
         /* 營運報告彈窗樣式 */
-        .report-modal-content { max-width: 550px !important; padding: 30px; }
+        .report-modal-content { max-width: 600px !important; padding: 30px; }
         .report-modal-content h3 { color: var(--text-dark); font-size: 1.5rem; margin-bottom: 20px; font-family: 'Cinzel', 'Noto Sans TC', sans-serif; }
         .report-grid {
             display: flex;
-            gap: 20px;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 15px;
             margin-bottom: 25px;
         }
         .report-card {
@@ -288,16 +311,27 @@
             border: 1px solid #E2E0E7;
             border-radius: 12px;
             padding: 20px 15px;
-            flex: 1;
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
-        .report-title { font-size: 0.95rem; font-weight: 700; color: #4A4E69; }
-        .report-value { font-size: 2rem; font-weight: 800; color: var(--accent-purple); font-family: 'Cinzel', serif; }
-        .report-subtitle { font-size: 0.8rem; color: #888; font-weight: 500; }
+        .report-title { font-size: 1rem; font-weight: 700; color: #4A4E69; }
+        .report-value { font-size: 2.2rem; font-weight: 800; color: var(--accent-purple); font-family: 'Cinzel', serif; }
+        .report-subtitle { font-size: 0.85rem; color: #666; font-weight: 700; background: #EBEAEF; padding: 6px; border-radius: 6px; display: inline-block; width: fit-content; margin: 0 auto; }
         .report-note { font-size: 0.8rem; color: var(--success-green); margin-bottom: 20px; text-align: left; background: #ECFDF5; padding: 10px; border-radius: 8px; }
+
+        /* 耗材電費彈窗樣式 */
+        .expense-modal-content { max-width: 600px !important; text-align: left; }
+        .expense-section { background: #FAFAFC; padding: 20px; border-radius: 12px; border: 1px solid #E2E0E7; margin-bottom: 15px; }
+        .expense-section h4 { color: var(--accent-purple); font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .expense-input-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 10px; }
+        .expense-input-row > div { display: flex; flex-direction: column; gap: 6px; }
+        .expense-input-row label { font-size: 0.85rem; font-weight: 700; color: #4A4E69; }
+        .consumable-table-wrapper { width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid #E2E0E7; margin-top: 15px; }
+        .consumable-table-wrapper table { min-width: unset; font-size: 0.9rem; margin-bottom: 0; }
+        .consumable-table-wrapper th { padding: 10px; font-size: 0.85rem; }
+        .consumable-table-wrapper td { padding: 10px; }
 
         .img-modal-content { max-width: 600px !important; padding: 30px; }
         .preview-img-container { width: 100%; max-height: 60vh; overflow-y: auto; border: 2px dashed #E2E0E7; border-radius: 12px; margin-bottom: 20px; background: #FAFAFC; }
@@ -331,7 +365,7 @@
         .modal-content h3 { color: var(--danger-red); font-size: 1.4rem; margin-bottom: 10px; }
         .img-modal-content h3 { color: var(--accent-purple) !important; }
 
-        .modal-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .modal-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
         
         .btn-modal { padding: 10px 24px; font-size: 1rem; font-weight: 700; border-radius: 8px; cursor: pointer; border: none; transition: var(--transition); }
         .btn-cancel { background-color: #EBEAEF; color: #4A4E69; }
@@ -348,12 +382,6 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        /* RWD 微調 */
-        @media(max-width: 768px) {
-            .report-grid { flex-direction: column; gap: 15px; }
-            .report-card { width: 100%; }
-        }
     </style>
 </head>
 <body>
@@ -364,6 +392,7 @@
             <p>專屬闆闆的即時顧客清單（依照預約日期時間排序）</p>
         </div>
         <div class="header-actions">
+            <button class="btn-expense" id="expenseBtn">🛒 耗材進貨&電費</button>
             <button class="btn-report" id="reportBtn">📊 營運報告</button>
             <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
         </div>
@@ -402,7 +431,8 @@
                         <th>選擇核心款式</th>
                         <th>附加服務項目</th>
                         <th>實收總額</th>
-                        <th>保固與簽名</th> <th>客戶備註需求</th>
+                        <th>保固與簽名</th> 
+                        <th>客戶備註需求</th>
                         <th>操作管理</th>
                     </tr>
                 </thead>
@@ -412,20 +442,76 @@
         </div>
     </div>
 
+    <div id="expenseModal" class="modal-overlay">
+        <div class="modal-content expense-modal-content">
+            <h3 style="text-align: center; color: var(--text-dark); font-family: 'Cinzel', sans-serif; margin-bottom: 5px;">🛒 耗材進貨 & 電費紀錄</h3>
+            <p id="expenseMonthLabel" style="text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 20px;"></p>
+
+            <div class="expense-section">
+                <h4>⚡ 本月電費</h4>
+                <div class="expense-input-row">
+                    <div>
+                        <label>總計金額 (元)</label>
+                        <input type="number" id="electricityBillInput" class="input-discount" style="width: 150px; text-align: left;" value="0" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="expense-section">
+                <h4>🛍️ 耗材進貨</h4>
+                <div class="expense-input-row">
+                    <div>
+                        <label>品名</label>
+                        <input type="text" id="itemName" style="width: 140px; text-align: left;" class="input-discount" placeholder="例如: 凝膠、鑽飾">
+                    </div>
+                    <div>
+                        <label>數量</label>
+                        <input type="number" id="itemQty" style="width: 80px;" class="input-discount" value="1" min="1">
+                    </div>
+                    <div>
+                        <label>合計 (元)</label>
+                        <input type="number" id="itemTotal" style="width: 100px; text-align: left;" class="input-discount" min="0">
+                    </div>
+                    <div>
+                        <button id="addItemBtn" class="btn-refresh" style="padding: 10px 15px;">新增</button>
+                    </div>
+                </div>
+                
+                <div class="consumable-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr><th>品名</th><th>數量</th><th>合計金額</th><th style="text-align: center;">操作</th></tr>
+                        </thead>
+                        <tbody id="consumableList">
+                            </tbody>
+                    </table>
+                </div>
+                <div style="text-align: right; margin-top: 15px; font-size: 1.05rem; font-weight: 700; color: var(--text-dark);">
+                    本月耗材總計：<span style="color: var(--danger-red);">$<span id="consumableTotalSum">0</span></span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeExpenseBtn">取消返回</button>
+                <button class="btn-modal btn-confirm-success" id="saveExpenseBtn">💾 儲存本月紀錄</button>
+            </div>
+        </div>
+    </div>
+
     <div id="reportModal" class="modal-overlay">
         <div class="modal-content report-modal-content">
             <h3>📊 營運財務報告</h3>
-            <div class="report-note">💡 系統僅採計狀態為「✅ 服務已完成」的預約紀錄作為實收營業額。</div>
+            <div class="report-note">💡 系統已自動將「實收營業額」扣除您登記的「當月耗材與電費」以計算淨利潤。</div>
             <div class="report-grid">
                 <div class="report-card">
-                    <div class="report-title">本月累計營業額</div>
-                    <div class="report-value" id="monthlyRevenueValue">$0</div>
-                    <div class="report-subtitle" id="monthlyRevenueLabel"></div>
+                    <div class="report-title">本月結算淨利潤 <span style="font-size: 0.8rem; font-weight: normal;">(結算至 <span id="monthlyMonthLabel"></span>)</span></div>
+                    <div class="report-value" id="monthlyNetValue">$0</div>
+                    <div class="report-subtitle" id="monthlyBreakdownLabel">實收 $0 | 耗材 -$0 | 電費 -$0</div>
                 </div>
                 <div class="report-card">
-                    <div class="report-title">年度累計營業額</div>
-                    <div class="report-value" id="annualRevenueValue">$0</div>
-                    <div class="report-subtitle" id="annualRevenueLabel"></div>
+                    <div class="report-title">年度結算淨利潤 <span style="font-size: 0.8rem; font-weight: normal;">(結算至 <span id="annualYearLabel"></span>)</span></div>
+                    <div class="report-value" id="annualNetValue">$0</div>
+                    <div class="report-subtitle" id="annualBreakdownLabel">實收 $0 | 耗材 -$0 | 電費 -$0</div>
                 </div>
             </div>
             <div class="modal-actions">
@@ -513,7 +599,11 @@
         let currentViewingImgData = null;
         let currentViewingClientName = '';
         let globalDiscount = 95; 
-        let globalBookingsData = []; // 新增：用於存儲所有訂單資料，以利報表計算
+        let globalBookingsData = []; 
+        
+        // 新增：成本與支出變數
+        let globalExpensesData = {}; // key: YYYY-MM
+        let currentMonthConsumables = []; 
 
         // --- DOM 元素抓取 ---
         const deleteModal = document.getElementById('deleteModal');
@@ -533,10 +623,17 @@
         const signatureInput = document.getElementById('signatureInput');
         const signatureContainer = document.getElementById('signatureContainer');
         
-        // 報表 DOM
         const reportModal = document.getElementById('reportModal');
         const reportBtn = document.getElementById('reportBtn');
         const closeReportBtn = document.getElementById('closeReportBtn');
+
+        // 成本管理 DOM
+        const expenseBtn = document.getElementById('expenseBtn');
+        const expenseModal = document.getElementById('expenseModal');
+        const closeExpenseBtn = document.getElementById('closeExpenseBtn');
+        const saveExpenseBtn = document.getElementById('saveExpenseBtn');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const consumableList = document.getElementById('consumableList');
 
         const ctx = signatureCanvas.getContext('2d');
         let isDrawing = false;
@@ -608,39 +705,169 @@
             }
         });
 
-        // --- 報表控制邏輯 ---
+        // --- 讀取所有支出資料 ---
+        async function loadExpenses() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "monthly_expenses"));
+                let tempExpenses = {};
+                querySnapshot.forEach((doc) => {
+                    tempExpenses[doc.id] = doc.data(); 
+                });
+                globalExpensesData = tempExpenses;
+            } catch (error) {
+                console.error("讀取成本支出失敗: ", error);
+            }
+        }
+
+        // --- 耗材與電費管理邏輯 ---
+        function renderConsumables() {
+            consumableList.innerHTML = '';
+            let total = 0;
+            currentMonthConsumables.forEach((item, index) => {
+                total += parseInt(item.total);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.qty}</td>
+                    <td style="color: var(--accent-purple); font-weight: 700;">$${item.total}</td>
+                    <td style="text-align: center;"><button class="btn-delete-row" data-index="${index}" style="padding: 4px 8px;">刪除</button></td>
+                `;
+                consumableList.appendChild(tr);
+            });
+            document.getElementById('consumableTotalSum').innerText = total.toLocaleString();
+        }
+
+        consumableList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-delete-row')) {
+                const index = e.target.getAttribute('data-index');
+                currentMonthConsumables.splice(index, 1);
+                renderConsumables();
+            }
+        });
+
+        addItemBtn.addEventListener('click', () => {
+            const name = document.getElementById('itemName').value.trim();
+            const qty = parseInt(document.getElementById('itemQty').value);
+            const total = parseInt(document.getElementById('itemTotal').value);
+
+            if (!name || isNaN(qty) || isNaN(total) || qty < 1 || total < 0) {
+                alert("⚠️ 請填寫完整的品名、正確的數量與合計金額！");
+                return;
+            }
+
+            currentMonthConsumables.push({ name, qty, total });
+            renderConsumables();
+
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemQty').value = '1';
+            document.getElementById('itemTotal').value = '';
+            document.getElementById('itemName').focus();
+        });
+
+        expenseBtn.addEventListener('click', () => {
+            const now = new Date();
+            const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            document.getElementById('expenseMonthLabel').innerText = `目前紀錄月份：${now.getFullYear()} 年 ${now.getMonth() + 1} 月`;
+
+            // 載入當月資料
+            const monthData = globalExpensesData[currentYearMonth] || { electricity: 0, consumables: [], totalConsumablesCost: 0 };
+            document.getElementById('electricityBillInput').value = monthData.electricity || 0;
+            currentMonthConsumables = monthData.consumables ? [...monthData.consumables] : [];
+
+            renderConsumables();
+            expenseModal.style.display = 'flex';
+        });
+
+        closeExpenseBtn.addEventListener('click', () => {
+            expenseModal.style.display = 'none';
+        });
+
+        saveExpenseBtn.addEventListener('click', async () => {
+            const now = new Date();
+            const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            const electricity = parseInt(document.getElementById('electricityBillInput').value) || 0;
+            const totalConsumablesCost = currentMonthConsumables.reduce((sum, item) => sum + parseInt(item.total), 0);
+
+            saveExpenseBtn.disabled = true;
+            saveExpenseBtn.innerText = "儲存中...";
+
+            try {
+                const expenseData = {
+                    electricity: electricity,
+                    consumables: currentMonthConsumables,
+                    totalConsumablesCost: totalConsumablesCost,
+                    updatedAt: new Date().toISOString()
+                };
+
+                await setDoc(doc(db, "monthly_expenses", currentYearMonth), expenseData);
+                globalExpensesData[currentYearMonth] = expenseData;
+
+                alert("✅ 本月耗材與電費紀錄已成功儲存！");
+                expenseModal.style.display = 'none';
+            } catch (error) {
+                console.error("儲存支出失敗: ", error);
+                alert("儲存失敗，請檢查網路連線或權限！");
+            } finally {
+                saveExpenseBtn.disabled = false;
+                saveExpenseBtn.innerText = "💾 儲存本月紀錄";
+            }
+        });
+
+
+        // --- 報表控制邏輯 (升級版：扣除成本算淨利) ---
         reportBtn.addEventListener('click', () => {
             const now = new Date();
             const currentYear = now.getFullYear().toString();
-            // 月份補零 (例如：6月 -> '06')
             const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
             const currentYearMonth = `${currentYear}-${currentMonth}`;
 
-            let monthlyTotal = 0;
-            let annualTotal = 0;
+            let monthlyGross = 0; // 當月實收
+            let annualGross = 0;  // 當年實收
 
+            // 1. 計算營業總額
             globalBookingsData.forEach(item => {
-                // 僅計算已完成且有金額資料的訂單
                 if (item.status === "completed" && item.priceCalculations) {
-                    const bookingDate = item.bookingDate || ""; // 預期格式: YYYY-MM-DD
+                    const bookingDate = item.bookingDate || ""; 
                     const price = item.priceCalculations.totalPrice || 0;
-
-                    // 判斷是否為本年
-                    if (bookingDate.startsWith(currentYear)) {
-                        annualTotal += price;
-                    }
-                    // 判斷是否為本月
-                    if (bookingDate.startsWith(currentYearMonth)) {
-                        monthlyTotal += price;
-                    }
+                    if (bookingDate.startsWith(currentYear)) annualGross += price;
+                    if (bookingDate.startsWith(currentYearMonth)) monthlyGross += price;
                 }
             });
 
-            // 渲染報表畫面
-            document.getElementById('monthlyRevenueValue').innerText = `$${monthlyTotal.toLocaleString()}`;
-            document.getElementById('monthlyRevenueLabel').innerText = `結算至 ${currentYear}年${currentMonth}月`;
-            document.getElementById('annualRevenueValue').innerText = `$${annualTotal.toLocaleString()}`;
-            document.getElementById('annualRevenueLabel').innerText = `結算至 ${currentYear}年度`;
+            // 2. 計算支出總額
+            let monthlyElectricity = 0;
+            let monthlyConsumables = 0;
+            let annualElectricity = 0;
+            let annualConsumables = 0;
+
+            for (const [yyyyMm, data] of Object.entries(globalExpensesData)) {
+                const elec = parseInt(data.electricity) || 0;
+                const cons = parseInt(data.totalConsumablesCost) || 0;
+
+                // 年度加總
+                if (yyyyMm.startsWith(currentYear)) {
+                    annualElectricity += elec;
+                    annualConsumables += cons;
+                }
+                // 當月加總
+                if (yyyyMm === currentYearMonth) {
+                    monthlyElectricity += elec;
+                    monthlyConsumables += cons;
+                }
+            }
+
+            // 3. 計算淨利
+            const monthlyNet = monthlyGross - monthlyElectricity - monthlyConsumables;
+            const annualNet = annualGross - annualElectricity - annualConsumables;
+
+            // 4. 渲染報表畫面
+            document.getElementById('monthlyNetValue').innerText = `$${monthlyNet.toLocaleString()}`;
+            document.getElementById('monthlyMonthLabel').innerText = `${currentYear}年${currentMonth}月`;
+            document.getElementById('monthlyBreakdownLabel').innerHTML = `實收 $${monthlyGross.toLocaleString()} &nbsp;|&nbsp; 耗材 <span style="color:var(--danger-red);">-$${monthlyConsumables.toLocaleString()}</span> &nbsp;|&nbsp; 電費 <span style="color:var(--danger-red);">-$${monthlyElectricity.toLocaleString()}</span>`;
+
+            document.getElementById('annualNetValue').innerText = `$${annualNet.toLocaleString()}`;
+            document.getElementById('annualYearLabel').innerText = `${currentYear}年度`;
+            document.getElementById('annualBreakdownLabel').innerHTML = `實收 $${annualGross.toLocaleString()} &nbsp;|&nbsp; 耗材 <span style="color:var(--danger-red);">-$${annualConsumables.toLocaleString()}</span> &nbsp;|&nbsp; 電費 <span style="color:var(--danger-red);">-$${annualElectricity.toLocaleString()}</span>`;
 
             reportModal.style.display = 'flex';
         });
@@ -877,6 +1104,7 @@
             screenshotsMap.clear(); 
 
             await fetchDiscountConfig();
+            await loadExpenses(); // 同步讀取成本支出資料
 
             try {
                 const querySnapshot = await getDocs(collection(db, "nail_bookings"));
@@ -886,7 +1114,6 @@
                     rawList.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // 存入全域變數供報表計算使用
                 globalBookingsData = rawList;
 
                 rawList.sort((a, b) => {
