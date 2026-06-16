@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>神の指藝 | 闆闆專專屬預約管理後台</title>
+    <title>神の指藝 | 闆闆專屬預約管理後台</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -279,29 +279,29 @@
         .consumable-table-wrapper th { padding: 10px; font-size: 0.85rem; position: static;}
         .consumable-table-wrapper td { padding: 10px; }
 
-        .img-modal-content { max-width: 600px !important; padding: 30px; }
+        .img-modal-content { max-width: 650px !important; padding: 30px; }
         .preview-img-container { width: 100%; max-height: 60vh; overflow-y: auto; border: 2px dashed #E2E0E7; border-radius: 12px; margin-bottom: 20px; background: #FAFAFC; }
         .preview-img-container img { width: 100%; height: auto; display: block; }
 
-        .complete-modal-content { max-width: 650px !important; padding: 30px; }
+        .complete-modal-content { max-width: 680px !important; padding: 30px; }
         .complete-modal-content h3 { color: var(--success-green) !important; font-size: 1.5rem; margin-bottom: 15px; }
         
         .completion-text {
-            font-size: 1.05rem; color: #4A4E69; line-height: 1.6; text-align: left;
-            margin-bottom: 15px; background: #F8F9FA; padding: 15px; border-radius: 10px;
+            font-size: 0.9rem; color: #4A4E69; line-height: 1.6; text-align: left;
+            margin-bottom: 15px; background: #F8F9FA; padding: 15px; border-radius: 10px; border-left: 4px solid var(--success-green);
         }
-        .completion-text strong { color: var(--accent-purple); display: block; margin-top: 10px; font-size: 1.1rem; text-align: center; }
+        .completion-text strong { color: var(--accent-purple); display: block; margin-bottom: 5px; font-size: 1rem; text-align: left; }
 
         .signature-area {
-            position: relative; width: 100%; height: 220px;
+            position: relative; width: 100%; height: 160px;
             border: 2px dashed #C4C4C4; border-radius: 12px; margin-bottom: 10px;
             background: #FFFFFF; cursor: crosshair; touch-action: none;
         }
-        #signatureCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
+        .signature-area canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
         
         .signature-input-wrapper { margin-bottom: 20px; }
         .signature-input {
-            width: 100%; padding: 12px; font-size: 1.1rem;
+            width: 100%; padding: 10px; font-size: 1rem;
             border: 1px solid #E2E0E7; border-radius: 8px; text-align: center;
             transition: var(--transition); outline: none;
         }
@@ -414,7 +414,7 @@
                         <th>選擇核心款式</th>
                         <th>附加服務項目</th>
                         <th>實收總額</th>
-                        <th>美甲服務同意書 & 完工簽名</th> 
+                        <th>同意書與雙簽紀錄</th> 
                         <th>客戶備註需求</th>
                         <th>操作管理</th>
                     </tr>
@@ -592,9 +592,9 @@
 
     <div id="imageModal" class="modal-overlay">
         <div class="modal-content img-modal-content">
-            <h3>📑 美甲服務同意書與電子簽名憑證</h3>
+            <h3>📑 美甲服務同意書暨雙方簽名紀錄</h3>
             <div class="preview-img-container">
-                <img id="previewImage" src="" alt="美甲服務同意書與美甲師接單簽名截圖">
+                <img id="previewImage" src="" alt="同意書合約與雙方簽名截圖">
             </div>
             <div class="modal-actions">
                 <button class="btn-modal btn-cancel" id="closeImgModalBtn">關閉視窗</button>
@@ -605,25 +605,37 @@
 
     <div id="completionModal" class="modal-overlay">
         <div class="modal-content complete-modal-content">
-            <h3>✨ 美甲師確認接單與完工簽名 ✨</h3>
+            <h3>✨ 服務完成與同意書簽署 ✨</h3>
+            
             <div class="completion-text">
-                請美甲師確認今日服務項目、核心款式與實收總額是否確實。<br>
-                確認無誤後請美甲師於下方簽名以茲負責，系統將即時產生內含客戶美甲服務同意內容與美甲師核可之電子憑證：
-                <strong>「美甲師確認本單服務內容符合規範，完工即刻生效並提供後續保固服務」</strong>
+                <strong>【美甲服務同意書暨保固條款】</strong><br>
+                1. 本服務包含 8 天基本款式保固，非人為惡意損傷可獲得免費修補。<br>
+                2. 顧客確認今日施作之凝膠款式、指甲形狀、增厚感與色彩均符合個人期望與需求。<br>
+                3. 本合約自雙方簽名送出起即刻生效。感謝您的蒞臨，期待下次再為您換上耀眼新色彩！
             </div>
             
-            <div class="signature-area" id="signatureContainer">
-                <canvas id="signatureCanvas"></canvas>
-            </div>
-            
-            <div class="signature-input-wrapper">
-                <input type="text" id="signatureInput" class="signature-input" placeholder="⌨️ 若不便手寫，美甲師亦可點擊此處使用鍵盤輸入姓名核可...">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+                <div style="flex: 1; min-width: 260px; text-align: left;">
+                    <label style="font-weight: 700; display: block; margin-bottom: 5px; color: var(--accent-purple); font-size: 0.9rem;">👧 顧客簽名確認 (同意上述合約條款)</label>
+                    <div class="signature-area" id="signatureContainer" style="height: 150px; margin-bottom: 8px;">
+                        <canvas id="signatureCanvas"></canvas>
+                    </div>
+                    <input type="text" id="signatureInput" class="signature-input" style="padding: 8px; font-size: 0.95rem;" placeholder="⌨️ 或在此處以鍵盤輸入顧客姓名...">
+                </div>
+                
+                <div style="flex: 1; min-width: 260px; text-align: left;">
+                    <label style="font-weight: 700; display: block; margin-bottom: 5px; color: var(--success-green); font-size: 0.9rem;">💅 美甲師簽名確認 (確認接單與結案)</label>
+                    <div class="signature-area" id="signatureContainerTech" style="height: 150px; border-color: var(--success-green); margin-bottom: 8px;">
+                        <canvas id="signatureCanvasTech"></canvas>
+                    </div>
+                    <input type="text" id="signatureInputTech" class="signature-input" style="padding: 8px; font-size: 0.95rem;" placeholder="⌨️ 或在此處以鍵盤輸入美甲師姓名...">
+                </div>
             </div>
 
             <div class="modal-actions">
                 <button class="btn-modal btn-cancel" id="cancelCompletionBtn">返回修改</button>
                 <button class="btn-modal btn-clear" id="clearSignatureBtn">清除重寫</button>
-                <button class="btn-modal btn-confirm-success" id="confirmCompletionBtn">✅ 確認接單送出</button>
+                <button class="btn-modal btn-confirm-success" id="confirmCompletionBtn">✅ 確認送出結案</button>
             </div>
         </div>
     </div>
@@ -674,7 +686,7 @@
         let globalExpensesData = {}; 
         let currentMonthConsumables = []; 
 
-        // 全域設定檔 (統一存放在 booking_config)
+        // 全域設定檔
         let globalConfig = {
             firstTimeDiscount: 95,
             pageTitle: "",
@@ -698,9 +710,11 @@
         const cancelCompletionBtn = document.getElementById('cancelCompletionBtn');
         const confirmCompletionBtn = document.getElementById('confirmCompletionBtn');
         const clearSignatureBtn = document.getElementById('clearSignatureBtn');
+        
         const signatureCanvas = document.getElementById('signatureCanvas');
+        const signatureCanvasTech = document.getElementById('signatureCanvasTech');
         const signatureInput = document.getElementById('signatureInput');
-        const signatureContainer = document.getElementById('signatureContainer');
+        const signatureInputTech = document.getElementById('signatureInputTech');
         
         const reportModal = document.getElementById('reportModal');
         const closeReportBtn = document.getElementById('closeReportBtn');
@@ -712,72 +726,101 @@
         const consumableList = document.getElementById('consumableList');
 
         const ctx = signatureCanvas.getContext('2d');
-        let isDrawing = false;
-        let hasDrawn = false; 
+        const ctxTech = signatureCanvasTech.getContext('2d');
 
-        // --- 畫布(Canvas) 簽名邏輯 ---
+        // 獨立控管雙方手寫狀態
+        let clientSignState = { hasDrawn: false };
+        let techSignState = { hasDrawn: false };
+
+        // --- 畫布(Canvas) 簽名邏輯配置 ---
         function resizeCanvas() {
-            signatureCanvas.width = signatureContainer.offsetWidth;
-            signatureCanvas.height = signatureContainer.offsetHeight;
+            signatureCanvas.width = document.getElementById('signatureContainer').offsetWidth;
+            signatureCanvas.height = document.getElementById('signatureContainer').offsetHeight;
             ctx.lineWidth = 4;
             ctx.lineCap = 'round';
             ctx.strokeStyle = '#2B2D42';
+
+            signatureCanvasTech.width = document.getElementById('signatureContainerTech').offsetWidth;
+            signatureCanvasTech.height = document.getElementById('signatureContainerTech').offsetHeight;
+            ctxTech.lineWidth = 4;
+            ctxTech.lineCap = 'round';
+            ctxTech.strokeStyle = '#10B981'; // 美甲師簽名筆跡設為翡翠綠
         }
 
-        function startDrawing(e) {
-            isDrawing = true;
-            hasDrawn = true;
-            signatureInput.value = ''; 
-            draw(e);
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-            ctx.beginPath();
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            e.preventDefault(); 
-            let clientX, clientY;
+        // 雙畫布共用事件繫結函式
+        function setupSignaturePad(canvas, context, stateObj, inputEl) {
+            let isDrawing = false;
             
-            if (e.type.includes('touch')) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
+            function startDrawing(e) {
+                isDrawing = true;
+                stateObj.hasDrawn = true;
+                if(inputEl) inputEl.value = ''; 
+                draw(e);
             }
-            
-            const rect = signatureCanvas.getBoundingClientRect();
-            const x = clientX - rect.left;
-            const y = clientY - rect.top;
-            
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
+
+            function stopDrawing() {
+                isDrawing = false;
+                context.beginPath();
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault(); 
+                let clientX, clientY;
+                
+                if (e.type.includes('touch')) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                
+                const rect = canvas.getBoundingClientRect();
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+                
+                context.lineTo(x, y);
+                context.stroke();
+                context.beginPath();
+                context.moveTo(x, y);
+            }
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            canvas.addEventListener('touchstart', startDrawing, {passive: false});
+            canvas.addEventListener('touchmove', draw, {passive: false});
+            canvas.addEventListener('touchend', stopDrawing);
         }
 
-        signatureCanvas.addEventListener('mousedown', startDrawing);
-        signatureCanvas.addEventListener('mousemove', draw);
-        signatureCanvas.addEventListener('mouseup', stopDrawing);
-        signatureCanvas.addEventListener('mouseout', stopDrawing);
+        // 初始化雙手寫板事件
+        setupSignaturePad(signatureCanvas, ctx, clientSignState, signatureInput);
+        setupSignaturePad(signatureCanvasTech, ctxTech, techSignState, signatureInputTech);
 
-        signatureCanvas.addEventListener('touchstart', startDrawing, {passive: false});
-        signatureCanvas.addEventListener('touchmove', draw, {passive: false});
-        signatureCanvas.addEventListener('touchend', stopDrawing);
-
+        // 清除按鈕重設
         clearSignatureBtn.addEventListener('click', () => {
             ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+            ctxTech.clearRect(0, 0, signatureCanvasTech.width, signatureCanvasTech.height);
             signatureInput.value = '';
-            hasDrawn = false;
+            signatureInputTech.value = '';
+            clientSignState.hasDrawn = false;
+            techSignState.hasDrawn = false;
         });
 
         signatureInput.addEventListener('input', () => {
-            if (hasDrawn) {
+            if (clientSignState.hasDrawn) {
                 ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
-                hasDrawn = false;
+                clientSignState.hasDrawn = false;
+            }
+        });
+
+        signatureInputTech.addEventListener('input', () => {
+            if (techSignState.hasDrawn) {
+                ctxTech.clearRect(0, 0, signatureCanvasTech.width, signatureCanvasTech.height);
+                techSignState.hasDrawn = false;
             }
         });
 
@@ -881,20 +924,27 @@
             targetCompleteId = null;
         });
 
-        // --- 美甲師送出確認並將核章併入同意書憑證存入 Firebase ---
+        // --- 送出完成確認 + 整合雙方簽署之同意書截圖上傳 Firebase 邏輯 ---
         confirmCompletionBtn.addEventListener('click', async () => {
             if (!targetCompleteId) return;
 
             const typedName = signatureInput.value.trim();
+            const typedNameTech = signatureInputTech.value.trim();
             const signatureDataUrl = signatureCanvas.toDataURL('image/png');
+            const signatureDataUrlTech = signatureCanvasTech.toDataURL('image/png');
             
-            if (!hasDrawn && typedName === '') {
-                alert('請美甲師在畫布上簽章，或在下方輸入框打上姓名確認接單唷！');
+            // 驗證雙方簽章與核准狀態
+            if (!clientSignState.hasDrawn && typedName === '') {
+                alert('請水水顧客在畫布上簽名，或在下方欄位打上姓名唷！');
+                return;
+            }
+            if (!techSignState.hasDrawn && typedNameTech === '') {
+                alert('美甲師必須簽名或輸入姓名以確認接單結案唷！');
                 return;
             }
 
             try {
-                confirmCompletionBtn.innerText = "同意書憑證產生中...";
+                confirmCompletionBtn.innerText = "同步雙簽同意書中...";
                 confirmCompletionBtn.disabled = true;
 
                 const modalActions = completionModal.querySelector('.modal-actions');
@@ -912,30 +962,33 @@
                     });
                     finalScreenshotUrl = capturedCanvas.toDataURL('image/jpeg', 0.85);
                 } catch (screenshotError) {
-                    console.error("對話框擷取失敗，改採純簽名備份: ", screenshotError);
+                    console.error("對話框擷取失敗，改採基本備份: ", screenshotError);
                     finalScreenshotUrl = signatureDataUrl; 
                 }
 
                 modalActions.style.display = 'flex';
 
+                // 同步將雙方合約狀態寫回資料庫 nail_bookings
                 await updateDoc(doc(db, "nail_bookings", targetCompleteId), {
                     status: "completed",
-                    manicuristSignature: hasDrawn ? signatureDataUrl : null,
-                    manicuristTypedName: typedName || null,
+                    clientSignature: clientSignState.hasDrawn ? signatureDataUrl : null,
+                    clientTypedName: typedName || null,
+                    techSignature: techSignState.hasDrawn ? signatureDataUrlTech : null,
+                    techTypedName: typedNameTech || null,
                     warrantyScreenshot: finalScreenshotUrl, 
                     completedAt: new Date().toISOString()
                 });
 
                 completionModal.style.display = 'none';
-                alert("✅ 接單核章成功！已更新美甲服務同意書與完工簽名憑證。");
+                alert("✅ 結案成功！已完成服務並為您建立包含雙方簽名之美甲服務同意書紀錄。");
                 await loadBookings(); 
             } catch (error) {
-                console.error("更新美甲師完工狀態與簽名失敗: ", error);
+                console.error("更新完成狀態與截圖失敗: ", error);
                 alert("儲存失敗，請檢查網路連線！");
                 const modalActions = completionModal.querySelector('.modal-actions');
                 if (modalActions) modalActions.style.display = 'flex';
             } finally {
-                confirmCompletionBtn.innerText = "✅ 確認接單送出";
+                confirmCompletionBtn.innerText = "✅ 確認送出結案";
                 confirmCompletionBtn.disabled = false;
                 targetCompleteId = null;
             }
@@ -986,10 +1039,13 @@
                 targetCompleteId = e.target.getAttribute('data-id');
                 completionModal.style.display = 'flex';
                 
-                setTimeout(resizeCanvas, 50); 
+                setTimeout(resizeCanvas, 120); 
                 ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+                ctxTech.clearRect(0, 0, signatureCanvasTech.width, signatureCanvasTech.height);
                 signatureInput.value = '';
-                hasDrawn = false;
+                signatureInputTech.value = '';
+                clientSignState.hasDrawn = false;
+                techSignState.hasDrawn = false;
             }
 
             if (e.target.classList.contains('btn-view-img')) {
@@ -1015,7 +1071,7 @@
             if (!currentViewingImgData) return;
             const link = document.createElement('a');
             link.href = currentViewingImgData;
-            link.download = `${currentViewingClientName}_美甲服務同意書_簽名紀錄.jpg`;
+            link.download = `${currentViewingClientName}_美甲服務雙簽同意書.jpg`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1045,7 +1101,7 @@
             }
         }
 
-        // --- 核心資料載入與渲染（新增美甲服務同意書讀取流程） ---
+        // --- 核心資料載入與渲染 ---
         async function loadBookings() {
             const tbody = document.getElementById('bookingListTbody');
             const loading = document.getElementById('loading');
@@ -1080,11 +1136,8 @@
                     const key = `${item.bookingDate}_${item.bookingTime}`;
                     timeCounts[key] = (timeCounts[key] || 0) + 1;
                     
-                    // 優先抓取美甲服務同意書與核章憑證快照
                     if (item.warrantyScreenshot) {
                         screenshotsMap.set(item.id, item.warrantyScreenshot);
-                    } else if (item.consentScreenshot) {
-                        screenshotsMap.set(item.id, item.consentScreenshot);
                     }
                 });
 
@@ -1120,7 +1173,7 @@
 
                     const isCompleted = item.status === "completed";
                     if (isCompleted) {
-                        nameHTML += `<br><span class="status-completed" style="margin-top: 5px;">✅ 美甲師已接單完工</span>`;
+                        nameHTML += `<br><span class="status-completed" style="margin-top: 5px;">✅ 已完成雙簽</span>`;
                     }
 
                     let priceHTML = '';
@@ -1145,15 +1198,15 @@
                     }
 
                     let screenshotHTML = '';
-                    if (item.warrantyScreenshot || item.consentScreenshot) {
+                    if (item.warrantyScreenshot) {
                         screenshotHTML = `<button class="btn-view-img" data-id="${item.id}" data-name="${item.clientName || '客戶'}">👁️ 查看同意書</button>`;
                     } else {
-                        screenshotHTML = `<span style="color:#aaa; font-size:0.85rem;">無電子簽署紀錄</span>`;
+                        screenshotHTML = `<span style="color:#aaa; font-size:0.85rem;">尚未簽署</span>`;
                     }
 
                     let completeBtnHTML = isCompleted 
                         ? '' 
-                        : `<button class="btn-complete-row" data-id="${item.id}">✅ 接單簽名</button>`;
+                        : `<button class="btn-complete-row" data-id="${item.id}">✅ 結案簽名</button>`;
 
                     tr.innerHTML = `
                         <td>
@@ -1172,7 +1225,7 @@
                         <td>
                             <div class="action-btns">
                                 ${completeBtnHTML}
-                                <button class="btn-delete-row" data-id="${item.id}">🗑️ 刪除</button>
+                                <button class="btn-delete-row" data-id="${item.id}">🗑️ 刪除紀錄</button>
                             </div>
                         </td>
                     `;
@@ -1205,7 +1258,7 @@
         document.getElementById('refreshBtn').addEventListener('click', loadBookings);
 
         // ===================================================
-        // 漢堡選單與各種設定編輯 (全面串接 Firebase)
+        // 漢堡選單與各種設定編輯 (全面同步 Firebase)
         // ===================================================
 
         // --- 側邊漢堡選單控制 ---
@@ -1241,11 +1294,11 @@
                 }, { merge: true });
 
                 globalConfig = { ...globalConfig, ...updateData };
-                alert("🎉 設定已成功儲存！您的預約專頁已同步更新。");
+                alert("🎉 雲端配置已成功儲存！您的客戶預約專頁已同步更新連動。");
                 return true;
             } catch (error) {
                 console.error("儲存設定失敗: ", error);
-                alert("儲存雲端失敗，請確認網路連線與權限設定！");
+                alert("儲存雲端失敗，請檢查網路連線與權限設定！");
                 return false;
             } finally {
                 btnElement.innerText = defaultText;
@@ -1341,7 +1394,7 @@
 
         closeReportBtn.addEventListener('click', () => { reportModal.style.display = 'none'; });
 
-        // --- 選單 3: 優惠折扣設定 (與 Firebase 連動) ---
+        // --- 選單 3: 折扣設定與 Firebase 連動 ---
         const discountModal = document.getElementById('discountModal');
         document.getElementById('menuDiscountBtn').addEventListener('click', () => {
             closeSidebar();
@@ -1363,7 +1416,7 @@
             }
         });
 
-        // --- 處理動態表格列的刪除按鈕代理 ---
+        // --- 處理動態項目表格列刪除代理 ---
         function handleTableDeleteDelegation(tbodyId) {
             document.getElementById(tbodyId).addEventListener('click', (e) => {
                 if (e.target.classList.contains('btn-delete-row')) {
@@ -1374,7 +1427,7 @@
         handleTableDeleteDelegation('styleListTbody');
         handleTableDeleteDelegation('addonListTbody');
 
-        // --- 選單 4: 款式與價錢編輯 (同步連動 Firebase) ---
+        // --- 選單 4: 款式項目與價格編輯連動 ---
         const styleConfigModal = document.getElementById('styleConfigModal');
         document.getElementById('menuStyleBtn').addEventListener('click', () => {
             closeSidebar();
@@ -1394,7 +1447,7 @@
             if (success) styleConfigModal.style.display = 'none';
         });
 
-        // --- 選單 5: 附加服務與價錢編輯 (同步連動 Firebase) ---
+        // --- 選單 5: 附加服務與價格編輯連動 ---
         const addonConfigModal = document.getElementById('addonConfigModal');
         document.getElementById('menuAddonBtn').addEventListener('click', () => {
             closeSidebar();
@@ -1414,18 +1467,18 @@
             if (success) addonConfigModal.style.display = 'none';
         });
 
-        // 建立新 Row 的通用函式
+        // 建立新項目列的通用函式
         function addConfigRow(tbody, name = "", price = 0) {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><input type="text" class="input-discount row-name-input" style="width: 100%; text-align:left;" placeholder="輸入名稱" value="${name}"></td>
+                <td><input type="text" class="input-discount row-name-input" style="width: 100%; text-align:left;" placeholder="輸入項目名稱" value="${name}"></td>
                 <td><input type="number" class="input-discount row-price-input" style="width: 80px;" value="${price}" min="0"></td>
                 <td style="text-align:center;"><button class="btn-delete-row" style="padding: 6px 12px;">刪除</button></td>
             `;
             tbody.appendChild(tr);
         }
 
-        // 讀取表格資料的通用函式
+        // 讀取項目表格欄位的解構函式
         function extractTableData(tbodyId) {
             const rows = document.getElementById(tbodyId).querySelectorAll('tr');
             let data = [];
@@ -1439,7 +1492,7 @@
             return data;
         }
 
-        // --- 選單 6: 標題與副標題編輯 (同步連動 Firebase) ---
+        // --- 選單 6: 預約專頁主副標題編輯連動 ---
         const textConfigModal = document.getElementById('textConfigModal');
         document.getElementById('menuTitleBtn').addEventListener('click', () => {
             closeSidebar();
@@ -1457,7 +1510,7 @@
         });
 
 
-        // --- 搜尋功能控制 ---
+        // --- 顧客歷史搜尋功能控制 ---
         const fabSearchBtn = document.getElementById('fabSearchBtn');
         const searchModal = document.getElementById('searchModal');
         const closeSearchBtn = document.getElementById('closeSearchBtn');
@@ -1498,7 +1551,7 @@
 
             searchResultList.innerHTML = '';
             if (latestRecordsMap.size === 0) {
-                searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">查無相關紀錄</p>';
+                searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">查無相關預約紀錄</p>';
             } else {
                 latestRecordsMap.forEach(item => {
                     const div = document.createElement('div');
@@ -1515,7 +1568,7 @@
             }
         });
 
-        // 初始化系統載入
+        // 系統啟動初始化
         loadBookings();
         
     </script>
