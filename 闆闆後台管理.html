@@ -20,176 +20,53 @@
             --warning-orange: #F39C12;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            padding: 30px 20px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--bg-color); color: var(--text-dark); padding: 30px 20px; }
 
         /* 漢堡選單按鈕 */
-        .hamburger-btn {
-            background: none; border: none; color: white; font-size: 2rem; cursor: pointer; transition: var(--transition);
-            display: flex; align-items: center; justify-content: center;
-        }
+        .hamburger-btn { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
         .hamburger-btn:hover { color: #EBEAEF; transform: scale(1.05); }
 
         /* 側邊欄樣式 */
-        .sidebar-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(43, 45, 66, 0.7); backdrop-filter: blur(5px);
-            z-index: 2500; display: none; opacity: 0; transition: opacity 0.3s ease;
-        }
-        .sidebar {
-            position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: white; z-index: 2600; 
-            box-shadow: 4px 0 24px rgba(0,0,0,0.15); transition: left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); display: flex; flex-direction: column;
-        }
-        .sidebar-header {
-            padding: 25px 20px; background: linear-gradient(135deg, #3D2C38 0%, #241922 100%); color: white; font-family: 'Cinzel', 'Noto Sans TC', serif; font-size: 1.2rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center;
-        }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(43, 45, 66, 0.7); backdrop-filter: blur(5px); z-index: 2500; display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .sidebar { position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: white; z-index: 2600; box-shadow: 4px 0 24px rgba(0,0,0,0.15); transition: left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px 20px; background: linear-gradient(135deg, #3D2C38 0%, #241922 100%); color: white; font-family: 'Cinzel', 'Noto Sans TC', serif; font-size: 1.2rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
         .close-sidebar-btn { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; transition: var(--transition); }
         .close-sidebar-btn:hover { color: var(--new-client-pink); transform: rotate(90deg); }
         .sidebar-menu { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
         .sidebar-menu li { border-bottom: 1px solid #EBEAEF; }
-        .sidebar-menu li button { 
-            width: 100%; text-align: left; padding: 18px 20px; background: none; border: none; font-size: 1.05rem; 
-            color: var(--text-dark); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 12px; font-weight: 700; 
-        }
+        .sidebar-menu li button { width: 100%; text-align: left; padding: 18px 20px; background: none; border: none; font-size: 1.05rem; color: var(--text-dark); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 12px; font-weight: 700; }
         .sidebar-menu li button:hover { background: #F8F9FA; color: var(--accent-purple); padding-left: 25px; }
         .sidebar-menu-title { padding: 15px 20px 5px 20px; font-size: 0.8rem; color: #888; font-weight: 700; background: #FAFAFC; }
 
-        .dashboard-header {
-            max-width: 1400px;
-            margin: 0 auto 20px auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(135deg, #3D2C38 0%, #241922 100%);
-            padding: 25px 35px;
-            border-radius: 16px;
-            color: white;
-            box-shadow: var(--shadow);
-            flex-wrap: wrap;
-            gap: 15px;
-        }
+        .dashboard-header { max-width: 1400px; margin: 0 auto 20px auto; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #3D2C38 0%, #241922 100%); padding: 25px 35px; border-radius: 16px; color: white; box-shadow: var(--shadow); flex-wrap: wrap; gap: 15px; }
+        .dashboard-header-left { display: flex; align-items: center; gap: 20px; }
+        .dashboard-header h1 { font-family: 'Cinzel', serif; font-size: 1.8rem; letter-spacing: 2px; }
+        .dashboard-header p { font-size: 0.95rem; opacity: 0.8; margin-top: 5px; }
+        .header-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        
+        .btn-refresh { background-color: var(--accent-purple); color: white; border: none; padding: 10px 20px; font-size: 0.95rem; font-weight: 700; border-radius: 8px; cursor: pointer; transition: var(--transition); }
+        .btn-refresh:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        .dashboard-header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+        .input-discount { width: 80px; padding: 8px 12px; border: 2px solid #E2E0E7; border-radius: 8px; font-weight: 700; font-size: 1rem; text-align: center; outline: none; transition: var(--transition); }
+        .input-discount:focus { border-color: var(--accent-purple); }
 
-        .dashboard-header h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.8rem;
-            letter-spacing: 2px;
-        }
-
-        .dashboard-header p {
-            font-size: 0.95rem;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn-refresh {
-            background-color: var(--accent-purple);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-refresh:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .input-discount {
-            width: 80px;
-            padding: 8px 12px;
-            border: 2px solid #E2E0E7;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 1rem;
-            text-align: center;
-            outline: none;
-            transition: var(--transition);
-        }
-
-        .input-discount:focus {
-            border-color: var(--accent-purple);
-        }
-
-        /* 編輯設定相關表格 */
         .config-table-wrapper { width: 100%; max-height: 300px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #E2E0E7; border-radius: 8px; background: #FAFAFC;}
         .config-table-wrapper table { min-width: unset; width: 100%; border-collapse: collapse; text-align: left;}
         .config-table-wrapper th { background-color: #F1EFF5; padding: 12px 10px; font-size: 0.9rem; position: sticky; top: 0; z-index: 1;}
         .config-table-wrapper td { padding: 10px; border-bottom: 1px solid #EBEAEF; vertical-align: middle; }
 
-        /* 滑入式彈出提示視窗樣式 */
-        .toast-notification {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            background: #FFFFFF;
-            border-left: 6px solid var(--accent-purple);
-            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
-            border-radius: 12px;
-            padding: 20px;
-            z-index: 2000;
-            display: none; 
-            flex-direction: column;
-            gap: 12px;
-            max-width: 380px;
-            width: 90%;
-            animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .toast-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-            color: var(--text-dark);
-            font-size: 1.05rem;
-        }
-
+        .toast-notification { position: fixed; top: 25px; right: 25px; background: #FFFFFF; border-left: 6px solid var(--accent-purple); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15); border-radius: 12px; padding: 20px; z-index: 2000; display: none; flex-direction: column; gap: 12px; max-width: 380px; width: 90%; animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast-header { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text-dark); font-size: 1.05rem; }
         .toast-body { font-size: 0.9rem; color: #666; line-height: 1.5; }
         .toast-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 5px; }
-        
-        .btn-toast-update, .btn-toast-close {
-            border: none; padding: 6px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; cursor: pointer; transition: var(--transition);
-        }
-        .btn-toast-update { background-color: var(--accent-purple); color: white; }
+        .btn-toast-update, .btn-toast-close { border: none; padding: 6px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 6px; cursor: pointer; transition: var(--transition); }
+        .btn-toast-update { background-color: var(--accent-purple); color: white; display:none; /* 改為自動更新，隱藏更新鈕 */}
         .btn-toast-close { background-color: #EBEAEF; color: #4A4E69; }
         .btn-toast-update:hover { opacity: 0.9; }
         .btn-toast-close:hover { background-color: #D6D5DB; }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            padding: 20px;
-        }
-
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; padding: 20px; }
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .loading-status { text-align: center; padding: 40px; font-size: 1.2rem; color: #888; font-weight: 500; }
 
@@ -201,10 +78,8 @@
         .datetime-badge { display: inline-flex; flex-direction: column; gap: 4px; }
         .date-item { font-weight: 700; color: #333; display: flex; align-items: center; gap: 6px; }
         .time-item { display: inline-block; background-color: #E0E1DD; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; width: fit-content; }
-
         .client-name { font-weight: 700; color: var(--accent-purple); font-size: 1.05rem; }
         .client-name.new-guest { color: var(--new-client-pink) !important; font-weight: 800; background-color: #FFF0F3; padding: 4px 10px; border-radius: 6px; display: inline-block; border: 1px solid #FFCCD5; }
-
         .addon-tag { display: inline-block; background-color: #F0E6FF; color: #5A32A3; font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; margin: 2px; font-weight: 500; }
         .total-price { font-weight: 700; color: #2196F3; display: flex; flex-direction: column; gap: 2px; }
         .price-detail-sub { font-size: 0.75rem; color: #999; font-weight: 500; }
@@ -215,59 +90,28 @@
         tr.overlap-row .client-name:not(.new-guest), tr.overlap-row .total-price, tr.overlap-row .date-item { color: var(--danger-red) !important; }
         tr.overlap-row .time-item { background-color: #FFD2D2 !important; color: var(--danger-red) !important; }
         .overlap-warning { display: block; color: white; background-color: var(--danger-red); font-size: 0.75rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 5px; text-align: center; width: fit-content; }
-
         .status-completed { display: inline-block; background-color: #D1FAE5; color: #065F46; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; border: 1px solid #A7F3D0; }
 
         .action-btns { display: flex; gap: 8px; flex-direction: column; }
-
         .btn-complete-row { background-color: #ECFDF5; color: var(--success-green); border: 1px solid #A7F3D0; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition); }
         .btn-complete-row:hover { background-color: var(--success-green); color: white; }
-
         .btn-view-img { background-color: #E8F0FE; color: #1967D2; border: 1px solid #D2E3FC; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition); }
         .btn-view-img:hover { background-color: #1967D2; color: white; }
-
         .btn-delete-row { background-color: white; color: var(--danger-red); border: 1px solid #FAD2CF; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition); }
         .btn-delete-row:hover { background-color: var(--danger-red); color: white; border-color: var(--danger-red); }
 
-        /* 彈窗 Modal 共用與專屬樣式 */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(43, 45, 66, 0.7); backdrop-filter: blur(5px);
-            z-index: 3000; justify-content: center; align-items: center;
-            animation: fadeIn 0.3s ease;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(43, 45, 66, 0.7); backdrop-filter: blur(5px); z-index: 3000; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
+        .modal-content { background: #FFFFFF; padding: 35px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); animation: slideUp 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto; }
 
-        .modal-content {
-            background: #FFFFFF; padding: 35px; border-radius: 20px; text-align: center;
-            max-width: 400px; width: 90%; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto;
-        }
-
-        /* 營運報告彈窗樣式 */
         .report-modal-content { max-width: 600px !important; padding: 30px; }
         .report-modal-content h3 { color: var(--text-dark); font-size: 1.5rem; margin-bottom: 20px; font-family: 'Cinzel', 'Noto Sans TC', sans-serif; }
-        .report-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .report-card {
-            background: #FAFAFC;
-            border: 1px solid #E2E0E7;
-            border-radius: 12px;
-            padding: 20px 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .report-grid { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+        .report-card { background: #FAFAFC; border: 1px solid #E2E0E7; border-radius: 12px; padding: 20px 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 8px; }
         .report-title { font-size: 1rem; font-weight: 700; color: #4A4E69; }
         .report-value { font-size: 2.2rem; font-weight: 800; color: var(--accent-purple); font-family: 'Cinzel', serif; }
         .report-subtitle { font-size: 0.85rem; color: #666; font-weight: 700; background: #EBEAEF; padding: 6px; border-radius: 6px; display: inline-block; width: fit-content; margin: 0 auto; }
         .report-note { font-size: 0.8rem; color: var(--success-green); margin-bottom: 20px; text-align: left; background: #ECFDF5; padding: 10px; border-radius: 8px; }
 
-        /* 耗材電費彈窗樣式 */
         .expense-modal-content { max-width: 600px !important; text-align: left; }
         .expense-section { background: #FAFAFC; padding: 20px; border-radius: 12px; border: 1px solid #E2E0E7; margin-bottom: 15px; }
         .expense-section h4 { color: var(--accent-purple); font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
@@ -286,25 +130,14 @@
         .complete-modal-content { max-width: 680px !important; padding: 30px; }
         .complete-modal-content h3 { color: var(--success-green) !important; font-size: 1.5rem; margin-bottom: 15px; }
         
-        .completion-text {
-            font-size: 0.9rem; color: #4A4E69; line-height: 1.6; text-align: left;
-            margin-bottom: 15px; background: #F8F9FA; padding: 15px; border-radius: 10px; border-left: 4px solid var(--success-green);
-        }
+        .completion-text { font-size: 0.9rem; color: #4A4E69; line-height: 1.6; text-align: left; margin-bottom: 15px; background: #F8F9FA; padding: 15px; border-radius: 10px; border-left: 4px solid var(--success-green); }
         .completion-text strong { color: var(--accent-purple); display: block; margin-bottom: 5px; font-size: 1rem; text-align: left; }
 
-        .signature-area {
-            position: relative; width: 100%; height: 160px;
-            border: 2px dashed #C4C4C4; border-radius: 12px; margin-bottom: 10px;
-            background: #FFFFFF; cursor: crosshair; touch-action: none;
-        }
+        .signature-area { position: relative; width: 100%; height: 160px; border: 2px dashed #C4C4C4; border-radius: 12px; margin-bottom: 10px; background: #FFFFFF; cursor: crosshair; touch-action: none; }
         .signature-area canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
         
         .signature-input-wrapper { margin-bottom: 20px; }
-        .signature-input {
-            width: 100%; padding: 10px; font-size: 1rem;
-            border: 1px solid #E2E0E7; border-radius: 8px; text-align: center;
-            transition: var(--transition); outline: none;
-        }
+        .signature-input { width: 100%; padding: 10px; font-size: 1rem; border: 1px solid #E2E0E7; border-radius: 8px; text-align: center; transition: var(--transition); outline: none; }
         .signature-input:focus { border-color: var(--success-green); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
 
         .modal-icon { font-size: 3.5rem; margin-bottom: 10px; }
@@ -330,25 +163,9 @@
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        /* 懸浮按鈕 */
-        .fab-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1500;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--new-client-pink);
-            color: white;
-            font-size: 28px;
-            border: none;
-            box-shadow: 0 4px 15px rgba(255, 71, 126, 0.3);
-            cursor: pointer;
-            transition: var(--transition);}
+        .fab-btn { position: fixed; bottom: 30px; right: 30px; z-index: 1500; width: 60px; height: 60px; border-radius: 50%; background-color: var(--new-client-pink); color: white; font-size: 28px; border: none; box-shadow: 0 4px 15px rgba(255, 71, 126, 0.3); cursor: pointer; transition: var(--transition);}
         .fab-btn:hover { transform: scale(1.1); }
 
-        /* 搜尋清單樣式 */
         .search-results { margin-top: 15px; max-height: 300px; overflow-y: auto; text-align: left; }
         .result-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         .result-info { display: flex; flex-direction: column; gap: 2px; }
@@ -388,16 +205,15 @@
             </div>
         </div>
         <div class="header-actions">
-            <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
+            <button class="btn-refresh" id="refreshBtn">手動重整介面</button>
         </div>
     </div>
 
     <div id="toastAlert" class="toast-notification">
         <div class="toast-header">🔔 系統即時通知</div>
-        <div class="toast-body">偵測到雲端資料庫有全新的客戶預約進來囉！請更新頁面以載入最新清單。</div>
+        <div class="toast-body">有全新的客戶預約進來囉！您的清單已經自動更新排好了。</div>
         <div class="toast-actions">
-            <button class="btn-toast-close" id="closeToastBtn">暫時關閉</button>
-            <button class="btn-toast-update" id="updateToastBtn">立即更新</button>
+            <button class="btn-toast-close" id="closeToastBtn">我知道了</button>
         </div>
     </div>
 
@@ -434,7 +250,7 @@
                     <input type="number" id="discountConfigInput" class="input-discount" min="10" max="99" value="95">
                     <span style="font-weight: 700; color: #2B2D42;">折</span>
                 </div>
-                <div style="font-size: 0.85rem; color: #888; text-align:center; margin-top:10px;">(例如輸入 90 代表 9 折，85 代表 85 折)</div>
+                <div style="font-size: 0.85rem; color: #888; text-align:center; margin-top:10px;">(例如輸入 90 代表 9 折)</div>
             </div>
             <div class="modal-actions">
                 <button class="btn-modal btn-cancel" id="closeDiscountBtn">取消返回</button>
@@ -482,7 +298,6 @@
     <div id="textConfigModal" class="modal-overlay">
         <div class="modal-content">
             <h3>📝 編輯專頁標題與副標題</h3>
-            <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px;">自訂客戶在預約頁面第一眼看到的標題文案。</p>
             <div style="margin: 20px 0; text-align: left; display:flex; flex-direction:column; gap:15px;">
                 <div>
                     <label style="font-weight: 700; color: #4A4E69; margin-bottom:8px; display:block;">專頁主標題</label>
@@ -500,120 +315,22 @@
         </div>
     </div>
 
-    <div id="expenseModal" class="modal-overlay">
-        <div class="modal-content expense-modal-content">
-            <h3 style="text-align: center; color: var(--text-dark); font-family: 'Cinzel', sans-serif; margin-bottom: 5px;">🛒 耗材進貨 & 電費紀錄</h3>
-            <p id="expenseMonthLabel" style="text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 20px;"></p>
-
-            <div class="expense-section">
-                <h4>⚡ 本月電費</h4>
-                <div class="expense-input-row">
-                    <div>
-                        <label>總計金額 (元)</label>
-                        <input type="number" id="electricityBillInput" class="input-discount" style="width: 150px; text-align: left;" value="0" min="0">
-                    </div>
-                </div>
-            </div>
-
-            <div class="expense-section">
-                <h4>🛍️ 耗材進貨</h4>
-                <div class="expense-input-row">
-                    <div>
-                        <label>品名</label>
-                        <input type="text" id="itemName" style="width: 140px; text-align: left;" class="input-discount" placeholder="例如: 凝膠、鑽飾">
-                    </div>
-                    <div>
-                        <label>數量</label>
-                        <input type="number" id="itemQty" style="width: 80px;" class="input-discount" value="1" min="1">
-                    </div>
-                    <div>
-                        <label>合計 (元)</label>
-                        <input type="number" id="itemTotal" style="width: 100px; text-align: left;" class="input-discount" min="0">
-                    </div>
-                    <div>
-                        <button id="addItemBtn" class="btn-refresh" style="padding: 10px 15px;">新增</button>
-                    </div>
-                </div>
-                
-                <div class="consumable-table-wrapper">
-                    <table>
-                        <thead>
-                            <tr><th>品名</th><th>數量</th><th>合計金額</th><th style="text-align: center;">操作</th></tr>
-                        </thead>
-                        <tbody id="consumableList">
-                            </tbody>
-                    </table>
-                </div>
-                <div style="text-align: right; margin-top: 15px; font-size: 1.05rem; font-weight: 700; color: var(--text-dark);">
-                    本月耗材總計：<span style="color: var(--danger-red);">$<span id="consumableTotalSum">0</span></span>
-                </div>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn-modal btn-cancel" id="closeExpenseBtn">取消返回</button>
-                <button class="btn-modal btn-confirm-success" id="saveExpenseBtn">💾 儲存本月紀錄</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="reportModal" class="modal-overlay">
-        <div class="modal-content report-modal-content">
-            <h3>📊 營運財務報告</h3>
-            <div class="report-note">💡 系統已自動將「實收營業額」扣除您登記的「當月耗材與電費」以計算淨利潤。</div>
-            <div class="report-grid">
-                <div class="report-card">
-                    <div class="report-title">本月結算淨利潤 <span style="font-size: 0.8rem; font-weight: normal;">(結算至 <span id="monthlyMonthLabel"></span>)</span></div>
-                    <div class="report-value" id="monthlyNetValue">$0</div>
-                    <div class="report-subtitle" id="monthlyBreakdownLabel">實收 $0 | 耗材 -$0 | 電費 -$0</div>
-                </div>
-                <div class="report-card">
-                    <div class="report-title">年度結算淨利潤 <span style="font-size: 0.8rem; font-weight: normal;">(結算至 <span id="annualYearLabel"></span>)</span></div>
-                    <div class="report-value" id="annualNetValue">$0</div>
-                    <div class="report-subtitle" id="annualBreakdownLabel">實收 $0 | 耗材 -$0 | 電費 -$0</div>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-modal btn-cancel" id="closeReportBtn">關閉視窗</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="deleteModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-icon">⚠️</div>
-            <h3>確定要刪除這筆預約嗎？</h3>
-            <p>注意：刪除後資料將無法復原！<br>請確認客戶已完成服務或是確定取消預約。</p>
-            <div class="modal-actions">
-                <button class="btn-modal btn-cancel" id="cancelDeleteBtn">取消保留</button>
-                <button class="btn-modal btn-confirm-delete" id="confirmDeleteBtn">確認刪除</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="imageModal" class="modal-overlay">
-        <div class="modal-content img-modal-content">
-            <h3>📑 美甲服務同意書暨雙方簽名紀錄</h3>
-            <div class="preview-img-container">
-                <img id="previewImage" src="" alt="同意書合約與雙方簽名截圖">
-            </div>
-            <div class="modal-actions">
-                <button class="btn-modal btn-cancel" id="closeImgModalBtn">關閉視窗</button>
-                <button class="btn-modal btn-download-img" id="downloadImgBtn">📥 下載存檔</button>
-            </div>
-        </div>
-    </div>
+    <div id="expenseModal" class="modal-overlay"><div class="modal-content expense-modal-content"><h3 style="text-align: center;">🛒 耗材進貨 & 電費紀錄</h3><p id="expenseMonthLabel" style="text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 20px;"></p><div class="expense-section"><h4>⚡ 本月電費</h4><div class="expense-input-row"><div><label>總計金額 (元)</label><input type="number" id="electricityBillInput" class="input-discount" style="width: 150px; text-align: left;" value="0" min="0"></div></div></div><div class="expense-section"><h4>🛍️ 耗材進貨</h4><div class="expense-input-row"><div><label>品名</label><input type="text" id="itemName" style="width: 140px; text-align: left;" class="input-discount"></div><div><label>數量</label><input type="number" id="itemQty" style="width: 80px;" class="input-discount" value="1" min="1"></div><div><label>合計 (元)</label><input type="number" id="itemTotal" style="width: 100px; text-align: left;" class="input-discount" min="0"></div><div><button id="addItemBtn" class="btn-refresh" style="padding: 10px 15px;">新增</button></div></div><div class="consumable-table-wrapper"><table><thead><tr><th>品名</th><th>數量</th><th>合計金額</th><th style="text-align: center;">操作</th></tr></thead><tbody id="consumableList"></tbody></table></div><div style="text-align: right; margin-top: 15px; font-weight: 700;">本月耗材總計：<span style="color: var(--danger-red);">$<span id="consumableTotalSum">0</span></span></div></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeExpenseBtn">取消返回</button><button class="btn-modal btn-confirm-success" id="saveExpenseBtn">💾 儲存本月紀錄</button></div></div></div>
+    
+    <div id="reportModal" class="modal-overlay"><div class="modal-content report-modal-content"><h3>📊 營運財務報告</h3><div class="report-note">💡 系統已自動將「實收營業額」扣除您登記的「當月耗材與電費」以計算淨利潤。</div><div class="report-grid"><div class="report-card"><div class="report-title">本月結算淨利潤 <span style="font-size: 0.8rem; font-weight: normal;">(結算至 <span id="monthlyMonthLabel"></span>)</span></div><div class="report-value" id="monthlyNetValue">$0</div><div class="report-subtitle" id="monthlyBreakdownLabel">實收 $0 | 耗材 -$0 | 電費 -$0</div></div><div class="report-card"><div class="report-title">年度結算淨利潤 <span style="font-size: 0.8rem; font-weight: normal;">(結算至 <span id="annualYearLabel"></span>)</span></div><div class="report-value" id="annualNetValue">$0</div><div class="report-subtitle" id="annualBreakdownLabel">實收 $0 | 耗材 -$0 | 電費 -$0</div></div></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeReportBtn">關閉視窗</button></div></div></div>
+    
+    <div id="deleteModal" class="modal-overlay"><div class="modal-content"><div class="modal-icon">⚠️</div><h3>確定要刪除這筆預約嗎？</h3><p>注意：刪除後資料將無法復原！</p><div class="modal-actions"><button class="btn-modal btn-cancel" id="cancelDeleteBtn">取消保留</button><button class="btn-modal btn-confirm-delete" id="confirmDeleteBtn">確認刪除</button></div></div></div>
+    
+    <div id="imageModal" class="modal-overlay"><div class="modal-content img-modal-content"><h3>📑 美甲服務同意書暨雙方簽名紀錄</h3><div class="preview-img-container"><img id="previewImage" src="" alt="同意書合約與雙方簽名截圖"></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeImgModalBtn">關閉視窗</button><button class="btn-modal btn-download-img" id="downloadImgBtn">📥 下載存檔</button></div></div></div>
 
     <div id="completionModal" class="modal-overlay">
         <div class="modal-content complete-modal-content">
             <h3>✨ 服務完成與同意書簽署 ✨</h3>
-            
             <div class="completion-text">
                 <strong>【美甲服務同意書暨保固條款】</strong><br>
                 1. 本服務包含 8 天基本款式保固，非人為惡意損傷可獲得免費修補。<br>
-                2. 顧客確認今日施作之凝膠款式、指甲形狀、增厚感與色彩均符合個人期望與需求。<br>
-                3. 本合約自雙方簽名送出起即刻生效。感謝您的蒞臨，期待下次再為您換上耀眼新色彩！
+                2. 顧客確認今日施作之凝膠款式、指甲形狀、增厚感與色彩均符合個人期望與需求。
             </div>
-            
             <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
                 <div style="flex: 1; min-width: 260px; text-align: left;">
                     <label style="font-weight: 700; display: block; margin-bottom: 5px; color: var(--accent-purple); font-size: 0.9rem;">👧 顧客簽名確認 (同意上述合約條款)</label>
@@ -622,7 +339,6 @@
                     </div>
                     <input type="text" id="signatureInput" class="signature-input" style="padding: 8px; font-size: 0.95rem;" placeholder="⌨️ 或在此處以鍵盤輸入顧客姓名...">
                 </div>
-                
                 <div style="flex: 1; min-width: 260px; text-align: left;">
                     <label style="font-weight: 700; display: block; margin-bottom: 5px; color: var(--success-green); font-size: 0.9rem;">💅 美甲師簽名確認 (確認接單與結案)</label>
                     <div class="signature-area" id="signatureContainerTech" style="height: 150px; border-color: var(--success-green); margin-bottom: 8px;">
@@ -631,7 +347,6 @@
                     <input type="text" id="signatureInputTech" class="signature-input" style="padding: 8px; font-size: 0.95rem;" placeholder="⌨️ 或在此處以鍵盤輸入美甲師姓名...">
                 </div>
             </div>
-
             <div class="modal-actions">
                 <button class="btn-modal btn-cancel" id="cancelCompletionBtn">返回修改</button>
                 <button class="btn-modal btn-clear" id="clearSignatureBtn">清除重寫</button>
@@ -645,16 +360,14 @@
         <div class="modal-content" style="max-width: 500px;">
             <h3>🔍 顧客快速搜尋</h3>
             <input type="text" id="searchInput" class="signature-input" placeholder="輸入顧客姓名或電話...">
-            <div id="searchResultList" class="search-results">
-                </div>
-            <div class="modal-actions">
-                <button class="btn-modal btn-cancel" id="closeSearchBtn">關閉</button>
-            </div>
+            <div id="searchResultList" class="search-results"></div>
+            <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeSearchBtn">關閉</button></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        // 【修正亮點】引入 onSnapshot 將所有資料改為即時連動
         import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, onSnapshot, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import html2canvas from "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm";
 
@@ -686,13 +399,8 @@
         let globalExpensesData = {}; 
         let currentMonthConsumables = []; 
 
-        // 全域設定檔
         let globalConfig = {
-            firstTimeDiscount: 95,
-            pageTitle: "",
-            pageSubtitle: "",
-            styles: [],
-            addons: []
+            firstTimeDiscount: 95, pageTitle: "", pageSubtitle: "", styles: [], addons: []
         };
         let globalDiscount = 95; 
 
@@ -728,129 +436,68 @@
         const ctx = signatureCanvas.getContext('2d');
         const ctxTech = signatureCanvasTech.getContext('2d');
 
-        // 獨立控管雙方手寫狀態
         let clientSignState = { hasDrawn: false };
         let techSignState = { hasDrawn: false };
 
-        // --- 畫布(Canvas) 簽名邏輯配置 ---
+        // --- 畫布(Canvas) 邏輯 ---
         function resizeCanvas() {
             signatureCanvas.width = document.getElementById('signatureContainer').offsetWidth;
             signatureCanvas.height = document.getElementById('signatureContainer').offsetHeight;
-            ctx.lineWidth = 4;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = '#2B2D42';
+            ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#2B2D42';
 
             signatureCanvasTech.width = document.getElementById('signatureContainerTech').offsetWidth;
             signatureCanvasTech.height = document.getElementById('signatureContainerTech').offsetHeight;
-            ctxTech.lineWidth = 4;
-            ctxTech.lineCap = 'round';
-            ctxTech.strokeStyle = '#10B981'; // 美甲師簽名筆跡設為翡翠綠
+            ctxTech.lineWidth = 4; ctxTech.lineCap = 'round'; ctxTech.strokeStyle = '#10B981'; 
         }
 
-        // 雙畫布共用事件繫結函式
         function setupSignaturePad(canvas, context, stateObj, inputEl) {
             let isDrawing = false;
-            
             function startDrawing(e) {
-                isDrawing = true;
-                stateObj.hasDrawn = true;
-                if(inputEl) inputEl.value = ''; 
-                draw(e);
+                isDrawing = true; stateObj.hasDrawn = true; if(inputEl) inputEl.value = ''; draw(e);
             }
-
-            function stopDrawing() {
-                isDrawing = false;
-                context.beginPath();
-            }
-
+            function stopDrawing() { isDrawing = false; context.beginPath(); }
             function draw(e) {
-                if (!isDrawing) return;
-                e.preventDefault(); 
+                if (!isDrawing) return; e.preventDefault(); 
                 let clientX, clientY;
-                
-                if (e.type.includes('touch')) {
-                    clientX = e.touches[0].clientX;
-                    clientY = e.touches[0].clientY;
-                } else {
-                    clientX = e.clientX;
-                    clientY = e.clientY;
-                }
-                
+                if (e.type.includes('touch')) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; } 
+                else { clientX = e.clientX; clientY = e.clientY; }
                 const rect = canvas.getBoundingClientRect();
-                const x = clientX - rect.left;
-                const y = clientY - rect.top;
-                
-                context.lineTo(x, y);
-                context.stroke();
-                context.beginPath();
-                context.moveTo(x, y);
+                const x = clientX - rect.left; const y = clientY - rect.top;
+                context.lineTo(x, y); context.stroke(); context.beginPath(); context.moveTo(x, y);
             }
-
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
-
-            canvas.addEventListener('touchstart', startDrawing, {passive: false});
-            canvas.addEventListener('touchmove', draw, {passive: false});
-            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseout', stopDrawing);
+            canvas.addEventListener('touchstart', startDrawing, {passive: false}); canvas.addEventListener('touchmove', draw, {passive: false}); canvas.addEventListener('touchend', stopDrawing);
         }
 
-        // 初始化雙手寫板事件
         setupSignaturePad(signatureCanvas, ctx, clientSignState, signatureInput);
         setupSignaturePad(signatureCanvasTech, ctxTech, techSignState, signatureInputTech);
 
-        // 清除按鈕重設
         clearSignatureBtn.addEventListener('click', () => {
             ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
             ctxTech.clearRect(0, 0, signatureCanvasTech.width, signatureCanvasTech.height);
-            signatureInput.value = '';
-            signatureInputTech.value = '';
-            clientSignState.hasDrawn = false;
-            techSignState.hasDrawn = false;
+            signatureInput.value = ''; signatureInputTech.value = '';
+            clientSignState.hasDrawn = false; techSignState.hasDrawn = false;
         });
 
-        signatureInput.addEventListener('input', () => {
-            if (clientSignState.hasDrawn) {
-                ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
-                clientSignState.hasDrawn = false;
-            }
-        });
+        signatureInput.addEventListener('input', () => { if (clientSignState.hasDrawn) { ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height); clientSignState.hasDrawn = false; }});
+        signatureInputTech.addEventListener('input', () => { if (techSignState.hasDrawn) { ctxTech.clearRect(0, 0, signatureCanvasTech.width, signatureCanvasTech.height); techSignState.hasDrawn = false; }});
 
-        signatureInputTech.addEventListener('input', () => {
-            if (techSignState.hasDrawn) {
-                ctxTech.clearRect(0, 0, signatureCanvasTech.width, signatureCanvasTech.height);
-                techSignState.hasDrawn = false;
-            }
-        });
-
-        // --- 讀取所有支出資料 ---
+        // --- 耗材與電費管理 ---
         async function loadExpenses() {
             try {
                 const querySnapshot = await getDocs(collection(db, "monthly_expenses"));
                 let tempExpenses = {};
-                querySnapshot.forEach((doc) => {
-                    tempExpenses[doc.id] = doc.data(); 
-                });
+                querySnapshot.forEach((doc) => { tempExpenses[doc.id] = doc.data(); });
                 globalExpensesData = tempExpenses;
-            } catch (error) {
-                console.error("讀取成本支出失敗: ", error);
-            }
+            } catch (error) { console.error("讀取成本支出失敗: ", error); }
         }
 
-        // --- 耗材與電費管理邏輯 ---
         function renderConsumables() {
-            consumableList.innerHTML = '';
-            let total = 0;
+            consumableList.innerHTML = ''; let total = 0;
             currentMonthConsumables.forEach((item, index) => {
                 total += parseInt(item.total);
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${item.name}</td>
-                    <td>${item.qty}</td>
-                    <td style="color: var(--accent-purple); font-weight: 700;">$${item.total}</td>
-                    <td style="text-align: center;"><button class="btn-delete-row" data-index="${index}" style="padding: 4px 8px;">刪除</button></td>
-                `;
+                tr.innerHTML = `<td>${item.name}</td><td>${item.qty}</td><td style="color: var(--accent-purple); font-weight: 700;">$${item.total}</td><td style="text-align: center;"><button class="btn-delete-row" data-index="${index}" style="padding: 4px 8px;">刪除</button></td>`;
                 consumableList.appendChild(tr);
             });
             document.getElementById('consumableTotalSum').innerText = total.toLocaleString();
@@ -859,8 +506,7 @@
         consumableList.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-delete-row')) {
                 const index = e.target.getAttribute('data-index');
-                currentMonthConsumables.splice(index, 1);
-                renderConsumables();
+                currentMonthConsumables.splice(index, 1); renderConsumables();
             }
         });
 
@@ -868,107 +514,48 @@
             const name = document.getElementById('itemName').value.trim();
             const qty = parseInt(document.getElementById('itemQty').value);
             const total = parseInt(document.getElementById('itemTotal').value);
-
-            if (!name || isNaN(qty) || isNaN(total) || qty < 1 || total < 0) {
-                alert("⚠️ 請填寫完整的品名、正確的數量與合計金額！");
-                return;
-            }
-
-            currentMonthConsumables.push({ name, qty, total });
-            renderConsumables();
-
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemQty').value = '1';
-            document.getElementById('itemTotal').value = '';
-            document.getElementById('itemName').focus();
+            if (!name || isNaN(qty) || isNaN(total) || qty < 1 || total < 0) { alert("⚠️ 請填寫完整的品名、數量與合計！"); return; }
+            currentMonthConsumables.push({ name, qty, total }); renderConsumables();
+            document.getElementById('itemName').value = ''; document.getElementById('itemQty').value = '1'; document.getElementById('itemTotal').value = '';
         });
 
-        closeExpenseBtn.addEventListener('click', () => {
-            expenseModal.style.display = 'none';
-        });
-
+        closeExpenseBtn.addEventListener('click', () => { expenseModal.style.display = 'none'; });
         saveExpenseBtn.addEventListener('click', async () => {
-            const now = new Date();
-            const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            const now = new Date(); const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
             const electricity = parseInt(document.getElementById('electricityBillInput').value) || 0;
             const totalConsumablesCost = currentMonthConsumables.reduce((sum, item) => sum + parseInt(item.total), 0);
-
-            saveExpenseBtn.disabled = true;
-            saveExpenseBtn.innerText = "儲存中...";
-
+            saveExpenseBtn.disabled = true; saveExpenseBtn.innerText = "儲存中...";
             try {
-                const expenseData = {
-                    electricity: electricity,
-                    consumables: currentMonthConsumables,
-                    totalConsumablesCost: totalConsumablesCost,
-                    updatedAt: new Date().toISOString()
-                };
-
+                const expenseData = { electricity, consumables: currentMonthConsumables, totalConsumablesCost, updatedAt: new Date().toISOString() };
                 await setDoc(doc(db, "monthly_expenses", currentYearMonth), expenseData);
                 globalExpensesData[currentYearMonth] = expenseData;
-
-                alert("✅ 本月耗材與電費紀錄已成功儲存！");
-                expenseModal.style.display = 'none';
-            } catch (error) {
-                console.error("儲存支出失敗: ", error);
-                alert("儲存失敗，請檢查網路連線或權限！");
-            } finally {
-                saveExpenseBtn.disabled = false;
-                saveExpenseBtn.innerText = "💾 儲存本月紀錄";
-            }
+                alert("✅ 本月耗材與電費紀錄儲存成功！"); expenseModal.style.display = 'none';
+            } catch (error) { alert("儲存失敗！"); } 
+            finally { saveExpenseBtn.disabled = false; saveExpenseBtn.innerText = "💾 儲存本月紀錄"; }
         });
 
-        // --- 關閉完成確認對話框邏輯 ---
-        cancelCompletionBtn.addEventListener('click', () => {
-            completionModal.style.display = 'none';
-            targetCompleteId = null;
-        });
-
-        // --- 送出完成確認 + 整合雙方簽署之同意書截圖上傳 Firebase 邏輯 ---
+        // --- 結案與同意書 ---
+        cancelCompletionBtn.addEventListener('click', () => { completionModal.style.display = 'none'; targetCompleteId = null; });
         confirmCompletionBtn.addEventListener('click', async () => {
             if (!targetCompleteId) return;
-
-            const typedName = signatureInput.value.trim();
-            const typedNameTech = signatureInputTech.value.trim();
-            const signatureDataUrl = signatureCanvas.toDataURL('image/png');
-            const signatureDataUrlTech = signatureCanvasTech.toDataURL('image/png');
+            const typedName = signatureInput.value.trim(); const typedNameTech = signatureInputTech.value.trim();
+            const signatureDataUrl = signatureCanvas.toDataURL('image/png'); const signatureDataUrlTech = signatureCanvasTech.toDataURL('image/png');
             
-            // 驗證雙方簽章與核准狀態
-            if (!clientSignState.hasDrawn && typedName === '') {
-                alert('請水水顧客在畫布上簽名，或在下方欄位打上姓名唷！');
-                return;
-            }
-            if (!techSignState.hasDrawn && typedNameTech === '') {
-                alert('美甲師必須簽名或輸入姓名以確認接單結案唷！');
-                return;
-            }
+            if (!clientSignState.hasDrawn && typedName === '') { alert('請顧客簽名或輸入姓名！'); return; }
+            if (!techSignState.hasDrawn && typedNameTech === '') { alert('請美甲師簽名或輸入姓名確認！'); return; }
 
             try {
-                confirmCompletionBtn.innerText = "同步雙簽同意書中...";
-                confirmCompletionBtn.disabled = true;
-
-                const modalActions = completionModal.querySelector('.modal-actions');
-                modalActions.style.display = 'none';
-
+                confirmCompletionBtn.innerText = "同步雙簽同意書中..."; confirmCompletionBtn.disabled = true;
+                const modalActions = completionModal.querySelector('.modal-actions'); modalActions.style.display = 'none';
                 const modalContent = completionModal.querySelector('.complete-modal-content');
                 let finalScreenshotUrl = "";
                 
                 try {
-                    const capturedCanvas = await html2canvas(modalContent, {
-                        backgroundColor: '#FFFFFF',
-                        scale: 2, 
-                        logging: false,
-                        useCORS: true
-                    });
+                    const capturedCanvas = await html2canvas(modalContent, { backgroundColor: '#FFFFFF', scale: 2, logging: false, useCORS: true });
                     finalScreenshotUrl = capturedCanvas.toDataURL('image/jpeg', 0.85);
-                } catch (screenshotError) {
-                    console.error("對話框擷取失敗，改採基本備份: ", screenshotError);
-                    finalScreenshotUrl = signatureDataUrl; 
-                }
+                } catch (err) { finalScreenshotUrl = signatureDataUrl; }
 
                 modalActions.style.display = 'flex';
-
-                // 同步將雙方合約狀態寫回資料庫 nail_bookings
                 await updateDoc(doc(db, "nail_bookings", targetCompleteId), {
                     status: "completed",
                     clientSignature: clientSignState.hasDrawn ? signatureDataUrl : null,
@@ -979,153 +566,95 @@
                     completedAt: new Date().toISOString()
                 });
 
-                completionModal.style.display = 'none';
-                alert("✅ 結案成功！已完成服務並為您建立包含雙方簽名之美甲服務同意書紀錄。");
-                await loadBookings(); 
-            } catch (error) {
-                console.error("更新完成狀態與截圖失敗: ", error);
-                alert("儲存失敗，請檢查網路連線！");
-                const modalActions = completionModal.querySelector('.modal-actions');
-                if (modalActions) modalActions.style.display = 'flex';
-            } finally {
-                confirmCompletionBtn.innerText = "✅ 確認送出結案";
-                confirmCompletionBtn.disabled = false;
-                targetCompleteId = null;
-            }
+                completionModal.style.display = 'none'; alert("✅ 結案成功！"); 
+            } catch (error) { alert("儲存失敗！"); } 
+            finally { confirmCompletionBtn.innerText = "✅ 確認送出結案"; confirmCompletionBtn.disabled = false; targetCompleteId = null; }
         });
 
-        // --- 提醒吐司控制 ---
-        const toastAlert = document.getElementById('toastAlert');
-        document.getElementById('closeToastBtn').addEventListener('click', () => toastAlert.style.display = 'none');
-        document.getElementById('updateToastBtn').addEventListener('click', () => {
-            toastAlert.style.display = 'none';
-            loadBookings();
-        });
-
-        // --- 刪除控制邏輯 ---
-        cancelDeleteBtn.addEventListener('click', () => {
-            deleteModal.style.display = 'none';
-            targetDeleteId = null;
-        });
-
+        // --- 刪除控制 ---
+        cancelDeleteBtn.addEventListener('click', () => { deleteModal.style.display = 'none'; targetDeleteId = null; });
         confirmDeleteBtn.addEventListener('click', async () => {
             if (!targetDeleteId) return;
             try {
-                confirmDeleteBtn.innerText = "刪除中...";
-                confirmDeleteBtn.disabled = true;
+                confirmDeleteBtn.innerText = "刪除中..."; confirmDeleteBtn.disabled = true;
                 await deleteDoc(doc(db, "nail_bookings", targetDeleteId));
                 deleteModal.style.display = 'none';
-                await loadBookings();
-            } catch (error) {
-                console.error("刪除失敗: ", error);
-                alert("刪除失敗，請檢查網路連線或權限設定！");
-            } finally {
-                confirmDeleteBtn.innerText = "確認刪除";
-                confirmDeleteBtn.disabled = false;
-                targetDeleteId = null;
-            }
+            } catch (error) { alert("刪除失敗！"); } 
+            finally { confirmDeleteBtn.innerText = "確認刪除"; confirmDeleteBtn.disabled = false; targetDeleteId = null; }
         });
 
-        // --- 圖片預覽與下載控制邏輯 ---
-        closeImgModalBtn.addEventListener('click', () => {
-            imageModal.style.display = 'none';
-            previewImage.src = '';
-            currentViewingImgData = null;
-            currentViewingClientName = '';
-        });
-
-        document.getElementById('bookingListTbody').addEventListener('click', (e) => {
-            if (e.target.classList.contains('btn-complete-row')) {
-                targetCompleteId = e.target.getAttribute('data-id');
-                completionModal.style.display = 'flex';
-                
-                setTimeout(resizeCanvas, 120); 
-                ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
-                ctxTech.clearRect(0, 0, signatureCanvasTech.width, signatureCanvasTech.height);
-                signatureInput.value = '';
-                signatureInputTech.value = '';
-                clientSignState.hasDrawn = false;
-                techSignState.hasDrawn = false;
-            }
-
-            if (e.target.classList.contains('btn-view-img')) {
-                const id = e.target.getAttribute('data-id');
-                const rawName = e.target.getAttribute('data-name');
-                
-                currentViewingClientName = rawName ? rawName.replace(/〔初〕/g, '').trim() : '客戶';
-                currentViewingImgData = screenshotsMap.get(id);
-
-                if (currentViewingImgData) {
-                    previewImage.src = currentViewingImgData;
-                    imageModal.style.display = 'flex';
-                }
-            }
-
-            if (e.target.classList.contains('btn-delete-row')) {
-                targetDeleteId = e.target.getAttribute('data-id');
-                deleteModal.style.display = 'flex';
-            }
-        });
-
+        // --- 圖片預覽 ---
+        closeImgModalBtn.addEventListener('click', () => { imageModal.style.display = 'none'; previewImage.src = ''; });
         downloadImgBtn.addEventListener('click', () => {
             if (!currentViewingImgData) return;
-            const link = document.createElement('a');
-            link.href = currentViewingImgData;
-            link.download = `${currentViewingClientName}_美甲服務雙簽同意書.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const link = document.createElement('a'); link.href = currentViewingImgData; link.download = `${currentViewingClientName}_同意書.jpg`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
         });
 
-        // --- 音效提示 ---
+        // --- 表格點擊事件代理 ---
+        document.getElementById('bookingListTbody').addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-complete-row')) {
+                targetCompleteId = e.target.getAttribute('data-id'); completionModal.style.display = 'flex';
+                setTimeout(resizeCanvas, 120); ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height); ctxTech.clearRect(0, 0, signatureCanvasTech.width, signatureCanvasTech.height);
+                signatureInput.value = ''; signatureInputTech.value = ''; clientSignState.hasDrawn = false; techSignState.hasDrawn = false;
+            }
+            if (e.target.classList.contains('btn-view-img')) {
+                const id = e.target.getAttribute('data-id'); const rawName = e.target.getAttribute('data-name');
+                currentViewingClientName = rawName ? rawName.replace(/〔初〕/g, '').trim() : '客戶'; currentViewingImgData = screenshotsMap.get(id);
+                if (currentViewingImgData) { previewImage.src = currentViewingImgData; imageModal.style.display = 'flex'; }
+            }
+            if (e.target.classList.contains('btn-delete-row')) {
+                targetDeleteId = e.target.getAttribute('data-id'); deleteModal.style.display = 'flex';
+            }
+        });
+
         function playNotificationChime() {
             try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                const ctx = new AudioContext();
-                const now = ctx.currentTime;
-                const osc1 = ctx.createOscillator();
-                const gain1 = ctx.createGain();
-                osc1.type = 'sine'; osc1.frequency.setValueAtTime(659.25, now);
-                gain1.gain.setValueAtTime(0.2, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc1.connect(gain1); gain1.connect(ctx.destination);
-                osc1.start(now); osc1.stop(now + 0.3);
-                const osc2 = ctx.createOscillator();
-                const gain2 = ctx.createGain();
-                osc2.type = 'sine'; osc2.frequency.setValueAtTime(880.00, now + 0.1);
-                gain2.gain.setValueAtTime(0.2, now + 0.1); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-                osc2.connect(gain2); gain2.connect(ctx.destination);
-                osc2.start(now + 0.1); osc2.stop(now + 0.5);
-            } catch (e) {
-                console.warn("瀏覽器尚未授權音效播放: ", e);
-            }
+                const AudioContext = window.AudioContext || window.webkitAudioContext; if (!AudioContext) return;
+                const ctx = new AudioContext(); const now = ctx.currentTime; const osc1 = ctx.createOscillator(); const gain1 = ctx.createGain();
+                osc1.type = 'sine'; osc1.frequency.setValueAtTime(659.25, now); gain1.gain.setValueAtTime(0.2, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc1.connect(gain1); gain1.connect(ctx.destination); osc1.start(now); osc1.stop(now + 0.3);
+                const osc2 = ctx.createOscillator(); const gain2 = ctx.createGain(); osc2.type = 'sine'; osc2.frequency.setValueAtTime(880.00, now + 0.1); gain2.gain.setValueAtTime(0.2, now + 0.1); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                osc2.connect(gain2); gain2.connect(ctx.destination); osc2.start(now + 0.1); osc2.stop(now + 0.5);
+            } catch (e) { }
         }
 
-        // --- 核心資料載入與渲染 ---
-        async function loadBookings() {
+        // ===================================================
+        // 核心修正：將資料載入改為即時監聽 (onSnapshot)
+        // ===================================================
+        let isFirstListeningLoad = true;
+        const toastAlert = document.getElementById('toastAlert');
+        document.getElementById('closeToastBtn').addEventListener('click', () => toastAlert.style.display = 'none');
+
+        async function initRealtimeBookings() {
             const tbody = document.getElementById('bookingListTbody');
             const loading = document.getElementById('loading');
             const table = document.getElementById('bookingTable');
             
-            toastAlert.style.display = 'none'; 
-            loading.style.display = 'block';
-            table.style.display = 'none';
-            tbody.innerHTML = '';
-            screenshotsMap.clear(); 
-
-            await fetchSystemConfig();
             await loadExpenses(); 
 
-            try {
-                const querySnapshot = await getDocs(collection(db, "nail_bookings"));
+            // 監聽 system_settings/booking_config，確保多位管理員同時操作時，設定能同步
+            onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
+                if (docSnap.exists()) {
+                    globalConfig = { ...globalConfig, ...docSnap.data() };
+                    if (globalConfig.firstTimeDiscount) {
+                        globalDiscount = globalConfig.firstTimeDiscount;
+                        document.getElementById('discountConfigInput').value = globalDiscount;
+                    }
+                }
+            });
+
+            // 即時監聽預約訂單：只要有新單、刪單、狀態改變，全部自動重新整理表格！
+            onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
                 let rawList = [];
-                
-                querySnapshot.forEach((doc) => {
+                screenshotsMap.clear(); 
+
+                snapshot.forEach((doc) => {
                     rawList.push({ id: doc.id, ...doc.data() });
                 });
-                
                 globalBookingsData = rawList;
 
+                // 排序：日期由舊到新，時間由早到晚
                 rawList.sort((a, b) => {
                     if (a.bookingDate !== b.bookingDate) return a.bookingDate.localeCompare(b.bookingDate);
                     return a.bookingTime.localeCompare(b.bookingTime);
@@ -1135,46 +664,35 @@
                 rawList.forEach(item => {
                     const key = `${item.bookingDate}_${item.bookingTime}`;
                     timeCounts[key] = (timeCounts[key] || 0) + 1;
-                    
-                    if (item.warrantyScreenshot) {
-                        screenshotsMap.set(item.id, item.warrantyScreenshot);
-                    }
+                    if (item.warrantyScreenshot) { screenshotsMap.set(item.id, item.warrantyScreenshot); }
                 });
 
                 if(rawList.length === 0) {
-                    loading.innerText = "目前雲端尚無預約客戶預約資料。";
-                    return;
+                    loading.style.display = 'block'; loading.innerText = "目前雲端尚無預約客戶預約資料。"; table.style.display = 'none'; return;
                 }
 
+                // 重新渲染表格
+                tbody.innerHTML = '';
                 rawList.forEach(item => {
                     const tr = document.createElement('tr');
                     const key = `${item.bookingDate}_${item.bookingTime}`;
                     const isOverlap = timeCounts[key] > 1;
-                    
                     if (isOverlap) tr.className = 'overlap-row'; 
 
                     let addonsHTML = '';
                     if (item.selectedAddons && item.selectedAddons.length > 0) {
-                        item.selectedAddons.forEach((addon, index) => {
-                            addonsHTML += `<span class="addon-tag">${index + 1}. ${addon}</span>`;
-                        });
-                    } else {
-                        addonsHTML = '<span style="color:#aaa; font-size:0.85rem;">無</span>';
-                    }
+                        item.selectedAddons.forEach((addon, index) => { addonsHTML += `<span class="addon-tag">${index + 1}. ${addon}</span>`; });
+                    } else { addonsHTML = '<span style="color:#aaa; font-size:0.85rem;">無</span>'; }
 
                     const isNewGuest = item.isFirstTime === true || (item.clientName && item.clientName.includes('〔初〕'));
                     let nameHTML = '';
                     if (isNewGuest) {
                         let cleanName = item.clientName ? item.clientName.replace('〔初〕', '') : '未填';
                         nameHTML = `<span class="client-name new-guest">〔初〕${cleanName}</span>`;
-                    } else {
-                        nameHTML = `<span class="client-name">${item.clientName || '未填'}</span>`;
-                    }
+                    } else { nameHTML = `<span class="client-name">${item.clientName || '未填'}</span>`; }
 
                     const isCompleted = item.status === "completed";
-                    if (isCompleted) {
-                        nameHTML += `<br><span class="status-completed" style="margin-top: 5px;">✅ 已完成雙簽</span>`;
-                    }
+                    if (isCompleted) { nameHTML += `<br><span class="status-completed" style="margin-top: 5px;">✅ 已完成雙簽</span>`; }
 
                     let priceHTML = '';
                     if (item.priceCalculations) {
@@ -1182,394 +700,187 @@
                         const base = item.priceCalculations.basePrice;
                         const addon = item.priceCalculations.addonPrice;
                         const discount = item.priceCalculations.discountPrice || 0;
-
                         if (isNewGuest && discount > 0) {
-                            const originalSum = base + addon;
-                            priceHTML = `
-                                <span class="total-price">$${total}
-                                    <span class="price-discount-tag">現折 ${globalDiscount} 折 (-$${discount.toLocaleString()})</span>
-                                    <span class="price-detail-sub">原價: $${originalSum.toLocaleString()}</span>
-                                </span>`;
-                        } else {
-                            priceHTML = `<span class="total-price">$${total}</span>`;
-                        }
-                    } else {
-                        priceHTML = `<span class="total-price">$0</span>`;
-                    }
+                            priceHTML = `<span class="total-price">$${total}<span class="price-discount-tag">現折 ${globalDiscount} 折 (-$${discount.toLocaleString()})</span><span class="price-detail-sub">原價: $${(base+addon).toLocaleString()}</span></span>`;
+                        } else { priceHTML = `<span class="total-price">$${total}</span>`; }
+                    } else { priceHTML = `<span class="total-price">$0</span>`; }
 
-                    let screenshotHTML = '';
-                    if (item.warrantyScreenshot) {
-                        screenshotHTML = `<button class="btn-view-img" data-id="${item.id}" data-name="${item.clientName || '客戶'}">👁️ 查看同意書</button>`;
-                    } else {
-                        screenshotHTML = `<span style="color:#aaa; font-size:0.85rem;">尚未簽署</span>`;
-                    }
-
-                    let completeBtnHTML = isCompleted 
-                        ? '' 
-                        : `<button class="btn-complete-row" data-id="${item.id}">✅ 結案簽名</button>`;
+                    let screenshotHTML = item.warrantyScreenshot ? `<button class="btn-view-img" data-id="${item.id}" data-name="${item.clientName || '客戶'}">👁️ 查看同意書</button>` : `<span style="color:#aaa; font-size:0.85rem;">尚未簽署</span>`;
+                    let completeBtnHTML = isCompleted ? '' : `<button class="btn-complete-row" data-id="${item.id}">✅ 結案簽名</button>`;
 
                     tr.innerHTML = `
-                        <td>
-                            <div class="datetime-badge">
-                                <span class="date-item">📅 ${item.bookingDate}</span>
-                                <span class="time-item">${item.bookingTime}</span>
-                                ${isOverlap ? '<span class="overlap-warning">⚠️ 時段重複重疊！</span>' : ''}
-                            </div>
-                        </td>
-                        <td>${nameHTML}</td>
-                        <td><strong>${item.clientPhone || '未填'}</strong></td>
-                        <td>${item.selectedStyle || '未選擇'}</td>
-                        <td>${addonsHTML}</td>
-                        <td>${priceHTML}</td>
-                        <td style="text-align:center;">${screenshotHTML}</td> <td><div class="notes-text">${item.notes || '<span style="color:#ccc;">無備註</span>'}</div></td>
-                        <td>
-                            <div class="action-btns">
-                                ${completeBtnHTML}
-                                <button class="btn-delete-row" data-id="${item.id}">🗑️ 刪除紀錄</button>
-                            </div>
-                        </td>
+                        <td><div class="datetime-badge"><span class="date-item">📅 ${item.bookingDate}</span><span class="time-item">${item.bookingTime}</span>${isOverlap ? '<span class="overlap-warning">⚠️ 時段重複重疊！</span>' : ''}</div></td>
+                        <td>${nameHTML}</td><td><strong>${item.clientPhone || '未填'}</strong></td><td>${item.selectedStyle || '未選擇'}</td><td>${addonsHTML}</td><td>${priceHTML}</td>
+                        <td style="text-align:center;">${screenshotHTML}</td><td><div class="notes-text">${item.notes || '<span style="color:#ccc;">無備註</span>'}</div></td>
+                        <td><div class="action-btns">${completeBtnHTML}<button class="btn-delete-row" data-id="${item.id}">🗑️ 刪除紀錄</button></div></td>
                     `;
                     tbody.appendChild(tr);
                 });
 
-                loading.style.display = 'none';
-                table.style.display = 'table';
+                loading.style.display = 'none'; table.style.display = 'table';
 
-            } catch (error) {
-                console.error("讀取後台失敗: ", error);
-                loading.innerText = "讀取雲端資料失敗，請確認 Firebase 設定或權限規則。";
-            }
-        }
-
-        // --- Firebase 即時監聽 ---
-        let isFirstListeningLoad = true;
-        onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
-            if (isFirstListeningLoad) {
+                // 只要不是第一次載入，且有新增的單，就跳出提示與音效
+                const hasNewBooking = snapshot.docChanges().some(change => change.type === "added");
+                if (!isFirstListeningLoad && hasNewBooking) {
+                    toastAlert.style.display = 'flex'; playNotificationChime();
+                }
                 isFirstListeningLoad = false;
-                return;
-            }
-            const hasNewBooking = snapshot.docChanges().some(change => change.type === "added");
-            if (hasNewBooking) {
-                toastAlert.style.display = 'flex';
-                playNotificationChime();
-            }
-        });
+            });
+        }
+        
+        // 輔助功能：手動點擊重整 (雖然有即時同步，但保留按鈕讓使用者安心)
+        document.getElementById('refreshBtn').addEventListener('click', () => { toastAlert.style.display = 'none'; alert('資料已為您保持最新同步！'); });
 
-        document.getElementById('refreshBtn').addEventListener('click', loadBookings);
 
         // ===================================================
         // 漢堡選單與各種設定編輯 (全面同步 Firebase)
         // ===================================================
-
-        // --- 側邊漢堡選單控制 ---
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
-        
-        document.getElementById('openSidebarBtn').addEventListener('click', () => {
-            sidebarOverlay.style.display = 'block';
-            setTimeout(() => { 
-                sidebarOverlay.style.opacity = '1'; 
-                sidebar.style.left = '0'; 
-            }, 10);
-        });
+        document.getElementById('openSidebarBtn').addEventListener('click', () => { sidebarOverlay.style.display = 'block'; setTimeout(() => { sidebarOverlay.style.opacity = '1'; sidebar.style.left = '0'; }, 10); });
+        function closeSidebar() { sidebar.style.left = '-320px'; sidebarOverlay.style.opacity = '0'; setTimeout(() => { sidebarOverlay.style.display = 'none'; }, 300); }
+        document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar); sidebarOverlay.addEventListener('click', closeSidebar);
 
-        function closeSidebar() {
-            sidebar.style.left = '-320px';
-            sidebarOverlay.style.opacity = '0';
-            setTimeout(() => { sidebarOverlay.style.display = 'none'; }, 300);
-        }
-
-        document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
-        sidebarOverlay.addEventListener('click', closeSidebar);
-
-        // --- 通用儲存設定至 Firebase 函式 ---
         async function updateSystemConfig(updateData, btnElement, defaultText) {
             try {
-                btnElement.innerText = "儲存中...";
-                btnElement.disabled = true;
-
-                await setDoc(doc(db, "system_settings", "booking_config"), {
-                    ...updateData,
-                    updatedAt: new Date().toISOString()
-                }, { merge: true });
-
-                globalConfig = { ...globalConfig, ...updateData };
-                alert("🎉 雲端配置已成功儲存！您的客戶預約專頁已同步更新連動。");
-                return true;
-            } catch (error) {
-                console.error("儲存設定失敗: ", error);
-                alert("儲存雲端失敗，請檢查網路連線與權限設定！");
-                return false;
-            } finally {
-                btnElement.innerText = defaultText;
-                btnElement.disabled = false;
-            }
+                btnElement.innerText = "儲存中..."; btnElement.disabled = true;
+                // 統一寫入 system_settings/booking_config
+                await setDoc(doc(db, "system_settings", "booking_config"), { ...updateData, updatedAt: new Date().toISOString() }, { merge: true });
+                alert("🎉 雲端配置已成功儲存！您的客戶預約專頁已同步更新連動。"); return true;
+            } catch (error) { alert("儲存雲端失敗！"); return false; } 
+            finally { btnElement.innerText = defaultText; btnElement.disabled = false; }
         }
 
-        // --- 讀取全域設定 ---
-        async function fetchSystemConfig() {
-            try {
-                const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    globalConfig = { ...globalConfig, ...data };
-                    
-                    if (globalConfig.firstTimeDiscount) {
-                        globalDiscount = globalConfig.firstTimeDiscount;
-                        document.getElementById('discountConfigInput').value = globalDiscount;
-                    }
-                }
-            } catch (error) {
-                console.error("讀取系統設定失敗: ", error);
-            }
-        }
-
-        // --- 選單 1: 耗材與電費 ---
         document.getElementById('menuExpenseBtn').addEventListener('click', () => {
-            closeSidebar();
-            const now = new Date();
-            const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            closeSidebar(); const now = new Date(); const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
             document.getElementById('expenseMonthLabel').innerText = `目前紀錄月份：${now.getFullYear()} 年 ${now.getMonth() + 1} 月`;
-
             const monthData = globalExpensesData[currentYearMonth] || { electricity: 0, consumables: [], totalConsumablesCost: 0 };
-            document.getElementById('electricityBillInput').value = monthData.electricity || 0;
-            currentMonthConsumables = monthData.consumables ? [...monthData.consumables] : [];
-
-            renderConsumables();
-            expenseModal.style.display = 'flex';
+            document.getElementById('electricityBillInput').value = monthData.electricity || 0; currentMonthConsumables = monthData.consumables ? [...monthData.consumables] : [];
+            renderConsumables(); expenseModal.style.display = 'flex';
         });
 
-        // --- 選單 2: 營運報表 ---
         document.getElementById('menuReportBtn').addEventListener('click', () => {
-            closeSidebar();
-            const now = new Date();
-            const currentYear = now.getFullYear().toString();
-            const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
-            const currentYearMonth = `${currentYear}-${currentMonth}`;
-
-            let monthlyGross = 0;
-            let annualGross = 0;
-
+            closeSidebar(); const now = new Date(); const currentYear = now.getFullYear().toString(); const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0'); const currentYearMonth = `${currentYear}-${currentMonth}`;
+            let monthlyGross = 0; let annualGross = 0;
             globalBookingsData.forEach(item => {
                 if (item.status === "completed" && item.priceCalculations) {
-                    const bookingDate = item.bookingDate || ""; 
-                    const price = item.priceCalculations.totalPrice || 0;
-                    if (bookingDate.startsWith(currentYear)) annualGross += price;
-                    if (bookingDate.startsWith(currentYearMonth)) monthlyGross += price;
+                    const bookingDate = item.bookingDate || ""; const price = item.priceCalculations.totalPrice || 0;
+                    if (bookingDate.startsWith(currentYear)) annualGross += price; if (bookingDate.startsWith(currentYearMonth)) monthlyGross += price;
                 }
             });
-
-            let monthlyElectricity = 0;
-            let monthlyConsumables = 0;
-            let annualElectricity = 0;
-            let annualConsumables = 0;
-
+            let monthlyElectricity = 0; let monthlyConsumables = 0; let annualElectricity = 0; let annualConsumables = 0;
             for (const [yyyyMm, data] of Object.entries(globalExpensesData)) {
-                const elec = parseInt(data.electricity) || 0;
-                const cons = parseInt(data.totalConsumablesCost) || 0;
-
-                if (yyyyMm.startsWith(currentYear)) {
-                    annualElectricity += elec;
-                    annualConsumables += cons;
-                }
-                if (yyyyMm === currentYearMonth) {
-                    monthlyElectricity += elec;
-                    monthlyConsumables += cons;
-                }
+                const elec = parseInt(data.electricity) || 0; const cons = parseInt(data.totalConsumablesCost) || 0;
+                if (yyyyMm.startsWith(currentYear)) { annualElectricity += elec; annualConsumables += cons; }
+                if (yyyyMm === currentYearMonth) { monthlyElectricity += elec; monthlyConsumables += cons; }
             }
-
-            const monthlyNet = monthlyGross - monthlyElectricity - monthlyConsumables;
-            const annualNet = annualGross - annualElectricity - annualConsumables;
-
-            document.getElementById('monthlyNetValue').innerText = `$${monthlyNet.toLocaleString()}`;
-            document.getElementById('monthlyMonthLabel').innerText = `${currentYear}年${currentMonth}月`;
+            const monthlyNet = monthlyGross - monthlyElectricity - monthlyConsumables; const annualNet = annualGross - annualElectricity - annualConsumables;
+            document.getElementById('monthlyNetValue').innerText = `$${monthlyNet.toLocaleString()}`; document.getElementById('monthlyMonthLabel').innerText = `${currentYear}年${currentMonth}月`;
             document.getElementById('monthlyBreakdownLabel').innerHTML = `實收 $${monthlyGross.toLocaleString()} &nbsp;|&nbsp; 耗材 <span style="color:var(--danger-red);">-$${monthlyConsumables.toLocaleString()}</span> &nbsp;|&nbsp; 電費 <span style="color:var(--danger-red);">-$${monthlyElectricity.toLocaleString()}</span>`;
-
-            document.getElementById('annualNetValue').innerText = `$${annualNet.toLocaleString()}`;
-            document.getElementById('annualYearLabel').innerText = `${currentYear}年度`;
+            document.getElementById('annualNetValue').innerText = `$${annualNet.toLocaleString()}`; document.getElementById('annualYearLabel').innerText = `${currentYear}年度`;
             document.getElementById('annualBreakdownLabel').innerHTML = `實收 $${annualGross.toLocaleString()} &nbsp;|&nbsp; 耗材 <span style="color:var(--danger-red);">-$${annualConsumables.toLocaleString()}</span> &nbsp;|&nbsp; 電費 <span style="color:var(--danger-red);">-$${annualElectricity.toLocaleString()}</span>`;
-
             reportModal.style.display = 'flex';
         });
-
         closeReportBtn.addEventListener('click', () => { reportModal.style.display = 'none'; });
 
-        // --- 選單 3: 折扣設定與 Firebase 連動 ---
         const discountModal = document.getElementById('discountModal');
-        document.getElementById('menuDiscountBtn').addEventListener('click', () => {
-            closeSidebar();
-            discountModal.style.display = 'flex';
-        });
+        document.getElementById('menuDiscountBtn').addEventListener('click', () => { closeSidebar(); discountModal.style.display = 'flex'; });
         document.getElementById('closeDiscountBtn').addEventListener('click', () => discountModal.style.display = 'none');
         document.getElementById('saveDiscountBtn').addEventListener('click', async () => {
             const inputVal = parseInt(document.getElementById('discountConfigInput').value);
-            if (isNaN(inputVal) || inputVal < 10 || inputVal > 99) {
-                alert("請輸入有效的折數（介於 10 到 99 之間，例如 95 代表 95 折）");
-                return;
-            }
+            if (isNaN(inputVal) || inputVal < 10 || inputVal > 99) { alert("請輸入有效的折數！"); return; }
             const btn = document.getElementById('saveDiscountBtn');
             const success = await updateSystemConfig({ firstTimeDiscount: inputVal }, btn, "確認修改折扣");
-            if (success) {
-                globalDiscount = inputVal;
-                discountModal.style.display = 'none';
-                await loadBookings();
-            }
+            if (success) discountModal.style.display = 'none';
         });
 
-        // --- 處理動態項目表格列刪除代理 ---
         function handleTableDeleteDelegation(tbodyId) {
-            document.getElementById(tbodyId).addEventListener('click', (e) => {
-                if (e.target.classList.contains('btn-delete-row')) {
-                    e.target.closest('tr').remove();
-                }
-            });
+            document.getElementById(tbodyId).addEventListener('click', (e) => { if (e.target.classList.contains('btn-delete-row')) { e.target.closest('tr').remove(); }});
         }
-        handleTableDeleteDelegation('styleListTbody');
-        handleTableDeleteDelegation('addonListTbody');
+        handleTableDeleteDelegation('styleListTbody'); handleTableDeleteDelegation('addonListTbody');
 
-        // --- 選單 4: 款式項目與價格編輯連動 ---
         const styleConfigModal = document.getElementById('styleConfigModal');
         document.getElementById('menuStyleBtn').addEventListener('click', () => {
-            closeSidebar();
-            const tbody = document.getElementById('styleListTbody');
-            tbody.innerHTML = '';
-            (globalConfig.styles || []).forEach(item => {
-                addConfigRow(tbody, item.name, item.price);
-            });
+            closeSidebar(); const tbody = document.getElementById('styleListTbody'); tbody.innerHTML = '';
+            (globalConfig.styles || []).forEach(item => { addConfigRow(tbody, item.name, item.price); });
             styleConfigModal.style.display = 'flex';
         });
         document.getElementById('closeStyleModalBtn').addEventListener('click', () => styleConfigModal.style.display = 'none');
         document.getElementById('addStyleRowBtn').addEventListener('click', () => addConfigRow(document.getElementById('styleListTbody')));
         document.getElementById('saveStyleBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('saveStyleBtn');
-            const styles = extractTableData('styleListTbody');
+            const btn = document.getElementById('saveStyleBtn'); const styles = extractTableData('styleListTbody');
             const success = await updateSystemConfig({ styles: styles }, btn, "💾 儲存所有變更");
             if (success) styleConfigModal.style.display = 'none';
         });
 
-        // --- 選單 5: 附加服務與價格編輯連動 ---
         const addonConfigModal = document.getElementById('addonConfigModal');
         document.getElementById('menuAddonBtn').addEventListener('click', () => {
-            closeSidebar();
-            const tbody = document.getElementById('addonListTbody');
-            tbody.innerHTML = '';
-            (globalConfig.addons || []).forEach(item => {
-                addConfigRow(tbody, item.name, item.price);
-            });
+            closeSidebar(); const tbody = document.getElementById('addonListTbody'); tbody.innerHTML = '';
+            (globalConfig.addons || []).forEach(item => { addConfigRow(tbody, item.name, item.price); });
             addonConfigModal.style.display = 'flex';
         });
         document.getElementById('closeAddonModalBtn').addEventListener('click', () => addonConfigModal.style.display = 'none');
         document.getElementById('addAddonRowBtn').addEventListener('click', () => addConfigRow(document.getElementById('addonListTbody')));
         document.getElementById('saveAddonBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('saveAddonBtn');
-            const addons = extractTableData('addonListTbody');
+            const btn = document.getElementById('saveAddonBtn'); const addons = extractTableData('addonListTbody');
             const success = await updateSystemConfig({ addons: addons }, btn, "💾 儲存所有變更");
             if (success) addonConfigModal.style.display = 'none';
         });
 
-        // 建立新項目列的通用函式
         function addConfigRow(tbody, name = "", price = 0) {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" class="input-discount row-name-input" style="width: 100%; text-align:left;" placeholder="輸入項目名稱" value="${name}"></td>
-                <td><input type="number" class="input-discount row-price-input" style="width: 80px;" value="${price}" min="0"></td>
-                <td style="text-align:center;"><button class="btn-delete-row" style="padding: 6px 12px;">刪除</button></td>
-            `;
+            tr.innerHTML = `<td><input type="text" class="input-discount row-name-input" style="width: 100%; text-align:left;" placeholder="輸入項目名稱" value="${name}"></td><td><input type="number" class="input-discount row-price-input" style="width: 80px;" value="${price}" min="0"></td><td style="text-align:center;"><button class="btn-delete-row" style="padding: 6px 12px;">刪除</button></td>`;
             tbody.appendChild(tr);
         }
 
-        // 讀取項目表格欄位的解構函式
         function extractTableData(tbodyId) {
-            const rows = document.getElementById(tbodyId).querySelectorAll('tr');
-            let data = [];
+            const rows = document.getElementById(tbodyId).querySelectorAll('tr'); let data = [];
             rows.forEach(row => {
-                const name = row.querySelector('.row-name-input').value.trim();
-                const price = parseInt(row.querySelector('.row-price-input').value);
-                if(name && !isNaN(price)) {
-                    data.push({ name, price });
-                }
+                const name = row.querySelector('.row-name-input').value.trim(); const price = parseInt(row.querySelector('.row-price-input').value);
+                if(name && !isNaN(price)) { data.push({ name, price }); }
             });
             return data;
         }
 
-        // --- 選單 6: 預約專頁主副標題編輯連動 ---
         const textConfigModal = document.getElementById('textConfigModal');
         document.getElementById('menuTitleBtn').addEventListener('click', () => {
-            closeSidebar();
-            document.getElementById('pageTitleInput').value = globalConfig.pageTitle || '';
-            document.getElementById('pageSubtitleInput').value = globalConfig.pageSubtitle || '';
+            closeSidebar(); document.getElementById('pageTitleInput').value = globalConfig.pageTitle || ''; document.getElementById('pageSubtitleInput').value = globalConfig.pageSubtitle || '';
             textConfigModal.style.display = 'flex';
         });
         document.getElementById('closeTextModalBtn').addEventListener('click', () => textConfigModal.style.display = 'none');
         document.getElementById('saveTextBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('saveTextBtn');
-            const title = document.getElementById('pageTitleInput').value.trim();
-            const subtitle = document.getElementById('pageSubtitleInput').value.trim();
+            const btn = document.getElementById('saveTextBtn'); const title = document.getElementById('pageTitleInput').value.trim(); const subtitle = document.getElementById('pageSubtitleInput').value.trim();
             const success = await updateSystemConfig({ pageTitle: title, pageSubtitle: subtitle }, btn, "💾 儲存標題變更");
             if (success) textConfigModal.style.display = 'none';
         });
 
-
-        // --- 顧客歷史搜尋功能控制 ---
+        // --- 顧客歷史搜尋功能 ---
         const fabSearchBtn = document.getElementById('fabSearchBtn');
         const searchModal = document.getElementById('searchModal');
-        const closeSearchBtn = document.getElementById('closeSearchBtn');
         const searchInput = document.getElementById('searchInput');
         const searchResultList = document.getElementById('searchResultList');
-
-        fabSearchBtn.addEventListener('click', () => {
-            searchModal.style.display = 'flex';
-            searchInput.value = '';
-            searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字進行搜尋</p>';
-        });
-
-        closeSearchBtn.addEventListener('click', () => {
-            searchModal.style.display = 'none';
-        });
-
+        fabSearchBtn.addEventListener('click', () => { searchModal.style.display = 'flex'; searchInput.value = ''; searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字進行搜尋</p>'; });
+        document.getElementById('closeSearchBtn').addEventListener('click', () => { searchModal.style.display = 'none'; });
         searchInput.addEventListener('input', (e) => {
             const val = e.target.value.trim().toLowerCase();
-            if (!val) {
-                searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字</p>';
-                return;
-            }
-
-            const filtered = globalBookingsData.filter(b => 
-                (b.clientName && b.clientName.toLowerCase().includes(val)) || 
-                (b.clientPhone && b.clientPhone.includes(val))
-            );
-
+            if (!val) { searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字</p>'; return; }
+            const filtered = globalBookingsData.filter(b => (b.clientName && b.clientName.toLowerCase().includes(val)) || (b.clientPhone && b.clientPhone.includes(val)));
             const latestRecordsMap = new Map();
             const sortedData = [...filtered].sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate));
-
-            sortedData.forEach(item => {
-                const key = item.clientPhone || item.clientName;
-                if (!latestRecordsMap.has(key)) {
-                    latestRecordsMap.set(key, item);
-                }
-            });
-
+            sortedData.forEach(item => { const key = item.clientPhone || item.clientName; if (!latestRecordsMap.has(key)) { latestRecordsMap.set(key, item); } });
             searchResultList.innerHTML = '';
-            if (latestRecordsMap.size === 0) {
-                searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">查無相關預約紀錄</p>';
-            } else {
+            if (latestRecordsMap.size === 0) { searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">查無相關預約紀錄</p>'; } 
+            else {
                 latestRecordsMap.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'result-item';
-                    div.innerHTML = `
-                        <div class="result-info">
-                            <span class="result-name">${item.clientName}</span>
-                            <span class="result-phone">📞 ${item.clientPhone || '無電話'}</span>
-                        </div>
-                        <div style="font-size: 0.8rem; color: #888;">${item.bookingDate}</div>
-                    `;
+                    const div = document.createElement('div'); div.className = 'result-item';
+                    div.innerHTML = `<div class="result-info"><span class="result-name">${item.clientName}</span><span class="result-phone">📞 ${item.clientPhone || '無電話'}</span></div><div style="font-size: 0.8rem; color: #888;">${item.bookingDate}</div>`;
                     searchResultList.appendChild(div);
                 });
             }
         });
 
-        // 系統啟動初始化
-        loadBookings();
+        // 系統啟動初始化 (啟動即時監聽)
+        initRealtimeBookings();
         
     </script>
 </body>
