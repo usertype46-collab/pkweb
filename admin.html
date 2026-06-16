@@ -2,672 +2,126 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>神の指藝 | 後台管理系統 v2.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>神の指藝 - 後台管理系統</title>
     <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 40%, #A1C4FD 70%, #C2E9FB 100%);
-            --header-bg: #2B2129;
-            --main-bg: #F4F6FA;
-            --card-bg: #FFFFFF;
-            --accent-purple: #7B2CBF;
-            --primary-color: #FF6B8B;
-            --text-dark: #3D2C38;
-            --text-light: #A0939C;
-            --success: #2EC4B6;
-            --danger: #E63946;
-            --warning: #F4A261;
-            --shadow: 0 10px 30px rgba(123, 44, 191, 0.05);
-            --transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: var(--main-bg); color: var(--text-dark); display: block; min-height: 100vh; overflow-x: hidden; }
-
-        /* --- 驗證登入鎖定遮罩 --- */
-        #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #2B2129 0%, #1A1118 100%); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .auth-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; max-width: 400px; width: 90%; }
-        .auth-card h2 { font-family: 'Cinzel', serif; color: var(--accent-purple); margin-bottom: 10px; font-size: 1.8rem; }
-        .auth-card p { color: var(--text-light); margin-bottom: 25px; font-size: 0.9rem; }
-        .auth-input { width: 100%; padding: 14px; border: 2px solid #EFE6EC; border-radius: 12px; font-size: 1.1rem; text-align: center; margin-bottom: 20px; letter-spacing: 4px; transition: var(--transition); }
-        .auth-input:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 4px rgba(123, 44, 191, 0.1); }
-        .auth-btn { width: 100%; background: linear-gradient(90deg, #FF6B8B, #7B2CBF); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: var(--transition); }
-        .auth-btn:hover { opacity: 0.95; transform: translateY(-2px); }
-
-        /* --- 後台核心佈局 (上方導覽 + 下方內容) --- */
-        #adminContainer { display: none; width: 100%; flex-direction: column; min-height: 100vh; }
-        
-        header { width: 100%; background-color: var(--header-bg); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.15); flex-wrap: wrap; gap: 15px; }
-        .logo-area { display: flex; align-items: baseline; gap: 15px; }
-        .logo-area h1 { font-family: 'Cinzel', serif; font-size: 1.6rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-        .logo-area p { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin: 0; }
-        .nav-menu { list-style: none; display: flex; flex-direction: row; gap: 12px; flex-wrap: wrap; }
-        .nav-item { padding: 10px 18px; border-radius: 20px; cursor: pointer; font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.7); transition: var(--transition); }
-        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
-        .nav-item.active { background: linear-gradient(90deg, #FF6B8B, #7B2CBF); color: white; box-shadow: 0 4px 10px rgba(123,44,191,0.3); }
-
-        main { padding: 40px; width: 100%; flex-grow: 1; }
-        .content-section { display: none; animation: fadeIn 0.4s ease; }
-        .content-section.active { display: block; }
-        
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
-        .section-title { font-size: 1.6rem; font-weight: 700; color: var(--header-bg); position: relative; }
-        .section-title::after { content: ''; display: block; width: 40px; height: 4px; background: var(--primary-color); border-radius: 2px; margin-top: 8px; }
-
-        /* --- 常用組件樣式 --- */
-        .btn-action { padding: 10px 20px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.9rem; }
-        .btn-primary { background: linear-gradient(90deg, #FF6B8B, #7B2CBF); color: white; box-shadow: 0 4px 15px rgba(255, 107, 139, 0.2); }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(123, 44, 191, 0.3); }
-        .btn-danger { background: #FFEBEB; color: var(--danger); }
-        .btn-danger:hover { background: var(--danger); color: white; }
-        .btn-edit { background: #EBF3FF; color: var(--accent-purple); }
-        .btn-edit:hover { background: var(--accent-purple); color: white; }
-        .btn-warning { background: #FFF4E5; color: var(--warning); border: 1px solid #FFE0B2; }
-        .btn-warning:hover { background: var(--warning); color: white; }
-        
-        .action-group { display: flex; gap: 8px; }
-
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
-        .card { background: var(--card-bg); border-radius: 20px; padding: 30px; box-shadow: var(--shadow); border: 1px solid rgba(238, 218, 229, 0.3); margin-bottom: 30px; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-dark); }
-        .form-control { width: 100%; padding: 12px 16px; border: 1px solid #E1D5DD; border-radius: 10px; font-size: 0.95rem; background: #FAFAFA; transition: var(--transition); }
-        .form-control:focus { outline: none; border-color: var(--accent-purple); background: white; box-shadow: 0 0 0 4px rgba(123, 44, 191, 0.08); }
-
-        .table-responsive { width: 100%; overflow-x: auto; background: white; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.02); margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
-        th { background: #FAF8FA; padding: 16px 20px; font-weight: 700; color: var(--header-bg); border-bottom: 2px solid #EFE6EC; white-space: nowrap; }
-        td { padding: 16px 20px; border-bottom: 1px solid #F5EFF3; color: #554852; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; }
-        
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; margin-left: 8px; }
-        .badge-new { background-color: #FFF0F2; color: var(--primary-color); }
-        .badge-old { background-color: #ECE9EC; color: #776B75; }
-
-        .list-item-manage { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #FCFAFC; border: 1px solid #EFE6EC; border-radius: 12px; margin-bottom: 12px; transition: var(--transition); }
-        .list-item-manage:hover { background: #FFF5F7; border-color: #FFB3C1; }
-
-        /* 統計資訊區塊 */
-        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 35px; }
-        .metric-card { background: white; border-radius: 16px; padding: 20px; box-shadow: var(--shadow); border-left: 5px solid var(--accent-purple); }
-        .metric-card.pink { border-left-color: var(--primary-color); }
-        .metric-card.green { border-left-color: var(--success); }
-        .metric-card.orange { border-left-color: var(--warning); }
-        .metric-label { font-size: 0.85rem; color: var(--text-light); font-weight: 500; }
-        .metric-value { font-size: 1.6rem; font-weight: 700; color: var(--text-dark); margin-top: 5px; }
-
-        /* 樣式預覽方塊 */
-        .preview-box { display: inline-block; width: 30px; height: 30px; border-radius: 6px; border: 1px solid #ddd; vertical-align: middle; margin-right: 10px; background-size: cover; background-position: center; }
-
-        /* 模態框 (Modal) 樣式 */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; }
-        .modal-content h3 { color: var(--header-bg); margin-bottom: 20px; font-size: 1.4rem; border-bottom: 2px solid #F5EFF3; padding-bottom: 10px; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        @media (max-width: 768px) {
-            header { flex-direction: column; padding: 15px 20px; }
-            main { padding: 20px; }
-            .nav-menu { justify-content: center; }
-            .action-group { flex-direction: column; }
-        }
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { border-bottom: 2px solid #7B2CBF; padding-bottom: 10px; color: #3D2C38; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; color: white; }
+        .btn-add { background: #4CAF50; }
+        .btn-save { background: #7B2CBF; width: 100%; margin-top: 20px; font-size: 1.1rem; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     </style>
 </head>
 <body>
 
-    <div id="authOverlay">
-        <div class="auth-card">
-            <h2>MEMBER ACCESS</h2>
-            <p>請輸入管理者專屬驗證金鑰密碼</p>
-            <input type="password" id="authPassword" class="auth-input" placeholder="••••••••">
-            <button onclick="verifyAdmin()" class="auth-btn">驗證並登入後台</button>
-            <div id="authError" style="color:var(--danger); font-size:0.85rem; margin-top:12px; display:none; font-weight:600;">⚠️ 密碼錯誤，拒絕存取！</div>
-        </div>
+<div class="container">
+    <h2>後台管理系統</h2>
+    
+    <div class="form-group">
+        <label>標題</label>
+        <input type="text" id="sysTitle">
+    </div>
+    <div class="form-group">
+        <label>副標題</label>
+        <input type="text" id="sysSubtitle">
     </div>
 
-    <div id="dataModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 id="modalTitle">新增/編輯項目</h3>
-            <input type="hidden" id="modalCollection">
-            <input type="hidden" id="modalDocId">
+    <h3>美甲款式管理</h3>
+    <table id="styleTable">
+        <thead><tr><th>名稱</th><th>價格</th><th>操作</th></tr></thead>
+        <tbody></tbody>
+    </table>
+    <button class="btn btn-add" onclick="addRow('styleTable')">+ 新增款式</button>
+
+    <h3>附加服務管理</h3>
+    <table id="addonTable">
+        <thead><tr><th>名稱</th><th>價格</th><th>操作</th></tr></thead>
+        <tbody></tbody>
+    </table>
+    <button class="btn btn-add" onclick="addRow('addonTable')">+ 新增服務</button>
+
+    <h3>保固條款 (一行一條)</h3>
+    <textarea id="warranty" rows="5"></textarea>
+
+    <button class="btn btn-save" onclick="saveData()">儲存所有設定</button>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // --- 請確保此處與您的專案設定一致 ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
+        authDomain: "beautiful-68dbc.firebaseapp.com",
+        projectId: "beautiful-68dbc",
+        // ... (其他參數保持不變)
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadData() {
+        const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById('sysTitle').value = data.title || "";
+            document.getElementById('sysSubtitle').value = data.subtitle || "";
+            document.getElementById('warranty').value = (data.warrantyTerms || []).join('\n');
             
-            <div class="form-group">
-                <label>項目名稱</label>
-                <input type="text" id="modalName" class="form-control" placeholder="請輸入名稱...">
-            </div>
-            <div class="form-group">
-                <label>費用金額 ($)</label>
-                <input type="number" id="modalPrice" class="form-control" placeholder="請輸入數字金額...">
-            </div>
-            <div class="form-group" id="modalBgGroup">
-                <label>背景樣式 / 圖片網址 (僅選單有支援時顯示)</label>
-                <input type="text" id="modalBg" class="form-control" placeholder="例如: #FFB3C1 或 https://圖片網址.jpg">
-                <small style="color:var(--text-light); margin-top:5px; display:block;">支援 CSS 色碼 (例:#000) 或 直接貼上圖片 URL</small>
-            </div>
-            
-            <div style="display:flex; gap:10px; margin-top:30px;">
-                <button class="btn-action btn-primary" style="flex:1;" onclick="saveModalData()">💾 確定儲存</button>
-                <button class="btn-action btn-danger" style="flex:1;" onclick="closeModal()">✖ 取消關閉</button>
-            </div>
-        </div>
-    </div>
+            populateTable('styleTable', data.nailStyles || []);
+            populateTable('addonTable', data.addonServices || []);
+        }
+    }
 
-    <div id="adminContainer">
-        <header>
-            <div class="logo-area">
-                <h1>神の指藝</h1>
-                <p>Management Dashboard v2.0</p>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item active" onclick="switchTab('ordersSection', this)">📊 預約看板</li>
-                <li class="nav-item" onclick="switchTab('stylesSection', this)">💅 核心款式</li>
-                <li class="nav-item" onclick="switchTab('addonsSection', this)">✨ 附加服務</li>
-                <li class="nav-item" onclick="switchTab('configSection', this)">⚙️ 系統配置</li>
-            </ul>
-        </header>
+    function populateTable(tableId, items) {
+        const tbody = document.querySelector(`#${tableId} tbody`);
+        tbody.innerHTML = '';
+        items.forEach(item => {
+            tbody.innerHTML += `<tr>
+                <td><input type="text" class="name" value="${item.name}"></td>
+                <td><input type="number" class="price" value="${item.price}"></td>
+                <td><button onclick="this.parentElement.parentElement.remove()">刪除</button></td>
+            </tr>`;
+        });
+    }
 
-        <main>
-            
-            <section id="ordersSection" class="content-section active">
-                <div class="section-header">
-                    <h2 class="section-title">預約訂單即時看板</h2>
-                </div>
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-label">總預約接單量</div>
-                        <div class="metric-value" id="metricTotalCount">0 筆</div>
-                    </div>
-                    <div class="metric-card pink">
-                        <div class="metric-label">預計總營收 (歷史累計)</div>
-                        <div class="metric-value" id="metricTotalRevenue">$0</div>
-                    </div>
-                    <div class="metric-card green">
-                        <div class="metric-label">本月營業總額</div>
-                        <div class="metric-value" id="metricMonthlyRevenue">$0</div>
-                    </div>
-                    <div class="metric-card orange">
-                        <div class="metric-label">本年度營業總額</div>
-                        <div class="metric-value" id="metricAnnualRevenue">$0</div>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>顧客姓名</th>
-                                <th>聯絡電話</th>
-                                <th>預約時間</th>
-                                <th>選擇核心款式</th>
-                                <th>預估總金額</th>
-                                <th>下單備註說明</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ordersTableBody">
-                            <tr><td colspan="6" style="text-align:center; color: var(--text-light);">資料即時讀取中...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+    window.addRow = (tableId) => {
+        const tbody = document.querySelector(`#${tableId} tbody`);
+        tbody.innerHTML += `<tr>
+            <td><input type="text" class="name"></td>
+            <td><input type="number" class="price"></td>
+            <td><button onclick="this.parentElement.parentElement.remove()">刪除</button></td>
+        </tr>`;
+    }
 
-            <section id="stylesSection" class="content-section">
-                <div class="section-header">
-                    <h2 class="section-title">核心美甲款式管理</h2>
-                    <button class="btn-action btn-primary" onclick="openModal('nail_styles')">＋ 新增核心款式</button>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>款式背景 / 預覽</th>
-                                <th>核心項目款式名稱</th>
-                                <th>基本定價</th>
-                                <th>操作功能 (修改/刪除)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stylesTableBody"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="addonsSection" class="content-section">
-                <div class="section-header">
-                    <h2 class="section-title">進階附加服務管理</h2>
-                    <button class="btn-action btn-primary" onclick="openModal('addon_services')">＋ 新增附加服務</button>
-                </div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>附加延伸服務項目</th>
-                                <th>追加費用金額</th>
-                                <th>操作功能 (修改/刪除)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="addonsTableBody"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="configSection" class="content-section">
-                <div class="section-header">
-                    <h2 class="section-title">系統基本條款配置</h2>
-                    <button class="btn-action btn-warning" onclick="importDefaults()">⚡ 一鍵匯入預設範例資料</button>
-                </div>
-                
-                <div class="grid-container">
-                    <div class="card">
-                        <h3 style="margin-bottom:20px; color:var(--accent-purple);">🌐 網頁與選單基礎設定</h3>
-                        <div class="form-group">
-                            <label>前台主標題 (H1 Title)</label>
-                            <input type="text" id="cfgTitle" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>前台霓虹副標題 (Subtitle)</label>
-                            <input type="text" id="cfgSubtitle" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>前台選單展示樣式 (切換選單風格)</label>
-                            <select id="cfgMenuStyle" class="form-control">
-                                <option value="list">📝 簡約列表模式 (預設)</option>
-                                <option value="card">📇 經典卡片模式 (可顯示背景色塊)</option>
-                                <option value="grid">🖼️ 圖片網格模式 (需配置圖片網址)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>新客初次體驗折扣 (例如填 85 代表 85 折)</label>
-                            <input type="number" id="cfgDiscount" class="form-control">
-                        </div>
-                        <button class="btn-action btn-primary" style="width:100%; justify-content:center;" onclick="saveGeneralConfig()">儲存全域配置</button>
-                    </div>
-
-                    <div class="card">
-                        <h3 style="margin-bottom:15px; color:var(--accent-purple);">⏰ 線上開放時段管理</h3>
-                        <div style="display:flex; gap:10px; margin-bottom:20px;">
-                            <input type="text" id="newTimeSlot" class="form-control" placeholder="例如 14:00 或 20:30">
-                            <button class="btn-action btn-primary" style="white-space:nowrap;" onclick="addTimeSlot()">新增時段</button>
-                        </div>
-                        <div id="timeSlotsContainer"></div>
-                    </div>
-                </div>
-
-                <div class="card" style="margin-top:30px;">
-                    <h3 style="margin-bottom:15px; color:var(--accent-purple);">🛡️ 售後保固免責條款條目編輯</h3>
-                    <p style="color:var(--text-light); font-size:0.9rem; margin-bottom:15px;">為確保顧客有良好售後服務，請在此維護保固條款：</p>
-                    <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <input type="text" id="newWarrantyTerm" class="form-control" placeholder="請輸入欲條列的保固承諾或規範文案...">
-                        <button class="btn-action btn-primary" style="white-space:nowrap;" onclick="addWarrantyTerm()">追加新增條款</button>
-                    </div>
-                    <div id="warrantyTermsContainer"></div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // ===================================================
-        // FIREBASE 配置設定
-        // ===================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
-            authDomain: "beautiful-68dbc.firebaseapp.com",
-            databaseURL: "https://beautiful-68dbc-default-rtdb.firebaseio.com",
-            projectId: "beautiful-68dbc",
-            storageBucket: "beautiful-68dbc.firebasestorage.app",
-            messagingSenderId: "348466975949",
-            appId: "1:348466975949:web:44eb81d962fe957fa34584",
-            measurementId: "G-3V4FDPJCQ0"
+    window.saveData = async () => {
+        const getTableData = (tableId) => {
+            const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+            return Array.from(rows).map((row, i) => ({
+                id: `${tableId.replace('Table', '')}_${i}`,
+                name: row.querySelector('.name').value,
+                price: parseInt(row.querySelector('.price').value)
+            }));
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const data = {
+            title: document.getElementById('sysTitle').value,
+            subtitle: document.getElementById('sysSubtitle').value,
+            nailStyles: getTableData('styleTable'),
+            addonServices: getTableData('addonTable'),
+            warrantyTerms: document.getElementById('warranty').value.split('\n').filter(t => t.trim() !== "")
+        };
 
-        // 登入與切換功能
-        window.verifyAdmin = function() {
-            const pwd = document.getElementById('authPassword').value;
-            if(pwd === "AMQ5600") {
-                document.getElementById('authOverlay').style.display = 'none';
-                document.getElementById('adminContainer').style.display = 'flex';
-                initializeDashboardListeners();
-            } else {
-                document.getElementById('authError').style.display = 'block';
-            }
-        }
+        await setDoc(doc(db, "system_settings", "booking_config"), data, { merge: true });
+        alert("儲存成功！");
+    };
 
-        window.switchTab = function(sectionId, element) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            element.classList.add('active');
-        }
-
-        // ===================================================
-        // 模態框 (Modal) 邏輯 - 新增與編輯統一處理
-        // ===================================================
-        window.openModal = function(collectionName, id = '', name = '', price = '', bg = '') {
-            document.getElementById('modalCollection').value = collectionName;
-            document.getElementById('modalDocId').value = id;
-            document.getElementById('modalName').value = name;
-            document.getElementById('modalPrice').value = price;
-            document.getElementById('modalBg').value = bg;
-
-            // 針對款式提供背景填寫，附加服務也可選用但可隱藏
-            document.getElementById('modalBgGroup').style.display = collectionName === 'nail_styles' ? 'block' : 'none';
-            document.getElementById('modalTitle').innerText = id ? '編輯修改項目' : '新增全新項目';
-            document.getElementById('dataModal').style.display = 'flex';
-        }
-
-        window.closeModal = function() {
-            document.getElementById('dataModal').style.display = 'none';
-        }
-
-        window.saveModalData = async function() {
-            const collectionName = document.getElementById('modalCollection').value;
-            const id = document.getElementById('modalDocId').value;
-            const name = document.getElementById('modalName').value.trim();
-            const price = parseInt(document.getElementById('modalPrice').value, 10);
-            const bg = document.getElementById('modalBg').value.trim();
-
-            if(!name || isNaN(price)) {
-                alert("請填寫正確的名稱與數值格式！");
-                return;
-            }
-
-            const payload = { name, price };
-            if(collectionName === 'nail_styles') payload.bg = bg;
-
-            try {
-                if(id) {
-                    await updateDoc(doc(db, collectionName, id), payload);
-                } else {
-                    await addDoc(collection(db, collectionName), payload);
-                }
-                closeModal();
-            } catch (e) {
-                alert("儲存失敗：" + e.message);
-            }
-        }
-
-        window.deleteData = async function(collectionName, docId) {
-            if(confirm("確定要刪除此項目嗎？前台顧客將無法再選取此項目。")) {
-                try { await deleteDoc(doc(db, collectionName, docId)); } 
-                catch (e) { alert("刪除失敗：" + e.message); }
-            }
-        }
-
-        // ===================================================
-        // 核心資料庫驅動邏輯 (即時接軌監聽)
-        // ===================================================
-        function initializeDashboardListeners() {
-            // 1. 即時監聽客戶預約訂單 + 計算月份/年度營收
-            const bookingsQuery = query(collection(db, "nail_bookings"), orderBy("createdAt", "desc"));
-            onSnapshot(bookingsQuery, (snapshot) => {
-                const tbody = document.getElementById('ordersTableBody');
-                tbody.innerHTML = '';
-                
-                let totalRevenue = 0;
-                let monthlyRevenue = 0;
-                let annualRevenue = 0;
-                let count = 0;
-
-                // 取得現在的年、月字串 (格式: YYYY-MM)
-                const today = new Date();
-                const currentMonthPrefix = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-                const currentYearPrefix = `${today.getFullYear()}`;
-
-                if(snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-light);">目前暫無預約申請訂單。</td></tr>`;
-                }
-
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    count++;
-                    const price = data.priceCalculations?.totalPrice || 0;
-                    totalRevenue += price;
-
-                    // 判斷日期來累計月營業額與年營業額 (假設 bookingDate 格式為 YYYY-MM-DD)
-                    const bDate = data.bookingDate || "";
-                    if(bDate.startsWith(currentMonthPrefix)) monthlyRevenue += price;
-                    if(bDate.startsWith(currentYearPrefix)) annualRevenue += price;
-
-                    const badgeHtml = data.isFirstTime 
-                        ? `<span class="badge badge-new">新客</span>` 
-                        : `<span class="badge badge-old">熟客</span>`;
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><div style="font-weight:700;">${data.clientName}</div>${badgeHtml}</td>
-                            <td><a href="tel:${data.clientPhone}" style="color:var(--accent-purple); text-decoration:none; font-weight:500;">${data.clientPhone}</a></td>
-                            <td><span style="color:#D14760; font-weight:600;">${data.bookingDate}</span><br><small>${data.bookingTime}</small></td>
-                            <td><span style="font-size:0.85rem; font-weight:500;">${data.selectedStyle}</span></td>
-                            <td style="font-weight:700; color:var(--primary-color)">$${price.toLocaleString()}</td>
-                            <td><small style="color:var(--text-light); line-height:1.4; display:block; max-width:200px; word-break:break-all;">${data.notes || '無特殊需求備註'}</small></td>
-                        </tr>
-                    `;
-                });
-
-                document.getElementById('metricTotalCount').innerText = `${count} 筆`;
-                document.getElementById('metricTotalRevenue').innerText = `$${totalRevenue.toLocaleString()}`;
-                document.getElementById('metricMonthlyRevenue').innerText = `$${monthlyRevenue.toLocaleString()}`;
-                document.getElementById('metricAnnualRevenue').innerText = `$${annualRevenue.toLocaleString()}`;
-            });
-
-            // 2. 即時監聽核心美甲款式 (支援背景展示)
-            onSnapshot(collection(db, "nail_styles"), (snapshot) => {
-                const tbody = document.getElementById('stylesTableBody');
-                tbody.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const style = doc.data();
-                    const safeName = style.name.replace(/'/g, "\\'"); 
-                    const safeBg = (style.bg || '').replace(/'/g, "\\'");
-                    
-                    // 渲染預覽方塊
-                    const bgStyle = style.bg 
-                        ? (style.bg.startsWith('http') ? `background-image: url('${style.bg}')` : `background-color: ${style.bg}`)
-                        : `background-color: #EEE`;
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><div class="preview-box" style="${bgStyle}"></div></td>
-                            <td style="font-weight:600;">${style.name}</td>
-                            <td style="color:var(--primary-color); font-weight:700;">$${style.price}</td>
-                            <td>
-                                <div class="action-group">
-                                    <button class="btn-action btn-edit" onclick="openModal('nail_styles', '${doc.id}', '${safeName}', ${style.price}, '${safeBg}')">✎ 修改</button>
-                                    <button class="btn-action btn-danger" onclick="deleteData('nail_styles', '${doc.id}')">🗑 刪除</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
-            });
-
-            // 3. 即時監聽附加服務
-            onSnapshot(collection(db, "addon_services"), (snapshot) => {
-                const tbody = document.getElementById('addonsTableBody');
-                tbody.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const addon = doc.data();
-                    const safeName = addon.name.replace(/'/g, "\\'");
-                    tbody.innerHTML += `
-                        <tr>
-                            <td style="font-weight:600;">${addon.name}</td>
-                            <td style="color:var(--primary-color); font-weight:700;">+$${addon.price}</td>
-                            <td>
-                                <div class="action-group">
-                                    <button class="btn-action btn-edit" onclick="openModal('addon_services', '${doc.id}', '${safeName}', ${addon.price})">✎ 修改</button>
-                                    <button class="btn-action btn-danger" onclick="deleteData('addon_services', '${doc.id}')">🗑 刪除</button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
-            });
-
-            // 4. 監聽全域系統設定與控制檔
-            onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
-                if (docSnap.exists()) {
-                    const config = docSnap.data();
-                    document.getElementById('cfgTitle').value = config.title || '神の指藝Beautiful moment.';
-                    document.getElementById('cfgSubtitle').value = config.subtitle || '✦【千變萬化客製凝膠｜專屬預約制】✦';
-                    document.getElementById('cfgDiscount').value = config.firstTimeDiscount || 80;
-                    document.getElementById('cfgMenuStyle').value = config.menuStyle || 'list';
-                    
-                    renderTimeSlots(config.timeSlots || []);
-                    renderWarrantyTerms(config.warrantyTerms || []);
-                }
-            });
-        }
-
-        // ===================================================
-        // 系統設定檔案處理
-        // ===================================================
-        window.saveGeneralConfig = async function() {
-            const title = document.getElementById('cfgTitle').value;
-            const subtitle = document.getElementById('cfgSubtitle').value;
-            const discount = parseInt(document.getElementById('cfgDiscount').value, 10);
-            const menuStyle = document.getElementById('cfgMenuStyle').value;
-
-            try {
-                await updateDoc(doc(db, "system_settings", "booking_config"), {
-                    title: title,
-                    subtitle: subtitle,
-                    firstTimeDiscount: discount,
-                    menuStyle: menuStyle
-                });
-                alert("✨ 全域文案、折扣與選單樣式已成功儲存！");
-            } catch (e) {
-                await setDoc(doc(db, "system_settings", "booking_config"), {
-                    title: title, subtitle: subtitle, firstTimeDiscount: discount, menuStyle: menuStyle, timeSlots: [], warrantyTerms: []
-                }, { merge: true });
-                alert("✨ 設定檔初始化配置建立成功！");
-            }
-        }
-
-        function renderTimeSlots(slots) {
-            const container = document.getElementById('timeSlotsContainer');
-            container.innerHTML = '';
-            slots.sort().forEach(slot => {
-                container.innerHTML += `
-                    <div class="list-item-manage">
-                        <span style="font-weight:700; color: var(--accent-purple)">⏰ ${slot}</span>
-                        <button class="btn-action btn-danger" style="padding:6px 12px; font-size:0.8rem;" onclick="removeTimeSlot('${slot}')">🗑 移除</button>
-                    </div>
-                `;
-            });
-            window.currentAvailableSlots = slots;
-        }
-
-        window.addTimeSlot = async function() {
-            const newSlotInput = document.getElementById('newTimeSlot');
-            const slotVal = newSlotInput.value.trim();
-            if(!slotVal) return;
-            
-            let updatedSlots = window.currentAvailableSlots || [];
-            if(updatedSlots.includes(slotVal)) { alert("該預約時段已存在。"); return; }
-            
-            updatedSlots.push(slotVal);
-            await updateDoc(doc(db, "system_settings", "booking_config"), { timeSlots: updatedSlots });
-            newSlotInput.value = '';
-        }
-
-        window.removeTimeSlot = async function(slotToRemove) {
-            if(!confirm(`確定要移除「${slotToRemove}」時段嗎？`)) return;
-            let updatedSlots = (window.currentAvailableSlots || []).filter(s => s !== slotToRemove);
-            await updateDoc(doc(db, "system_settings", "booking_config"), { timeSlots: updatedSlots });
-        }
-
-        function renderWarrantyTerms(terms) {
-            const container = document.getElementById('warrantyTermsContainer');
-            container.innerHTML = '';
-            terms.forEach((term, index) => {
-                const safeTerm = term.replace(/'/g, "\\'");
-                container.innerHTML += `
-                    <div class="list-item-manage" style="flex-wrap: wrap; gap: 10px;">
-                        <span style="font-size:0.9rem; font-weight:500; padding-right:15px; line-height:1.4; flex:1; min-width: 250px;">✦ ${term}</span>
-                        <div class="action-group">
-                            <button class="btn-action btn-edit" style="padding:6px 12px; font-size:0.8rem; white-space:nowrap;" onclick="editWarrantyTerm(${index}, '${safeTerm}')">✎ 修改</button>
-                            <button class="btn-action btn-danger" style="padding:6px 12px; font-size:0.8rem; white-space:nowrap;" onclick="removeWarrantyTerm(${index})">🗑 刪除</button>
-                        </div>
-                    </div>
-                `;
-            });
-            window.currentWarrantyTerms = terms;
-        }
-
-        window.addWarrantyTerm = async function() {
-            const termInput = document.getElementById('newWarrantyTerm');
-            const termVal = termInput.value.trim();
-            if(!termVal) return;
-
-            let updatedTerms = window.currentWarrantyTerms || [];
-            updatedTerms.push(termVal);
-            await updateDoc(doc(db, "system_settings", "booking_config"), { warrantyTerms: updatedTerms });
-            termInput.value = '';
-        }
-
-        window.editWarrantyTerm = async function(index, currentText) {
-            const newText = prompt("修改保固條款：", currentText);
-            if (newText !== null && newText.trim() !== '' && newText !== currentText) {
-                let updatedTerms = [...(window.currentWarrantyTerms || [])];
-                updatedTerms[index] = newText.trim();
-                await updateDoc(doc(db, "system_settings", "booking_config"), { warrantyTerms: updatedTerms });
-            }
-        }
-
-        window.removeWarrantyTerm = async function(indexToRemove) {
-            if(!confirm("確定要刪除此條保固條款嗎？")) return;
-            let updatedTerms = (window.currentWarrantyTerms || []).filter((_, idx) => idx !== indexToRemove);
-            await updateDoc(doc(db, "system_settings", "booking_config"), { warrantyTerms: updatedTerms });
-        }
-
-        // ===================================================
-        // 批次寫入預設資料功能 (客製化需求清單)
-        // ===================================================
-        window.importDefaults = async function() {
-            if(!confirm("【警告】這將會一次性新增預設的款式、附加服務與您指定的保固條款至資料庫。確定要執行嗎？")) return;
-            
-            try {
-                // 1. 寫入核心預設款式
-                const defaultStyles = [
-                    { name: "經典極簡單色凝膠", price: 900, bg: "#FFD1DC" },
-                    { name: "法式優雅氣質漸層", price: 1300, bg: "#E6E6FA" },
-                    { name: "奢華復古貓眼晶石", price: 1600, bg: "#4A4A4A" },
-                    { name: "獨家日系手繪藝術", price: 2200, bg: "#FFE4E1" },
-                    { name: "暈染大理石奢華風", price: 2000, bg: "#D3D3D3" }
-                ];
-                for(let item of defaultStyles) {
-                    await addDoc(collection(db, "nail_styles"), item);
-                }
-
-                // 2. 寫入進階附加服務
-                const defaultAddons = [
-                    { name: "本店溫和卸甲續作", price: 300 },
-                    { name: "他店安全卸甲", price: 500 },
-                    { name: "精細指緣深層保養", price: 400 },
-                    { name: "施華洛世奇水鑽(單指)", price: 150 }
-                ];
-                for(let item of defaultAddons) {
-                    await addDoc(collection(db, "addon_services"), item);
-                }
-
-                // 3. 覆蓋保固條款
-                const defaultTerms = [
-                    "如非人為因素，一個月內可至本店免費更換五指山兩座",
-                    "如經本店評估為人為因素，7天內本店也享有免費修補一次售後服務",
-                    "經本店評估後為人為因素，且無法修補，那就勞煩您帶著您的五金財寶袋，再度蒞臨本店，享受至高無上的服務喔！"
-                ];
-                await updateDoc(doc(db, "system_settings", "booking_config"), { warrantyTerms: defaultTerms });
-
-                alert("✅ 預設項目與保固條款已成功批次匯入！");
-            } catch (error) {
-                alert("匯入發生異常，可能設定檔尚未初始化，請先點擊「儲存全域配置」一次後再匯入。");
-            }
-        }
-    </script>
+    loadData();
+</script>
 </body>
 </html>
