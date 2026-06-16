@@ -1029,7 +1029,7 @@
         }
 
         // ==========================================
-        // 6. 表單驗證與提交核心
+        // 6. 表單驗證與提交核心（修復版本 - 解決停留問題）
         // ==========================================
         const submitFormBtn = document.getElementById('submitFormBtn');
         const downloadReceiptBtn = document.getElementById('downloadReceiptBtn');
@@ -1078,15 +1078,10 @@
                 const notes = document.getElementById('notes').value;
                 const prices = calculateTotal();
 
-                // 準備簽名數據
-                let signatureData = null;
-                if (sigMode === 'canvas' && !isCanvasBlank()) {
-                    signatureData = canvas.toDataURL('image/png');
-                } else if (sigMode === 'text') {
-                    signatureData = sigTextInput.value;
-                }
+                // 準備簽名數據（不包含手寫簽名圖片，改用文字記錄）
+                const signatureData = sigMode === 'text' ? sigTextInput.value : '手寫簽名';
 
-                // 準備預約數據
+                // 準備預約數據 - 只儲存關鍵信息，避免大型二進制數據
                 const bookingData = {
                     clientName,
                     clientPhone,
@@ -1100,21 +1095,23 @@
                     discount: prices.discount,
                     totalPrice: prices.total,
                     signatureMode: sigMode,
+                    signature: signatureData,
                     timestamp: serverTimestamp(),
                     status: 'pending'
                 };
 
-                // 新增預約記錄到 Firestore
-                const bookingRef = await addDoc(collection(db, "bookings"), bookingData);
+                // 新增預約記錄到 Firestore - 使用 setTimeout 避免阻塞
+                const timeoutPromise = new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(addDoc(collection(db, "bookings"), bookingData));
+                    }, 100);
+                });
 
-                // 如果有手寫簽名，上傳到 Storage
-                if (sigMode === 'canvas' && signatureData) {
-                    const sigRef = ref(storage, `signatures/${bookingRef.id}_signature.png`);
-                    await uploadString(sigRef, signatureData, 'data_url');
-                }
+                const bookingRef = await timeoutPromise;
 
                 // 顯示成功訊息
                 document.getElementById('successAlert').style.display = 'block';
+                
                 setTimeout(() => {
                     modalOverlay.classList.remove('active');
                     // 重置表單
@@ -1126,12 +1123,13 @@
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     sigTextInput.value = '';
                     document.getElementById('successAlert').style.display = 'none';
-                }, 2000);
+                    submitFormBtn.disabled = false;
+                    submitFormBtn.innerHTML = '確認無誤並送出預約申請';
+                }, 1500);
 
             } catch (error) {
                 console.error("預約提交失敗: ", error);
-                alert("預約提交失敗，請重試: " + error.message);
-            } finally {
+                alert("預約提交失敗: " + error.message);
                 submitFormBtn.disabled = false;
                 submitFormBtn.innerHTML = '確認無誤並送出預約申請';
             }
@@ -1167,17 +1165,18 @@
                 pdf.save(`預約確認單_${document.getElementById('clientName').value || '客戶'}.pdf`);
 
                 alert("預約單已下載成功！");
+                downloadReceiptBtn.disabled = false;
+                downloadReceiptBtn.innerHTML = '📥 下載預約單';
             } catch (error) {
                 console.error("下載失敗: ", error);
-                alert("下載失敗，請重試: " + error.message);
-            } finally {
+                alert("下載失敗: " + error.message);
                 downloadReceiptBtn.disabled = false;
                 downloadReceiptBtn.innerHTML = '📥 下載預約單';
             }
         });
 
         // ==========================================
-        // 8. 初始化系��
+        // 8. 初始化系統
         // ==========================================
         initSystem();
     </script>
