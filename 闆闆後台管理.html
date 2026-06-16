@@ -382,6 +382,33 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+     
+        /* 懸浮按鈕 */
+        .fab-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1500;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--new-client-pink);
+            color: white;
+            font-size: 28px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(255, 71, 126, 0.3);
+            cursor: pointer;
+            transition: var(--transition);}
+        .fab-btn:hover { transform: scale(1.1); }
+
+        /* 搜尋清單樣式 */
+        .search-results { margin-top: 15px; max-height: 300px; overflow-y: auto; text-align: left; }
+        .result-item { padding: 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .result-info { display: flex; flex-direction: column; gap: 2px; }
+        .result-name { font-weight: 700; color: var(--text-dark); }
+        .result-phone { font-size: 0.85rem; color: #666; }
+
     </style>
 </head>
 <body>
@@ -1247,6 +1274,88 @@
 
         document.getElementById('refreshBtn').addEventListener('click', loadBookings);
         loadBookings();
+        
+// --- 搜尋功能控制 ---
+const fabSearchBtn = document.getElementById('fabSearchBtn');
+const searchModal = document.getElementById('searchModal');
+const closeSearchBtn = document.getElementById('closeSearchBtn');
+const searchInput = document.getElementById('searchInput');
+const searchResultList = document.getElementById('searchResultList');
+
+fabSearchBtn.addEventListener('click', () => {
+    searchModal.style.display = 'flex';
+    searchInput.value = '';
+    searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字進行搜尋</p>';
+});
+
+closeSearchBtn.addEventListener('click', () => {
+    searchModal.style.display = 'none';
+});
+
+searchInput.addEventListener('input', (e) => {
+    const val = e.target.value.trim().toLowerCase();
+    if (!val) {
+        searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字</p>';
+        return;
+    }
+
+    // 篩選符合關鍵字的紀錄
+    const filtered = globalBookingsData.filter(b => 
+        (b.clientName && b.clientName.toLowerCase().includes(val)) || 
+        (b.clientPhone && b.clientPhone.includes(val))
+    );
+
+    // 邏輯：保留每個客戶的最新一筆紀錄
+    const latestRecordsMap = new Map();
+    
+    // 為了找最新，先將資料依日期排序 (最新在前面)
+    const sortedData = [...filtered].sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate));
+
+    sortedData.forEach(item => {
+        // 以電話作為唯一識別，若無電話則用名字
+        const key = item.clientPhone || item.clientName;
+        if (!latestRecordsMap.has(key)) {
+            latestRecordsMap.set(key, item);
+        }
+    });
+
+    // 渲染結果
+    searchResultList.innerHTML = '';
+    if (latestRecordsMap.size === 0) {
+        searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">查無相關紀錄</p>';
+    } else {
+        latestRecordsMap.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.innerHTML = `
+                <div class="result-info">
+                    <span class="result-name">${item.clientName}</span>
+                    <span class="result-phone">📞 ${item.clientPhone || '無電話'}</span>
+                </div>
+                <div style="font-size: 0.8rem; color: #888;">${item.bookingDate}</div>
+            `;
+            searchResultList.appendChild(div);
+        });
+    }
+});
+
+        
     </script>
+    
+    <button class="fab-btn" id="fabSearchBtn">👧</button>
+
+<div id="searchModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px;">
+        <h3>🔍 顧客快速搜尋</h3>
+        <input type="text" id="searchInput" class="signature-input" placeholder="輸入顧客姓名或電話...">
+        <div id="searchResultList" class="search-results">
+            </div>
+        <div class="modal-actions">
+            <button class="btn-modal btn-cancel" id="closeSearchBtn">關閉</button>
+        </div>
+    </div>
+</div>
+
+    
 </body>
 </html>
