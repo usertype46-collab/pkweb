@@ -1029,7 +1029,7 @@
         }
 
         // ==========================================
-        // 6. 表單驗證與提交核心（修復版本 - 解決停留問題）
+        // 6. 表單驗證與提交核心（新版本 - 含詳細診斷）
         // ==========================================
         const submitFormBtn = document.getElementById('submitFormBtn');
         const downloadReceiptBtn = document.getElementById('downloadReceiptBtn');
@@ -1078,36 +1078,29 @@
                 const notes = document.getElementById('notes').value;
                 const prices = calculateTotal();
 
-                // 準備簽名數據（不包含手寫簽名圖片，改用文字記錄）
+                // 準備簽名數據
                 const signatureData = sigMode === 'text' ? sigTextInput.value : '手寫簽名';
 
-                // 準備預約數據 - 只儲存關鍵信息，避免大型二進制數據
+                // 準備預約數據 - 精簡結構
                 const bookingData = {
                     clientName,
                     clientPhone,
                     bookingDate,
                     bookingTime,
                     notes,
-                    selectedStyle: currentSelection.selectedStyle.name,
-                    selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
-                    stylePrice: prices.stylePrice,
-                    addonPrice: prices.addonPrice,
-                    discount: prices.discount,
+                    style: currentSelection.selectedStyle.name,
+                    addons: Array.from(currentSelection.selectedAddons).map(item => item.name),
                     totalPrice: prices.total,
-                    signatureMode: sigMode,
                     signature: signatureData,
-                    timestamp: serverTimestamp(),
-                    status: 'pending'
+                    timestamp: serverTimestamp()
                 };
 
-                // 新增預約記錄到 Firestore - 使用 setTimeout 避免阻塞
-                const timeoutPromise = new Promise((resolve) => {
-                    setTimeout(() => {
-                        resolve(addDoc(collection(db, "bookings"), bookingData));
-                    }, 100);
-                });
+                console.log("📤 準備提交的預約數據:", bookingData);
 
-                const bookingRef = await timeoutPromise;
+                // 直接提交到 Firestore（不使用延遲）
+                const bookingRef = await addDoc(collection(db, "bookings"), bookingData);
+                
+                console.log("✅ 預約成功寫入！ID:", bookingRef.id);
 
                 // 顯示成功訊息
                 document.getElementById('successAlert').style.display = 'block';
@@ -1128,8 +1121,18 @@
                 }, 1500);
 
             } catch (error) {
-                console.error("預約提交失敗: ", error);
-                alert("預約提交失敗: " + error.message);
+                console.error("❌ 預約提交失敗:", error);
+                console.error("錯誤代碼:", error.code);
+                console.error("錯誤信息:", error.message);
+                
+                let errorMsg = error.message;
+                if (error.code === 'permission-denied') {
+                    errorMsg = "Firebase 權限錯誤 - 請檢查安全規則是否允許寫入";
+                } else if (error.code === 'unauthenticated') {
+                    errorMsg = "需要驗證身份 - 請檢查 Firebase 設定";
+                }
+                
+                alert("預約提交失敗: " + errorMsg);
                 submitFormBtn.disabled = false;
                 submitFormBtn.innerHTML = '確認無誤並送出預約申請';
             }
