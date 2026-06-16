@@ -269,6 +269,11 @@
             transform: translateY(-2px);
         }
 
+        .btn-submit:disabled, .btn-trigger:disabled, .btn-download-screenshot:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .btn-download-screenshot {
             margin-top: 10px;
             background: linear-gradient(90deg, #C8A2C8 0%, #B495B8 100%);
@@ -527,6 +532,20 @@
             color: #8C7572;
             font-size: 0.85rem;
         }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -632,7 +651,7 @@
                     <p>本店提供施作日起 7 日內保固服務。保固範圍限於：非人為因素造成之凝膠脫落、凝膠大面積翹起、凝膠異常剝離。保固期間內請拍照[...]
                     
                     <h4>三、不列入保固範圍</h4>
-                    <p>以下情況恕不提供免費保固：撞擊、摳除、咬甲等人為因素；使用指甲開罐、摳貼貼紙、刮除物品等不當使用；經常接觸化學藥劑（清[...]
+                    <p>以下情況恕不提供免費保固：撞擊、摳除、咬甲等人為因素；使用指甲開罐、摳貼貼紙、刮除物品等不當使用；經常接觸化學藥劑[...]
                     
                     <h4>四、施作風險說明</h4>
                     <p>本人了解：凝膠美甲並非永久性產品。維持時間因個人體質、生活習慣及保養方式而異。指甲若已有受損、過薄、剝離等狀況，持[...]
@@ -773,7 +792,7 @@
         const storage = getStorage(app);
 
         // ==========================================
-        // 2. 初始化與動態資料庫即時同步引擎 (雙向同步核心)
+        // 2. 初始化與動態資料庫即時同步引擎
         // ==========================================
         let nailStyles = [];
         let addonServices = [];
@@ -982,7 +1001,7 @@
         }
 
         // ==========================================
-        // 5. 預約單預覽更新 (新功能)
+        // 5. 預約單預覽更新
         // ==========================================
         function updateReceiptPreview() {
             const clientName = document.getElementById('clientName').value || '-';
@@ -1009,39 +1028,132 @@
             bookingReceiptPreview.style.display = 'block';
         }
 
-        // 即時更新預覽 (輸入框變化時)
-        document.getElementById('clientName').addEventListener('input', updateReceiptPreview);
-        document.getElementById('clientPhone').addEventListener('input', updateReceiptPreview);
-
         // ==========================================
-        // 6. 截圖與下載功能 (新核心功能)
+        // 6. 表單驗證與提交核心
         // ==========================================
+        const submitFormBtn = document.getElementById('submitFormBtn');
         const downloadReceiptBtn = document.getElementById('downloadReceiptBtn');
 
-        downloadReceiptBtn.addEventListener('click', async () => {
+        function validateForm() {
             const clientName = document.getElementById('clientName').value.trim();
             const clientPhone = document.getElementById('clientPhone').value.trim();
+            const checkTerms1 = document.getElementById('checkTerms1').checked;
+            const checkTerms2 = document.getElementById('checkTerms2').checked;
+            const checkTerms3 = document.getElementById('checkTerms3').checked;
 
-            if (!clientName || !clientPhone) {
-                alert("請先填寫顧客姓名與電話以生成預約單！");
-                return;
+            if (!clientName) {
+                alert("請輸入顧客姓名");
+                return false;
             }
+            if (!clientPhone) {
+                alert("請輸入聯絡電話");
+                return false;
+            }
+            if (!checkTerms1 || !checkTerms2 || !checkTerms3) {
+                alert("請勾選所有同意項目");
+                return false;
+            }
+            if (sigMode === 'canvas' && isCanvasBlank()) {
+                alert("請提供手寫簽名");
+                return false;
+            }
+            if (sigMode === 'text' && !sigTextInput.value.trim()) {
+                alert("請輸入打字簽名");
+                return false;
+            }
+            return true;
+        }
 
-            downloadReceiptBtn.disabled = true;
-            downloadReceiptBtn.innerText = "📥 生成中...";
+        submitFormBtn.addEventListener('click', async () => {
+            if (!validateForm()) return;
+
+            submitFormBtn.disabled = true;
+            submitFormBtn.innerHTML = '<span class="loading-spinner"></span> 寫入中...';
 
             try {
-                // 使用 html2canvas 截圖預覽區
-                const canvas = await html2canvas(bookingReceiptPreview, {
+                const clientName = document.getElementById('clientName').value;
+                const clientPhone = document.getElementById('clientPhone').value;
+                const bookingDate = document.getElementById('bookingDate').value;
+                const bookingTime = document.getElementById('bookingTime').value;
+                const notes = document.getElementById('notes').value;
+                const prices = calculateTotal();
+
+                // 準備簽名數據
+                let signatureData = null;
+                if (sigMode === 'canvas' && !isCanvasBlank()) {
+                    signatureData = canvas.toDataURL('image/png');
+                } else if (sigMode === 'text') {
+                    signatureData = sigTextInput.value;
+                }
+
+                // 準備預約數據
+                const bookingData = {
+                    clientName,
+                    clientPhone,
+                    bookingDate,
+                    bookingTime,
+                    notes,
+                    selectedStyle: currentSelection.selectedStyle.name,
+                    selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
+                    stylePrice: prices.stylePrice,
+                    addonPrice: prices.addonPrice,
+                    discount: prices.discount,
+                    totalPrice: prices.total,
+                    signatureMode: sigMode,
+                    timestamp: serverTimestamp(),
+                    status: 'pending'
+                };
+
+                // 新增預約記錄到 Firestore
+                const bookingRef = await addDoc(collection(db, "bookings"), bookingData);
+
+                // 如果有手寫簽名，上傳到 Storage
+                if (sigMode === 'canvas' && signatureData) {
+                    const sigRef = ref(storage, `signatures/${bookingRef.id}_signature.png`);
+                    await uploadString(sigRef, signatureData, 'data_url');
+                }
+
+                // 顯示成功訊息
+                document.getElementById('successAlert').style.display = 'block';
+                setTimeout(() => {
+                    modalOverlay.classList.remove('active');
+                    // 重置表單
+                    document.getElementById('clientName').value = '';
+                    document.getElementById('clientPhone').value = '';
+                    document.getElementById('checkTerms1').checked = false;
+                    document.getElementById('checkTerms2').checked = false;
+                    document.getElementById('checkTerms3').checked = false;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    sigTextInput.value = '';
+                    document.getElementById('successAlert').style.display = 'none';
+                }, 2000);
+
+            } catch (error) {
+                console.error("預約提交失敗: ", error);
+                alert("預約提交失敗，請重試: " + error.message);
+            } finally {
+                submitFormBtn.disabled = false;
+                submitFormBtn.innerHTML = '確認無誤並送出預約申請';
+            }
+        });
+
+        // ==========================================
+        // 7. 下載預約單功能
+        // ==========================================
+        downloadReceiptBtn.addEventListener('click', async () => {
+            downloadReceiptBtn.disabled = true;
+            downloadReceiptBtn.innerHTML = '<span class="loading-spinner"></span> 生成中...';
+
+            try {
+                const element = bookingReceiptPreview;
+                const canvas = await html2canvas(element, {
                     scale: 2,
                     backgroundColor: '#FFFFFF',
-                    useCORS: true
+                    useCORS: true,
+                    allowTaint: true
                 });
 
-                // 轉換為圖片資料 URL
-                const imageData = canvas.toDataURL('image/png');
-
-                // 建立 PDF 並插入圖片
+                const imgData = canvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({
                     orientation: 'portrait',
@@ -1049,141 +1161,24 @@
                     format: 'a4'
                 });
 
-                const pageWidth = pdf.internal.pageSize.getWidth();
-                const pageHeight = pdf.internal.pageSize.getHeight();
-                const imgWidth = pageWidth - 20;
+                const imgWidth = 210;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                pdf.save(`預約確認單_${document.getElementById('clientName').value || '客戶'}.pdf`);
 
-                pdf.addImage(imageData, 'PNG', 10, 10, imgWidth, imgHeight);
-
-                // 下載 PDF
-                const fileName = `預約單_${clientName}_${new Date().getTime()}.pdf`;
-                pdf.save(fileName);
-
-                // 將截圖上傳至 Firebase Storage (可選)
-                const timestamp = new Date().getTime();
-                const storageRef = ref(storage, `booking_receipts/${clientPhone}_${timestamp}.png`);
-                await uploadString(storageRef, imageData, 'data_url');
-
-                alert("✅ 預約單已成功下載！");
-
+                alert("預約單已下載成功！");
             } catch (error) {
-                console.error("截圖或下載失敗:", error);
-                alert("❌ 生成預約單失敗，請重試");
+                console.error("下載失敗: ", error);
+                alert("下載失敗，請重試: " + error.message);
             } finally {
                 downloadReceiptBtn.disabled = false;
-                downloadReceiptBtn.innerText = "📥 下載預約單";
+                downloadReceiptBtn.innerHTML = '📥 下載預約單';
             }
         });
 
         // ==========================================
-        // 7. 資料傳輸與 Firebase 寫入
+        // 8. 初始化系��
         // ==========================================
-        const submitFormBtn = document.getElementById('submitFormBtn');
-        const successAlert = document.getElementById('successAlert');
-
-        submitFormBtn.addEventListener('click', async () => {
-            const clientName = document.getElementById('clientName').value.trim();
-            const clientPhone = document.getElementById('clientPhone').value.trim();
-            const bookingDate = document.getElementById('bookingDate').value;
-            const bookingTime = document.getElementById('bookingTime').value;
-            const notes = document.getElementById('notes').value.trim();
-            
-            const check1 = document.getElementById('checkTerms1').checked;
-            const check2 = document.getElementById('checkTerms2').checked;
-            const check3 = document.getElementById('checkTerms3').checked;
-
-            if (!clientName || !clientPhone || !bookingDate || !bookingTime) {
-                alert("請填齊顧客姓名、電話、預約日期與時段！"); return;
-            }
-            if (!check1 || !check2 || !check3) {
-                alert("必須完整勾選並同意美甲服務合約的所有勾選項！"); return;
-            }
-
-            let customerSignatureData = "";
-            if (sigMode === 'canvas') {
-                if (isCanvasBlank()) { alert("請完成手寫簽名以示負責！"); return; }
-                customerSignatureData = canvas.toDataURL();
-            } else {
-                if (!sigTextInput.value.trim()) { alert("請輸入打字簽名全名！"); return; }
-                customerSignatureData = "[打字簽章] " + sigTextInput.value.trim();
-            }
-
-            submitFormBtn.disabled = true;
-            submitFormBtn.innerText = "寫入雲端紀錄中...";
-
-            const prices = calculateTotal();
-
-            // 生成預約單截圖
-            let receiptImageUrl = "";
-            try {
-                const receiptCanvas = await html2canvas(bookingReceiptPreview, {
-                    scale: 2,
-                    backgroundColor: '#FFFFFF'
-                });
-                const receiptImageData = receiptCanvas.toDataURL('image/png');
-                
-                // 上傳至 Firebase Storage
-                const timestamp = new Date().getTime();
-                const storageRef = ref(storage, `booking_receipts/${clientPhone}_${timestamp}_full.png`);
-                await uploadString(storageRef, receiptImageData, 'data_url');
-                receiptImageUrl = `gs://beautiful-68dbc.firebasestorage.app/booking_receipts/${clientPhone}_${timestamp}_full.png`;
-            } catch (error) {
-                console.warn("預約單截圖上傳失敗，將繼續存儲其他資料:", error);
-            }
-
-            const bookingRecord = {
-                clientName: clientName,
-                clientPhone: clientPhone,
-                bookingDate: bookingDate,
-                bookingTime: bookingTime,
-                notes: notes,
-                selectedStyle: currentSelection.selectedStyle.name,
-                selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
-                priceCalculations: {
-                    basePrice: prices.stylePrice,
-                    addonPrice: prices.addonPrice,
-                    discountPrice: prices.discount,
-                    totalPrice: prices.total
-                },
-                agreedToTerms: true,
-                customerSignature: customerSignatureData,
-                receiptScreenshot: receiptImageUrl,
-                status: "待確認",
-                createdAt: serverTimestamp()
-            };
-
-            try {
-                await addDoc(collection(db, "nail_bookings"), bookingRecord);
-                
-                modalOverlay.classList.remove('active');
-                successAlert.style.display = 'block';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-
-                document.getElementById('bookingStepForm').reset();
-                document.getElementById('clientName').value = "";
-                document.getElementById('clientPhone').value = "";
-                document.getElementById('checkTerms1').checked = false;
-                document.getElementById('checkTerms2').checked = false;
-                document.getElementById('checkTerms3').checked = false;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                sigTextInput.value = "";
-                bookingReceiptPreview.style.display = 'none';
-                
-                document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
-                currentSelection.selectedStyle = null;
-                currentSelection.selectedAddons.clear();
-                calculateTotal();
-
-            } catch (error) {
-                console.error("寫入雲端失敗:", error);
-                alert("儲存失敗，請確認 Firebase 設定。");
-            } finally {
-                submitFormBtn.disabled = false;
-                submitFormBtn.innerText = "確認無誤並送出預約申請";
-            }
-        });
-
         initSystem();
     </script>
 </body>
