@@ -48,6 +48,19 @@
             overflow-x: hidden;
         }
 
+        /* 跑馬燈警報樣式 */
+        #marqueeContainer {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 99999;
+            background: var(--hud-warning); color: var(--hud-danger);
+            font-weight: 900; font-size: 20px; padding: 10px 0;
+            overflow: hidden; white-space: nowrap;
+            animation: flash 1s infinite alternate;
+            display: none; box-shadow: 0 0 20px var(--hud-warning);
+        }
+        @keyframes flash { from { opacity: 1; } to { opacity: 0.6; } }
+        .marquee-content { display: inline-block; animation: scrollText 5s linear infinite; }
+        @keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
         /* 全局雷射掃描線動畫 */
         body::after {
             content: "";
@@ -323,6 +336,8 @@
 </head>
 <body>
 
+<div id="marqueeContainer"><div class="marquee-content" id="marqueeText"></div></div>
+
 <div id="loginOverlay">
     <div class="login-box">
         <h2>系統安全驗證</h2>
@@ -361,6 +376,8 @@
             <div class="form-group"><label>色系：</label><input type="text" id="p1_color" placeholder="例如：黑色/白色"></div>
             <div class="form-group"><label>淨重 (KG)：</label><input type="number" id="p1_weight" value="25"></div>
             <div class="form-group"><label>廠商：</label><input type="text" id="p1_supplier"></div>
+            <div class="form-group"><label>安全庫存 (KG)：</label><input type="number" id="p1_safety" value="0"></div>
+            <div class="form-group"><label>預警開關：</label><select id="p1_safety_enabled"><option value="true">開啟</option><option value="false">關閉</option></select></div>
             <button class="btn btn-success" id="btn_saveP1" onclick="saveP1()">寫入資料庫</button>
         </div>
         <div class="file-ops admin-only">
@@ -370,7 +387,7 @@
                 <button class="btn btn-secondary" style="width:auto; padding:8px 20px;" onclick="exportCSV('powder')">匯出</button>
             </div>
         </div>
-        <div class="data-container"><table class="data-table" id="tb_p1"><thead><tr><th>粉號</th><th>代號</th><th>色系</th><th>淨重</th><th>廠商</th><th class="admin-only">執行指令</th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p1"><thead><tr><th>粉號</th><th>代號</th><th>安全庫存</th><th>狀態</th><th class="admin-only">執行指令</th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div id="page2" class="page">
@@ -498,7 +515,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <script>
-    // ⚠️ Firebase Config (保持不變)
     const firebaseConfig = {
         apiKey: "AIzaSyDTIMGBYqAqOpFcCqEMjWWUwC_nPAfQ9ko",
         authDomain: "paint-system-21867.firebaseapp.com",
@@ -519,7 +535,6 @@
     const today = new Date().toISOString().split('T')[0];
     ['p3_date', 'p4_date', 'p7_date'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = today; });
 
-    // --- 1. 權限登入 ---
     function login(role) {
         if(role === 'admin') {
             const pwd = document.getElementById('admin_pwd').value;
@@ -528,12 +543,10 @@
         } else {
             userRole = 'viewer';
         }
-        
         document.getElementById('loginOverlay').style.display = 'none';
         document.getElementById('roleDisplay').innerHTML = role === 'admin' 
             ? '<span style="color:var(--hud-danger); font-weight:900; letter-spacing:2px;">[ 管理員 ]</span>' 
             : '<span style="color:var(--text-muted); font-weight:900; letter-spacing:2px;">[ 檢視者 ]</span>';
-        
         applyPermissions();
     }
 
@@ -549,7 +562,6 @@
         });
     }
 
-    // --- 2. 頁面切換 ---
     function goPage(p) { 
         document.querySelectorAll('.page').forEach(el => el.style.display='none'); 
         document.getElementById('page'+p).style.display='block'; 
@@ -563,29 +575,39 @@
         document.getElementById('homePage').style.display='block'; 
     }
 
-    // --- 3. Firebase 即時同步 ---
     db.ref('/').on('value', (snapshot) => {
         if(snapshot.exists()) {
             dbData = snapshot.val();
             ['powder','inventory','purchase','usage','waste'].forEach(k => { if(!dbData[k]) dbData[k] = {}; });
-            
             const statusEl = document.getElementById('syncStatus');
             statusEl.innerText = "[ 已連線 ]";
             statusEl.style.color = "var(--hud-success)";
-            
             refreshAllUI();
-        } else {
-            db.ref('/').set(dbData);
         }
     });
 
-    setTimeout(() => {
-        if(document.getElementById('syncStatus').innerText.includes("連線中")) {
-            const statusEl = document.getElementById('syncStatus');
-            statusEl.innerText = "[ 網路連線失敗 ]";
-            statusEl.style.color = "var(--hud-danger)";
+    function checkLowStock() {
+        let alerts = [];
+        for (let id in dbData.powder) {
+            let p = dbData.powder[id];
+            if(p.safety_enabled === "true") {
+                let inv = dbData.inventory[id] || { box: 0, loose: 0 };
+                let total = (inv.box * (p.weight || 25)) + inv.loose;
+                if(total < (Number(p.safety_stock) || 0)) {
+                    alerts.push(`⚠️ 警報：粉號 ${id} [${p.code || ''}] 目前庫存 ${total} KG 低於安全水位！`);
+                }
+            }
         }
-    }, 5000);
+        
+        const container = document.getElementById('marqueeContainer');
+        const text = document.getElementById('marqueeText');
+        if(alerts.length > 0) {
+            container.style.display = 'block';
+            text.innerHTML = alerts.join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+        } else {
+            container.style.display = 'none';
+        }
+    }
 
     function refreshAllUI() {
         let optHtml = '<option value="">請點擊展開...</option>';
@@ -602,13 +624,14 @@
         });
         renderTables();
         if(document.getElementById('page6').style.display === 'block') renderP6();
+        checkLowStock();
     }
 
     function renderTables() {
         let htmlP1 = '';
         for(let id in dbData.powder) {
             let d = dbData.powder[id];
-            htmlP1 += `<tr><td><strong>${id}</strong></td><td>${d.code || '無資料'}</td><td>${d.color_system || '無資料'}</td><td>${d.weight || 25} KG</td><td>${d.supplier || '無資料'}</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-purple); color:var(--hud-purple); margin-right:5px;" onclick="editP1('${id}')">修改</button><button class="action-btn" onclick="delData('powder', '${id}')">刪除</button></td></tr>`;
+            htmlP1 += `<tr><td><strong>${id}</strong></td><td>${d.code || '無資料'}</td><td>${d.safety_stock || 0} KG</td><td>${d.safety_enabled === "true" ? '<span style="color:var(--hud-success)">●</span>' : '<span style="color:var(--hud-danger)">○</span>'}</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-purple); color:var(--hud-purple); margin-right:5px;" onclick="editP1('${id}')">修改</button><button class="action-btn" onclick="delData('powder', '${id}')">刪除</button></td></tr>`;
         }
         document.querySelector('#tb_p1 tbody').innerHTML = htmlP1;
 
@@ -650,15 +673,16 @@
         const color_system = document.getElementById('p1_color').value.trim();
         const weight = Number(document.getElementById('p1_weight').value);
         const supplier = document.getElementById('p1_supplier').value.trim();
+        const safety_stock = document.getElementById('p1_safety').value.trim();
+        const safety_enabled = document.getElementById('p1_safety_enabled').value;
 
         if(!id) return alert('錯誤：系統粉號為必填參數！');
         
         let updates = {}; 
-        updates[`/powder/${id}`] = { code, color_system, weight, supplier };
+        updates[`/powder/${id}`] = { code, color_system, weight, supplier, safety_stock, safety_enabled };
         if(!dbData.inventory[id]) updates[`/inventory/${id}`] = { box: 0, loose: 0 };
         
         db.ref().update(updates);
-        
         document.getElementById('p1_id').value = ''; document.getElementById('p1_code').value = ''; 
         document.getElementById('p1_color').value = ''; document.getElementById('p1_supplier').value = '';
         document.getElementById('p1_id').readOnly = false;
@@ -675,6 +699,8 @@
         document.getElementById('p1_color').value = d.color_system || '';
         document.getElementById('p1_weight').value = d.weight || 25;
         document.getElementById('p1_supplier').value = d.supplier || '';
+        document.getElementById('p1_safety').value = d.safety_stock || 0;
+        document.getElementById('p1_safety_enabled').value = d.safety_enabled || "false";
         document.getElementById('btn_saveP1').innerText = "儲存修正資料";
         document.getElementById('p1_id').scrollIntoView({ behavior: 'smooth' });
     }
@@ -715,7 +741,6 @@
 
         updates[`/inventory/${id}`] = { box: inv.box + box, loose: inv.loose + loose };
         db.ref().update(updates);
-        
         document.getElementById('p3_box').value = 0; document.getElementById('p3_loose').value = 0; 
         alert('✅ 入庫序列已確認執行！');
     }
@@ -743,7 +768,6 @@
         const box = Number(document.getElementById('p4_box').value) || 0;
         const loose = Number(document.getElementById('p4_loose').value) || 0;
         const ret = Number(document.getElementById('p4_return').value) || 0;
-        
         const w = dbData.powder[id] ? dbData.powder[id].weight : 25;
         const totalUsage = (box * w) + loose - ret;
         document.getElementById('p4_usage').value = isNaN(totalUsage) ? 0 : totalUsage + " KG";
@@ -756,10 +780,8 @@
         const loose = Number(document.getElementById('p4_loose').value) || 0;
         const return_qty = Number(document.getElementById('p4_return').value) || 0;
         if(!id) return alert('警告：未指定目標粉號');
-
         const w = dbData.powder[id] ? dbData.powder[id].weight : 25;
         const usage_qty = (box * w) + loose - return_qty;
-
         let inv = dbData.inventory[id] || { box: 0, loose: 0 };
         let updates = {};
         let key = editKeys.usage;
@@ -784,10 +806,8 @@
         let newBox = inv.box - box; 
         let newLoose = inv.loose - loose + return_qty;
         if(newBox < 0 || newLoose < 0) return alert('⚠️ 嚴重警告：預算執行後庫存數值呈現異常（小於零）！');
-
         updates[`/inventory/${id}`] = { box: newBox, loose: newLoose };
         db.ref().update(updates);
-        
         document.getElementById('p4_box').value = 0; document.getElementById('p4_loose').value = 0; document.getElementById('p4_return').value = 0;
         fetchCurrentStock(); 
         alert('✅ 能量扣除與出庫序列執行完畢！');
@@ -809,11 +829,9 @@
         const date = document.getElementById('p7_date').value; 
         const qty = Number(document.getElementById('p7_qty').value);
         if(!qty) return alert('錯誤：參數箱數不可為空');
-        
         let updates = {}; let key = editKeys.waste;
         if(key) { updates[`/waste/${key}`] = { date, qty }; editKeys.waste = null; document.getElementById('btn_saveP7').innerText = "寫入回收紀錄"; } 
         else { key = db.ref().child('waste').push().key; updates[`/waste/${key}`] = { date, qty }; }
-        
         db.ref().update(updates);
         document.getElementById('p7_qty').value = ''; 
         alert('✅ 廢棄質能回收參數更新完畢！');
@@ -868,43 +886,12 @@
         const id = document.getElementById('p6_id').value; 
         const res = document.getElementById('p6_result');
         if(!id) { res.style.display = 'none'; return; }
-        
         let d = dbData.powder[id] || {}; 
         let inv = dbData.inventory[id] || {box:0, loose:0};
         let weight = d.weight || 25;
         let total = (inv.box * weight) + inv.loose;
-
         res.style.display = 'block';
-        res.innerHTML = `
-            <div class="dashboard-grid">
-                <div class="dash-card">
-                    <div class="dash-card-header">📋 粉末資料</div>
-                    <div class="info-row"><span class="info-label">粉號</span><span class="info-value" style="color:var(--hud-cyan); font-size:18px;">${id}</span></div>
-                    <div class="info-row"><span class="info-label">代號</span><span class="info-value">${d.code || '無資料'}</span></div>
-                    <div class="info-row"><span class="info-label">色系</span><span class="info-value">${d.color_system || '無資料'}</span></div>
-                    <div class="info-row"><span class="info-label">廠商</span><span class="info-value">${d.supplier || '無資料'}</span></div>
-                    <div class="info-row"><span class="info-label">淨重</span><span class="info-value">${weight} KG</span></div>
-                </div>
-                
-                <div class="split-stats">
-                    <div class="stat-box box-stat">
-                        <div class="stat-unit">📦 箱數</div>
-                        <div class="num">${inv.box}</div>
-                        <div class="stat-unit">箱</div>
-                    </div>
-                    <div class="stat-box loose-stat">
-                        <div class="stat-unit">⚖️ 散粉</div>
-                        <div class="num">${inv.loose}</div>
-                        <div class="stat-unit">KG</div>
-                    </div>
-                </div>
-
-                <div class="dash-card total-card">
-                    <div class="total-label">⚡ 總重量估測</div>
-                    <div><span class="total-value">${total}</span> <span class="total-unit">KG</span></div>
-                </div>
-            </div>
-        `;
+        res.innerHTML = `<div class="dashboard-grid"><div class="dash-card"><div class="dash-card-header">📋 粉末資料</div><div class="info-row"><span class="info-label">粉號</span><span class="info-value" style="color:var(--hud-cyan); font-size:18px;">${id}</span></div><div class="info-row"><span class="info-label">代號</span><span class="info-value">${d.code || '無資料'}</span></div><div class="info-row"><span class="info-label">色系</span><span class="info-value">${d.color_system || '無資料'}</span></div><div class="info-row"><span class="info-label">廠商</span><span class="info-value">${d.supplier || '無資料'}</span></div><div class="info-row"><span class="info-label">淨重</span><span class="info-value">${weight} KG</span></div></div><div class="split-stats"><div class="stat-box box-stat"><div class="stat-unit">📦 箱數</div><div class="num">${inv.box}</div><div class="stat-unit">箱</div></div><div class="stat-box loose-stat"><div class="stat-unit">⚖️ 散粉</div><div class="num">${inv.loose}</div><div class="stat-unit">KG</div></div></div><div class="dash-card total-card"><div class="total-label">⚡ 總重量估測</div><div><span class="total-value">${total}</span> <span class="total-unit">KG</span></div></div></div>`;
     }
 
     function calculateWaste() {
@@ -914,22 +901,17 @@
         });
         let totalKg = totalQty * 25;
         document.getElementById('waste_total').innerText = totalKg.toLocaleString();
-        
         let target = 10000; 
         let pct = (totalKg / target) * 100;
         if(pct > 100) pct = 100;
-        
         const progressBar = document.getElementById('waste_progress_bar');
         progressBar.style.width = pct.toFixed(1) + '%';
         progressBar.innerText = pct.toFixed(1) + '%';
-        
         if(pct >= 90) { progressBar.style.background = 'linear-gradient(90deg, #be123c, var(--hud-danger))'; progressBar.style.boxShadow = '0 0 20px var(--hud-danger)'; } 
         else if(pct >= 70) { progressBar.style.background = 'linear-gradient(90deg, var(--hud-warning), #fbbf24)'; progressBar.style.boxShadow = '0 0 20px var(--hud-warning)'; }
         else { progressBar.style.background = 'linear-gradient(90deg, var(--hud-purple), var(--hud-cyan))'; progressBar.style.boxShadow = '0 0 20px var(--hud-cyan)'; }
-        
         let days = (new Date() - firstDate) / (1000 * 60 * 60 * 24); if(days < 1) days = 1;
         let avgPerDay = totalKg / days;
-        
         if(totalKg >= target) {
             document.getElementById('waste_forecast').innerHTML = '<span style="color:var(--hud-danger); font-weight:900;">⚠️ 最高級別警報：負載超越 10 噸，強烈建議啟動物理清運！</span>';
         } else if(avgPerDay > 0) {
@@ -943,13 +925,11 @@
     function exportCSV(node) {
         let csv = "\uFEFF"; let data = dbData[node] || {};
         let nameMap = { powder: '粉號清冊', inventory: '庫存盤點', purchase: '採購入庫', usage: '出庫用量', waste: '廢粉紀錄' };
-        
-        if(node === 'powder') { csv += "粉號,代號,色系,淨重,廠商\n"; Object.keys(data).forEach(k => csv += `"${k}","${data[k].code || ''}","${data[k].color_system || ''}",${data[k].weight || 25},"${data[k].supplier || ''}"\n`); }
-        if(node === 'inventory') { csv += "粉號,箱數,散粉\n"; Object.keys(data).forEach(k => csv += `"${k}",${data[k].box},${data[k].loose}\n`); }
-        if(node === 'purchase') { csv += "日期,粉號,箱數,散粉\n"; Object.values(data).forEach(r => csv += `"${r.date}","${r.id}",${r.box},${r.loose}\n`); }
-        if(node === 'usage') { csv += "日期,粉號,領箱數,領散粉,回庫,用量\n"; Object.values(data).forEach(r => csv += `"${r.date}","${r.id}",${r.box},${r.loose},${r.return_qty || 0},${r.usage_qty || 0}\n`); }
-        if(node === 'waste') { csv += "日期,桶數\n"; Object.values(data).forEach(r => csv += `"${r.date}",${r.qty}\n`); }
-        
+        if(node === 'powder') { csv += "粉號,代號,色系,淨重,廠商,安全庫存,啟用預警\n"; Object.keys(data).forEach(k => csv += `"${k}","${data[k].code || ''}","${data[k].color_system || ''}",${data[k].weight || 25},"${data[k].supplier || ''}",${data[k].safety_stock || 0},"${data[k].safety_enabled || 'false'}"\n`); }
+        else if(node === 'inventory') { csv += "粉號,箱數,散粉\n"; Object.keys(data).forEach(k => csv += `"${k}",${data[k].box},${data[k].loose}\n`); }
+        else if(node === 'purchase') { csv += "日期,粉號,箱數,散粉\n"; Object.values(data).forEach(r => csv += `"${r.date}","${r.id}",${r.box},${r.loose}\n`); }
+        else if(node === 'usage') { csv += "日期,粉號,領箱數,領散粉,回庫,用量\n"; Object.values(data).forEach(r => csv += `"${r.date}","${r.id}",${r.box},${r.loose},${r.return_qty || 0},${r.usage_qty || 0}\n`); }
+        else if(node === 'waste') { csv += "日期,桶數\n"; Object.values(data).forEach(r => csv += `"${r.date}",${r.qty}\n`); }
         let link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
         link.setAttribute("download", `${nameMap[node]}_資料匯出.CSV`);
         document.body.appendChild(link); link.click(); document.body.removeChild(link);
@@ -965,7 +945,7 @@
                 let updates = {}; 
                 for(let i = 1; i < lines.length; i++) {
                     let cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
-                    if(node === 'powder' && cols.length >= 3) { updates[`/${node}/${cols[0]}`] = { code: cols[1], color_system: cols.length>=5?cols[2]:'', weight: isNaN(Number(cols.length>=5?cols[3]:cols[2]))?25:Number(cols.length>=5?cols[3]:cols[2]), supplier: cols.length>=5?cols[4]:'' }; }
+                    if(node === 'powder' && cols.length >= 3) { updates[`/${node}/${cols[0]}`] = { code: cols[1], color_system: cols.length>=5?cols[2]:'', weight: isNaN(Number(cols.length>=5?cols[3]:cols[2]))?25:Number(cols.length>=5?cols[3]:cols[2]), supplier: cols.length>=5?cols[4]:'', safety_stock: cols.length>=6?cols[5]:0, safety_enabled: cols.length>=7?cols[6]:'false' }; }
                     else if(node === 'inventory' && cols.length >= 3) { updates[`/${node}/${cols[0]}`] = { box: isNaN(Number(cols[1]))?0:Number(cols[1]), loose: isNaN(Number(cols[2]))?0:Number(cols[2]) }; }
                     else if(node === 'purchase' && cols.length >= 4) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], id: cols[1], box: isNaN(Number(cols[2]))?0:Number(cols[2]), loose: isNaN(Number(cols[3]))?0:Number(cols[3]) }; }
                     else if(node === 'usage' && cols.length >= 4) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], id: cols[1], box: isNaN(Number(cols[2]))?0:Number(cols[2]), loose: isNaN(Number(cols[3]))?0:Number(cols[3]), return_qty: cols.length>=6?Number(cols[4]):0, usage_qty: cols.length>=6?Number(cols[5]):((Number(cols[2])*(dbData.powder[cols[1]]?.weight||25))+Number(cols[3])-(cols.length>=6?Number(cols[4]):0)) }; }
