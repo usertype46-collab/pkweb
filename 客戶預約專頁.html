@@ -1037,19 +1037,20 @@
                 // 強制讓隱藏的成功表單區域短暫渲染顯示，以便 html2canvas 進行光柵化快照
                 successReceiptSection.style.display = 'block';
 
-                // 執行 html2canvas 網頁快照技術
+                // 執行 html2canvas 網頁快照技術 (壓縮優化版)
                 const targetArea = document.getElementById('receiptCaptureArea');
                 const capturedCanvas = await html2canvas(targetArea, {
-                    scale: 2, 
+                    scale: 1, // 將解析度倍率從 2 降回 1，大幅減少圖檔尺寸
                     backgroundColor: '#FFFFFF',
                     useCORS: true
                 });
-                const screenshotBase64 = capturedCanvas.toDataURL('image/png');
+                // 改用 JPEG 格式，並設定 60% (0.6) 壓縮品質，取代原本肥大的 PNG
+                const screenshotBase64 = capturedCanvas.toDataURL('image/jpeg', 0.6);
 
                 submitFormBtn.innerText = "上傳電子合約雲端中...";
 
-                // 將這張截圖上傳到 Firebase Storage 中儲存
-                const screenshotFilename = `warranty_receipts/${Date.now()}_${clientPhone}.png`;
+                // 將這張截圖上傳到 Firebase Storage 中儲存 (副檔名改為 jpg)
+                const screenshotFilename = `warranty_receipts/${Date.now()}_${clientPhone}.jpg`;
                 const storageRef = ref(storage, screenshotFilename);
                 await uploadString(storageRef, screenshotBase64, 'data_url');
                 
@@ -1108,7 +1109,18 @@
 
             } catch (error) {
                 console.error("寫入雲端或截圖失敗:", error);
-                alert("儲存失敗，請確認 Firebase 安全規則設定與 Storage 權限。");
+                
+                // 更詳細的錯誤提示
+                let errorMessage = "未知錯誤";
+                if (error.code === 'storage/unauthorized') {
+                    errorMessage = "Storage 權限不足，請檢查 Firebase Storage 安全規則。";
+                } else if (error.code === 'permission-denied') {
+                    errorMessage = "Firestore 權限不足，請檢查資料庫安全規則。";
+                } else {
+                    errorMessage = error.message;
+                }
+                alert("儲存失敗：" + errorMessage);
+                
             } finally {
                 submitFormBtn.disabled = false;
                 submitFormBtn.innerText = "確認無誤並送出預約申請";
