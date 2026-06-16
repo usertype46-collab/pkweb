@@ -1098,7 +1098,7 @@
                 console.log("📤 準備提交的預約數據:", bookingData);
 
                 // 直接提交到 Firestore（不使用延遲）
-                const bookingRef = await addDoc(collection(db, "bookings"), bookingData);
+                const bookingRef = await addDoc(collection(db, "nail_bookings"), bookingData);
                 
                 console.log("✅ 預約成功寫入！ID:", bookingRef.id);
 
