@@ -1137,7 +1137,45 @@
                 submitFormBtn.innerHTML = '確認無誤並送出預約申請';
             }
         });
+          // ==========================================
+        // 7. 下載預約單功能
+        // ==========================================
+        downloadReceiptBtn.addEventListener('click', async () => {
+            downloadReceiptBtn.disabled = true;
+            downloadReceiptBtn.innerHTML = '<span class="loading-spinner"></span> 生成中...';
 
+            try {
+                const element = bookingReceiptPreview;
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#FFFFFF',
+                    useCORS: true,
+                    allowTaint: true
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const imgWidth = 210;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+                pdf.save(`預約確認單_${document.getElementById('clientName').value || '客戶'}.pdf`);
+
+                alert("預約單已下載成功！");
+                downloadReceiptBtn.disabled = false;
+                downloadReceiptBtn.innerHTML = '📥 下載預約單';
+            } catch (error) {
+                console.error("下載失敗: ", error);
+                alert("下載失敗: " + error.message);
+                downloadReceiptBtn.disabled = false;
+                downloadReceiptBtn.innerHTML = '📥 下載預約單';
+            }
+        });
         // ==========================================
         // 8. 初始化系統
         // ==========================================
