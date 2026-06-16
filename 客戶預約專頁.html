@@ -955,11 +955,20 @@
         closeModalBtn.addEventListener('click', () => modalOverlay.classList.remove('active'));
 
         function resizeCanvas() {
+            // 1. 在改變尺寸前，先把現有的簽名轉成圖片數據備份
+            const dataURL = canvas.toDataURL();
+            // 2. 更新畫布尺寸 (這一步會導致畫布被清空)
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
+            // 3. 重新設定繪圖屬性 (因為尺寸重置會重設繪圖環境)
             ctx.lineWidth = 3;
             ctx.lineCap = "round";
             ctx.strokeStyle = "#3A2E2B";
+            // 4. 將剛剛備份的圖片畫回去
+            const img = new Image();
+            img.src = dataURL;
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0);
         }
         window.addEventListener('resize', resizeCanvas);
 
