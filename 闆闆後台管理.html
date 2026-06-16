@@ -496,8 +496,8 @@
                         <input type="number" id="itemQty" style="width: 80px;" class="input-discount" value="1" min="1">
                     </div>
                     <div>
-                        <label>合計 (元)</label>
-                        <input type="number" id="itemTotal" style="width: 100px; text-align: left;" class="input-discount" min="0">
+                        <label>單價 (元)</label>
+                        <input type="number" id="itemUnitPrice" style="width: 100px; text-align: left;" class="input-discount" min="0">
                     </div>
                     <div>
                         <button id="addItemBtn" class="btn-refresh" style="padding: 10px 15px;">新增</button>
@@ -628,8 +628,7 @@
         let globalDiscount = 95; 
         let globalBookingsData = []; 
         
-        // 新增：成本與支出變數
-        let globalExpensesData = {}; // key: YYYY-MM
+        let globalExpensesData = {}; 
         let currentMonthConsumables = []; 
 
         // --- DOM 元素抓取 ---
@@ -654,7 +653,6 @@
         const reportBtn = document.getElementById('reportBtn');
         const closeReportBtn = document.getElementById('closeReportBtn');
 
-        // 成本管理 DOM
         const expenseBtn = document.getElementById('expenseBtn');
         const expenseModal = document.getElementById('expenseModal');
         const closeExpenseBtn = document.getElementById('closeExpenseBtn');
@@ -775,19 +773,20 @@
         addItemBtn.addEventListener('click', () => {
             const name = document.getElementById('itemName').value.trim();
             const qty = parseInt(document.getElementById('itemQty').value);
-            const total = parseInt(document.getElementById('itemTotal').value);
+            const unitPrice = parseInt(document.getElementById('itemUnitPrice').value);
 
-            if (!name || isNaN(qty) || isNaN(total) || qty < 1 || total < 0) {
-                alert("⚠️ 請填寫完整的品名、正確的數量與合計金額！");
+            if (!name || isNaN(qty) || isNaN(unitPrice) || qty < 1 || unitPrice < 0) {
+                alert("⚠️ 請填寫完整的品名、正確的數量與單價！");
                 return;
             }
 
+            const total = qty * unitPrice; // 自動計算總額
             currentMonthConsumables.push({ name, qty, total });
             renderConsumables();
 
             document.getElementById('itemName').value = '';
             document.getElementById('itemQty').value = '1';
-            document.getElementById('itemTotal').value = '';
+            document.getElementById('itemUnitPrice').value = '';
             document.getElementById('itemName').focus();
         });
 
@@ -796,7 +795,6 @@
             const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
             document.getElementById('expenseMonthLabel').innerText = `目前紀錄月份：${now.getFullYear()} 年 ${now.getMonth() + 1} 月`;
 
-            // 載入當月資料
             const monthData = globalExpensesData[currentYearMonth] || { electricity: 0, consumables: [], totalConsumablesCost: 0 };
             document.getElementById('electricityBillInput').value = monthData.electricity || 0;
             currentMonthConsumables = monthData.consumables ? [...monthData.consumables] : [];
@@ -841,17 +839,16 @@
         });
 
 
-        // --- 報表控制邏輯 (升級版：扣除成本算淨利) ---
+        // --- 報表控制邏輯 ---
         reportBtn.addEventListener('click', () => {
             const now = new Date();
             const currentYear = now.getFullYear().toString();
             const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
             const currentYearMonth = `${currentYear}-${currentMonth}`;
 
-            let monthlyGross = 0; // 當月實收
-            let annualGross = 0;  // 當年實收
+            let monthlyGross = 0; 
+            let annualGross = 0; 
 
-            // 1. 計算營業總額
             globalBookingsData.forEach(item => {
                 if (item.status === "completed" && item.priceCalculations) {
                     const bookingDate = item.bookingDate || ""; 
@@ -861,7 +858,6 @@
                 }
             });
 
-            // 2. 計算支出總額
             let monthlyElectricity = 0;
             let monthlyConsumables = 0;
             let annualElectricity = 0;
@@ -871,23 +867,19 @@
                 const elec = parseInt(data.electricity) || 0;
                 const cons = parseInt(data.totalConsumablesCost) || 0;
 
-                // 年度加總
                 if (yyyyMm.startsWith(currentYear)) {
                     annualElectricity += elec;
                     annualConsumables += cons;
                 }
-                // 當月加總
                 if (yyyyMm === currentYearMonth) {
                     monthlyElectricity += elec;
                     monthlyConsumables += cons;
                 }
             }
 
-            // 3. 計算淨利
             const monthlyNet = monthlyGross - monthlyElectricity - monthlyConsumables;
             const annualNet = annualGross - annualElectricity - annualConsumables;
 
-            // 4. 渲染報表畫面
             document.getElementById('monthlyNetValue').innerText = `$${monthlyNet.toLocaleString()}`;
             document.getElementById('monthlyMonthLabel').innerText = `${currentYear}年${currentMonth}月`;
             document.getElementById('monthlyBreakdownLabel').innerHTML = `實收 $${monthlyGross.toLocaleString()} &nbsp;|&nbsp; 耗材 <span style="color:var(--danger-red);">-$${monthlyConsumables.toLocaleString()}</span> &nbsp;|&nbsp; 電費 <span style="color:var(--danger-red);">-$${monthlyElectricity.toLocaleString()}</span>`;
@@ -903,13 +895,11 @@
             reportModal.style.display = 'none';
         });
 
-        // --- 關閉完成確認對話框邏輯 ---
         cancelCompletionBtn.addEventListener('click', () => {
             completionModal.style.display = 'none';
             targetCompleteId = null;
         });
 
-        // --- 送出完成確認 + 自動化視窗內容截圖儲存邏輯 ---
         confirmCompletionBtn.addEventListener('click', async () => {
             if (!targetCompleteId) return;
 
@@ -969,14 +959,12 @@
             }
         });
 
-        // --- 提醒吐司控制 ---
         closeToastBtn.addEventListener('click', () => toastAlert.style.display = 'none');
         updateToastBtn.addEventListener('click', () => {
             toastAlert.style.display = 'none';
             loadBookings();
         });
 
-        // --- 刪除控制邏輯 ---
         cancelDeleteBtn.addEventListener('click', () => {
             deleteModal.style.display = 'none';
             targetDeleteId = null;
@@ -1000,7 +988,6 @@
             }
         });
 
-        // --- 圖片預覽與下載控制邏輯 ---
         closeImgModalBtn.addEventListener('click', () => {
             imageModal.style.display = 'none';
             previewImage.src = '';
@@ -1048,7 +1035,6 @@
             document.body.removeChild(link);
         });
 
-        // --- 音效提示 ---
         function playNotificationChime() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1072,7 +1058,6 @@
             }
         }
 
-        // --- 自雲端讀取全域折扣設定 ---
         async function fetchDiscountConfig() {
             try {
                 const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
@@ -1088,7 +1073,6 @@
             }
         }
 
-        // --- 確認修改並儲存全域折扣設定至雲端 ---
         document.getElementById('saveDiscountBtn').addEventListener('click', async () => {
             const inputVal = parseInt(document.getElementById('discountConfigInput').value);
             if (isNaN(inputVal) || inputVal < 10 || inputVal > 99) {
@@ -1118,7 +1102,6 @@
             }
         });
 
-        // --- 核心資料載入與渲染 ---
         async function loadBookings() {
             const tbody = document.getElementById('bookingListTbody');
             const loading = document.getElementById('loading');
@@ -1131,7 +1114,7 @@
             screenshotsMap.clear(); 
 
             await fetchDiscountConfig();
-            await loadExpenses(); // 同步讀取成本支出資料
+            await loadExpenses(); 
 
             try {
                 const querySnapshot = await getDocs(collection(db, "nail_bookings"));
@@ -1258,7 +1241,6 @@
             }
         }
 
-        // --- Firebase 即時監聽 ---
         let isFirstListeningLoad = true;
         onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
             if (isFirstListeningLoad) {
@@ -1275,70 +1257,62 @@
         document.getElementById('refreshBtn').addEventListener('click', loadBookings);
         loadBookings();
         
-// --- 搜尋功能控制 ---
-const fabSearchBtn = document.getElementById('fabSearchBtn');
-const searchModal = document.getElementById('searchModal');
-const closeSearchBtn = document.getElementById('closeSearchBtn');
-const searchInput = document.getElementById('searchInput');
-const searchResultList = document.getElementById('searchResultList');
+        const fabSearchBtn = document.getElementById('fabSearchBtn');
+        const searchModal = document.getElementById('searchModal');
+        const closeSearchBtn = document.getElementById('closeSearchBtn');
+        const searchInput = document.getElementById('searchInput');
+        const searchResultList = document.getElementById('searchResultList');
 
-fabSearchBtn.addEventListener('click', () => {
-    searchModal.style.display = 'flex';
-    searchInput.value = '';
-    searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字進行搜尋</p>';
-});
-
-closeSearchBtn.addEventListener('click', () => {
-    searchModal.style.display = 'none';
-});
-
-searchInput.addEventListener('input', (e) => {
-    const val = e.target.value.trim().toLowerCase();
-    if (!val) {
-        searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字</p>';
-        return;
-    }
-
-    // 篩選符合關鍵字的紀錄
-    const filtered = globalBookingsData.filter(b => 
-        (b.clientName && b.clientName.toLowerCase().includes(val)) || 
-        (b.clientPhone && b.clientPhone.includes(val))
-    );
-
-    // 邏輯：保留每個客戶的最新一筆紀錄
-    const latestRecordsMap = new Map();
-    
-    // 為了找最新，先將資料依日期排序 (最新在前面)
-    const sortedData = [...filtered].sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate));
-
-    sortedData.forEach(item => {
-        // 以電話作為唯一識別，若無電話則用名字
-        const key = item.clientPhone || item.clientName;
-        if (!latestRecordsMap.has(key)) {
-            latestRecordsMap.set(key, item);
-        }
-    });
-
-    // 渲染結果
-    searchResultList.innerHTML = '';
-    if (latestRecordsMap.size === 0) {
-        searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">查無相關紀錄</p>';
-    } else {
-        latestRecordsMap.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'result-item';
-            div.innerHTML = `
-                <div class="result-info">
-                    <span class="result-name">${item.clientName}</span>
-                    <span class="result-phone">📞 ${item.clientPhone || '無電話'}</span>
-                </div>
-                <div style="font-size: 0.8rem; color: #888;">${item.bookingDate}</div>
-            `;
-            searchResultList.appendChild(div);
+        fabSearchBtn.addEventListener('click', () => {
+            searchModal.style.display = 'flex';
+            searchInput.value = '';
+            searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字進行搜尋</p>';
         });
-    }
-});
 
+        closeSearchBtn.addEventListener('click', () => {
+            searchModal.style.display = 'none';
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim().toLowerCase();
+            if (!val) {
+                searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">請輸入關鍵字</p>';
+                return;
+            }
+
+            const filtered = globalBookingsData.filter(b => 
+                (b.clientName && b.clientName.toLowerCase().includes(val)) || 
+                (b.clientPhone && b.clientPhone.includes(val))
+            );
+
+            const latestRecordsMap = new Map();
+            const sortedData = [...filtered].sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate));
+
+            sortedData.forEach(item => {
+                const key = item.clientPhone || item.clientName;
+                if (!latestRecordsMap.has(key)) {
+                    latestRecordsMap.set(key, item);
+                }
+            });
+
+            searchResultList.innerHTML = '';
+            if (latestRecordsMap.size === 0) {
+                searchResultList.innerHTML = '<p style="color:#aaa; text-align:center;">查無相關紀錄</p>';
+            } else {
+                latestRecordsMap.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'result-item';
+                    div.innerHTML = `
+                        <div class="result-info">
+                            <span class="result-name">${item.clientName}</span>
+                            <span class="result-phone">📞 ${item.clientPhone || '無電話'}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #888;">${item.bookingDate}</div>
+                    `;
+                    searchResultList.appendChild(div);
+                });
+            }
+        });
         
     </script>
     
@@ -1356,6 +1330,5 @@ searchInput.addEventListener('input', (e) => {
     </div>
 </div>
 
-    
 </body>
 </html>
