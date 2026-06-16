@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>神の指藝預約系統 | Beautiful moment.</title>
+    <title>專業美甲藝術設計預約系統 | DÉESSE NAIL ART</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 千變萬化風格變數：炫彩、夢幻且具備光澤感 --- */
+        /* --- 全局樣式與變數 --- */
         :root {
-            --primary-gradient: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 40%, #A1C4FD 70%, #C2E9FB 100%);
-            --primary-color: #FF6B8B;  
-            --accent-purple: #7B2CBF;   
-            --bg-color: #FAFAFC;       
-            --text-dark: #3D2C38;     
+            --primary-color: #C8A2C8; 
+            --accent-color: #B8860B;  
+            --bg-color: #FDFBF9;      
+            --text-color: #4A3E3D;    
             --card-bg: #FFFFFF;
-            --shadow: 0 15px 35px rgba(123, 44, 191, 0.08);
-            --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            --shadow: 0 10px 30px rgba(184, 134, 11, 0.08);
+            --transition: all 0.3s ease;
         }
 
         * {
@@ -28,53 +27,39 @@
         body {
             font-family: 'Noto Sans TC', sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-dark);
-            line-height: 1.8;
-            letter-spacing: 0.6px;
+            color: var(--text-color);
+            line-height: 1.6;
         }
 
-        /* --- 頁首設計：炫彩夢幻動畫 --- */
+        /* --- 頁首設計 --- */
         header {
             text-align: center;
-            padding: 60px 20px;
-            background: var(--primary-gradient);
-            background-size: 300% 300%;
-            animation: gradientMove 12s ease infinite;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 6px 25px rgba(255, 154, 158, 0.2);
-        }
-
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #FFF5F5 0%, #F5E6E8 100%);
+            border-bottom: 1px solid rgba(184, 134, 11, 0.15);
         }
 
         header h1 {
             font-family: 'Cinzel', 'Noto Sans TC', serif;
-            font-size: 2.5rem;
-            color: #FFFFFF;
-            text-shadow: 0 3px 12px rgba(61, 44, 56, 0.25);
-            letter-spacing: 5px;
-            margin-bottom: 15px;
+            font-size: 2.2rem;
+            color: #3A2E2B;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
         }
 
         header p {
-            font-size: 1.15rem;
-            color: #FFFFFF;
-            font-weight: 500;
-            opacity: 0.95;
-            letter-spacing: 3px;
-            text-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            font-size: 1rem;
+            color: #8C7572;
+            font-weight: 300;
         }
 
-        /* --- 主要版面佈局 --- */
+        /* --- 主要佈局 --- */
         .container {
             max-width: 1200px;
             margin: 40px auto;
-            padding: 0 24px;
+            padding: 0 20px;
             display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
+            grid-template-columns: 1.2fr 0.8fr;
             gap: 40px;
         }
 
@@ -84,426 +69,438 @@
             }
         }
 
-        /* 標題置中設計 */
         h2 {
-            font-size: 1.35rem;
-            margin-bottom: 30px;
-            padding-bottom: 12px;
-            border-bottom: 2px dashed #EEDAE5;
-            color: var(--accent-purple);
-            text-align: center;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E8D7D0;
+            color: #3A2E2B;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 10px;
-            letter-spacing: 1.5px;
         }
 
         .section-panel {
             background: var(--card-bg);
-            border-radius: 24px;
-            padding: 35px;
+            border-radius: 16px;
+            padding: 30px;
             box-shadow: var(--shadow);
-            border: 1px solid rgba(238, 218, 229, 0.5);
+            border: 1px solid rgba(232, 215, 208, 0.5);
         }
 
-        /* --- 款式選擇區 --- */
+        /* --- 款式選擇區 (Grid Cards) --- */
         .style-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .style-card {
-            border: 2px solid #F3EDF1;
-            border-radius: 18px;
-            padding: 30px 20px;
-            text-align: center; 
+            border: 2px solid #F0E6E4;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
             cursor: pointer;
             transition: var(--transition);
             background: #FFF;
             position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
         .style-card:hover {
-            transform: translateY(-6px);
-            border-color: #FF9A9E;
-            box-shadow: 0 12px 28px rgba(255, 154, 158, 0.3);
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 5px 15px rgba(200, 162, 200, 0.2);
         }
 
         .style-card.selected {
-            border-color: var(--accent-purple);
-            background-color: #FAF5FF;
-            box-shadow: 0 8px 20px rgba(123, 44, 191, 0.1);
+            border-color: var(--accent-color);
+            background-color: #FDF9F5;
         }
 
         .style-card.selected::after {
-            content: '✦';
+            content: '✓';
             position: absolute;
-            top: 12px;
-            right: 12px;
-            background: var(--accent-purple);
+            top: 10px;
+            right: 10px;
+            background: var(--accent-color);
             color: white;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
-            font-size: 13px;
-            line-height: 24px;
-            text-align: center;
-            font-weight: bold;
+            font-size: 12px;
+            line-height: 22px;
         }
 
         .style-name {
             font-weight: 700;
-            font-size: 1.05rem;
-            margin-bottom: 15px;
-            color: var(--text-dark);
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #3A2E2B;
         }
 
         .style-price {
-            color: var(--primary-color);
+            color: var(--accent-color);
             font-weight: 700;
-            font-size: 1.25rem;
-            background: #FFF0F2;
-            padding: 3px 18px;
-            border-radius: 20px;
-            letter-spacing: 1px;
+            font-size: 1.2rem;
         }
 
-        /* --- 加選項目 --- */
+        /* --- 加選項目 (Checkboxes) --- */
         .addons-list {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 16px;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 576px) {
+            .addons-list {
+                grid-template-columns: 1fr;
+            }
         }
 
         .addon-item {
             display: flex;
             align-items: center;
-            justify-content: space-between; 
-            padding: 16px 20px;
-            background: #FCFAFC;
-            border: 1px solid #EFE6EC;
-            border-radius: 14px;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: #FDFBF9;
+            border: 1px solid #EFEAE6;
+            border-radius: 8px;
             cursor: pointer;
             transition: var(--transition);
-            font-size: 0.95rem;
         }
 
         .addon-item:hover {
-            background: #FFF5F7;
-            border-color: #FFB3C1;
-            transform: translateX(2px);
-        }
-
-        .addon-item .addon-left {
-            display: flex;
-            align-items: center;
+            border-color: var(--primary-color);
         }
 
         .addon-item input {
-            margin-right: 14px;
-            accent-color: var(--accent-purple);
-            transform: scale(1.15);
+            margin-right: 10px;
+            accent-color: var(--accent-color);
         }
 
-        /* --- 表單基本控制項 --- */
+        /* --- 表單控制項 --- */
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 600;
+            font-weight: 500;
             font-size: 0.95rem;
-            color: var(--text-dark);
         }
 
         .form-control {
             width: 100%;
-            padding: 14px 18px;
-            border: 1px solid #E1D5DD;
-            border-radius: 12px;
+            padding: 12px 15px;
+            border: 1px solid #DCD1CC;
+            border-radius: 8px;
             font-size: 1rem;
-            color: var(--text-dark);
+            color: var(--text-color);
             background-color: #FAFAFA;
             transition: var(--transition);
         }
 
         .form-control:focus {
             outline: none;
-            border-color: var(--accent-purple);
+            border-color: var(--primary-color);
             background-color: #FFF;
-            box-shadow: 0 0 0 4px rgba(123, 44, 191, 0.12);
+            box-shadow: 0 0 0 3px rgba(200, 162, 200, 0.15);
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 15px;
         }
 
-        /* --- 保固條款區塊樣式 --- */
-        .warranty-box {
-            background-color: #FAF5FF;
-            border: 1px solid #EEDAE5;
-            border-radius: 14px;
-            padding: 18px;
-            margin-bottom: 24px;
-            font-size: 0.9rem;
-            color: #55434F;
-        }
-
-        .warranty-title {
-            font-weight: 700;
-            color: var(--accent-purple);
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .warranty-subtitle {
-            color: #FF6B8B;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .warranty-list {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .warranty-list li {
-            margin-bottom: 6px;
-            position: relative;
-            padding-left: 18px;
-            line-height: 1.6;
-        }
-
-        .warranty-list li::before {
-            content: '✦';
-            position: absolute;
-            left: 0;
-            color: var(--primary-color);
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-top: 14px;
-            padding-top: 12px;
-            border-top: 1px dotted #EEDAE5;
-        }
-
-        .checkbox-label input[type="checkbox"] {
-            margin-top: 5px;
-            accent-color: var(--accent-purple);
-            transform: scale(1.2);
-        }
-
-        /* --- 粉色甜蜜感計價框架 --- */
+        /* --- 價格計算面板 --- */
         .price-summary {
-            background: linear-gradient(135deg, #FFF0F5 0%, #FFE4E1 100%);
-            border: 2px dashed #FFB6C1;
-            color: #6A3B44;
-            padding: 28px;
-            border-radius: 18px;
-            margin-bottom: 28px;
-            box-shadow: 0 8px 20px rgba(255, 182, 193, 0.25);
-            position: relative;
+            background: linear-gradient(135deg, #3A2E2B 0%, #2A201E 100%);
+            color: #FFF;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
         }
 
         .price-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             font-size: 0.95rem;
-            font-weight: 500;
+            color: #D3C4BF;
         }
 
         .discount-row {
-            color: #C5221F;
-            font-weight: 700;
-            display: none;
+            color: #FFB7B2;
+            font-weight: bold;
         }
 
         .price-total {
             display: flex;
             justify-content: space-between;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 2px solid #FFC0CB;
-            font-size: 1.5rem;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #544542;
+            font-size: 1.4rem;
             font-weight: 700;
-            color: #D14760;
+            color: #E6C594;
         }
 
-        /* --- 提交按鈕 --- */
-        .btn-submit {
+        /* --- 按鈕樣式 --- */
+        .btn-submit, .btn-trigger {
             width: 100%;
-            background: linear-gradient(90deg, #FF6B8B 0%, #7B2CBF 100%);
+            background: linear-gradient(90deg, #D4AF37 0%, #B8860B 100%);
             color: white;
             border: none;
-            padding: 16px;
-            font-size: 1.15rem;
+            padding: 15px;
+            font-size: 1.1rem;
             font-weight: 700;
-            border-radius: 12px;
+            border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 6px 22px rgba(255, 107, 139, 0.35);
+            box-shadow: 0 5px 15px rgba(184, 134, 11, 0.3);
             transition: var(--transition);
-            letter-spacing: 2px;
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 26px rgba(123, 44, 191, 0.45);
-            opacity: 0.95;
-        }
-
-        .btn-submit:disabled {
-            background: #D5C9D2 !important;
-            box-shadow: none !important;
-            cursor: not-allowed;
-        }
-
-        /* --- 系統提示框架 --- */
-        .alert {
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 22px;
-            display: none;
-            font-weight: 600;
             text-align: center;
-            line-height: 1.6;
-        }
-        .alert-error {
-            background-color: #FCE8E6;
-            color: #C5221F;
-            border: 1px solid #FAD2CF;
         }
 
-        /* --- 彈出式對話框 (Modal) 樣式 --- */
+        .btn-submit:hover, .btn-trigger:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* --- 彈出式對話框 (Modal) --- */
         .modal-overlay {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(61, 44, 56, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.3s ease;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
         }
 
-        .modal-content {
-            background: #FFFFFF;
-            padding: 40px 30px;
-            border-radius: 24px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            animation: slideUp 0.3s ease;
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
         }
 
-        .modal-icon {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
+        .modal-container {
+            background: #FFF;
+            width: 100%;
+            max-width: 750px;
+            max-height: 90vh;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideDown 0.3s ease;
         }
 
-        .modal-content h3 {
-            color: var(--accent-purple);
-            font-size: 1.6rem;
-            margin-bottom: 10px;
-            font-family: 'Cinzel', 'Noto Sans TC', serif;
+        @keyframes slideDown {
+            from { transform: translateY(-30px); }
+            to { transform: translateY(0); }
         }
 
-        .modal-content p {
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
-        .btn-modal-confirm {
-            background: linear-gradient(90deg, #FF6B8B 0%, #7B2CBF 100%);
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            font-size: 1.1rem;
+        .modal-header {
+            background: #F5E6E8;
+            padding: 20px;
+            font-size: 1.3rem;
             font-weight: 700;
-            border-radius: 10px;
+            color: #3A2E2B;
+            border-bottom: 1px solid #E8D7D0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(255, 107, 139, 0.3);
+            color: #8C7572;
         }
 
-        .btn-modal-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(123, 44, 191, 0.4);
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .agreement-box {
+            background: #FDFBF9;
+            border: 1px solid #E8D7D0;
+            padding: 20px;
+            border-radius: 8px;
+            height: 250px;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            color: #5A4E4D;
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .agreement-box h4 {
+            margin: 15px 0 5px 0;
+            color: #3A2E2B;
         }
+
+        .checkbox-group {
+            margin-bottom: 15px;
+            background: #FFF5F5;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .checkbox-group input {
+            margin-top: 4px;
+            accent-color: var(--accent-color);
+        }
+
+        /* 簽名板樣式 */
+        .signature-section {
+            margin-top: 20px;
+            border: 1px solid #E8D7D0;
+            border-radius: 8px;
+            padding: 15px;
+            background: #FAF6F4;
+        }
+
+        .signature-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .signature-pad-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            background: #FFF;
+            border: 1px dashed #B8860B;
+            border-radius: 6px;
+        }
+
+        .signature-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .signature-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #DCD1CC;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .btn-clear {
+            background: #EFEAE6;
+            border: none;
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #5A4E4D;
+        }
+
+        .btn-toggle-sig {
+            background: none;
+            border: none;
+            color: #B8860B;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .manicurist-mask {
+            background: #EFEAE6;
+            color: #8C7572;
+            text-align: center;
+            padding: 30px;
+            border-radius: 6px;
+            font-style: italic;
+            border: 1px dashed #CDCDCD;
+        }
+
+        .warning-banner {
+            background: #FFF2E6;
+            border: 1px solid #FFD9B3;
+            color: #B35900;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #E8D7D0;
+            background: #FAF8F6;
+        }
+
+        /* --- 訊息提示 --- */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: 500;
+            text-align: center;
+        }
+        .alert-success { background-color: #E6F4EA; color: #137333; border: 1px solid #C4EED0; }
+        .alert-error { background-color: #FCE8E6; color: #C5221F; border: 1px solid #FAD2CF; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>神の指藝Beautiful moment.</h1>
-        <p>✦【千變萬化客製凝膠｜專專屬預約制】✦</p>
+        <h1 id="salonTitle">DÉESSE NAIL ART</h1>
+        <p id="salonSubtitle">專業美甲藝術設計預約與線上訂價申請系統</p>
     </header>
 
     <div class="container">
         <div class="section-panel">
-            <h2>✦ 步驟一：選擇核心美甲款式 ✦</h2>
-            <div class="style-grid" id="styleGrid"></div>
+            <h2><span>✦</span> 步驟一：選擇核心美甲款式</h2>
+            <div class="style-grid" id="styleGrid">
+                </div>
 
-            <h2>✦ 步驟二：進階附加服務 ✦</h2>
-            <div class="addons-list" id="addonsList"></div>
+            <h2><span>✦</span> 步驟二：進階附加服務</h2>
+            <div class="addons-list" id="addonsList">
+                </div>
         </div>
 
         <div class="section-panel" style="height: fit-content;">
-            <h2>✦ 步驟三：填寫申請資料 ✦</h2>
+            <h2><span>✦</span> 步驟三：選擇時間與小計</h2>
             
+            <div class="alert alert-success" id="successAlert">系統預約申請成功！我們將會發送簡訊確認。</div>
             <div class="alert alert-error" id="errorAlert">請填寫所有必填欄位並選擇款式。</div>
 
-            <form id="bookingForm">
-                <div class="form-group">
-                    <label for="clientName">顧客姓名 *</label>
-                    <input type="text" id="clientName" class="form-control" placeholder="請輸入您的真實姓名" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="clientPhone">聯絡電話 *</label>
-                    <input type="tel" id="clientPhone" class="form-control" placeholder="例如：0912345678" required>
-                </div>
-
+            <form id="bookingStepForm">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="bookingDate">預約日期 *</label>
@@ -512,28 +509,17 @@
                     <div class="form-group">
                         <label for="bookingTime">預約時段 *</label>
                         <select id="bookingTime" class="form-control" required>
-                            <option value="">讀取預約時段中...</option>
+                            <option value="">請選擇時段</option>
+                            <option value="10:00~13:00">10:00 ~ 13:00</option>
+                            <option value="14:00~17:00">14:00 ~ 17:00</option>
+                            <option value="18:00~21:00">18:00 ~ 21:00</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="notes">備註與特殊設計需求描述</label>
-                    <textarea id="notes" class="form-control" rows="3" placeholder="如有指定美甲師或需卸甲請備註於此..."></textarea>
-                </div>
-
-                <div class="warranty-box">
-                    <div class="warranty-title">🛡️ 〔保固條款〕</div>
-                    <div class="warranty-subtitle">為確保您有良好售後服務！標示：請詳細閱讀</div>
-                    <ul class="warranty-list" id="warrantyTermsList">
-                        <li>如非人為因素，一個月內可至本店免費更換五指山兩座</li>
-                        <li>如經本店評估為人為因素，7天內本店也享有免費修補一次售後服務</li>
-                        <li>經本店評估後為人為因素，且無法修補，那就勞煩您帶著您的五金財寶袋，再度蒞臨本店，享受至高無上的服務喔！</li>
-                    </ul>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="agreeWarranty" required>
-                        <span>我已詳細閱讀並同意上述保固條款 *</span>
-                    </label>
+                    <textarea id="notes" class="form-control" rows="2" placeholder="如有指定美甲師或其他需求請備註於此..."></textarea>
                 </div>
 
                 <div class="price-summary">
@@ -545,9 +531,9 @@
                         <span>附加服務小計</span>
                         <span id="summaryAddonPrice">$0</span>
                     </div>
-                    <div class="price-row discount-row" id="discountRow">
-                        <span id="discountTitle">✨ 新客初次體驗優惠</span>
-                        <span id="summaryDiscount">- $0</span>
+                    <div class="price-row discount-row">
+                        <span>新客優惠活動 (95折)</span>
+                        <span id="summaryDiscount">-$0</span>
                     </div>
                     <div class="price-total">
                         <span>預估總金額</span>
@@ -555,28 +541,117 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit" id="submitBtn">送出預約申請</button>
+                <h2><span>✦</span> 步驟四：服務同意書</h2>
+                <button type="button" class="btn-trigger" id="openModalBtn">詳細閱讀美甲服務同意書並簽名</button>
             </form>
         </div>
     </div>
 
-    <div id="successModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-icon">✨</div>
-            <h3>預約成功！</h3>
-            <p id="successModalText">系統預約申請已送出！<br>我們將會發送簡訊與您確認後續事宜。</p>
-            <button id="modalConfirmBtn" class="btn-modal-confirm">確認並關閉</button>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>美甲服務合約簽署與確認資料</span>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                
+                <h3 style="margin-bottom:15px; font-size:1.1rem; color:var(--accent-color);">【顧客聯繫資料填寫】</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clientName">顧客姓名 *</label>
+                        <input type="text" id="clientName" class="form-control" placeholder="請輸入您的真實姓名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientPhone">聯絡電話 *</label>
+                        <input type="tel" id="clientPhone" class="form-control" placeholder="例如：0912345678" required>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom:10px; font-size:1.1rem; color:var(--accent-color);">【美甲服務同意書條款】</h3>
+                <div class="agreement-box">
+                    <h4 style="margin-top:0;">美甲服務同意書</h4>
+                    <p>本人已了解本次美甲服務內容，並同意以下事項：</p>
+                    
+                    <h4>一、施作前注意事項</h4>
+                    <p>1. 本人目前無指甲疾病、灰指甲、甲溝炎、香港腳、皮膚傳染疾病等狀況。<br>
+                    2. 若有懷孕、特殊疾病、藥物治療中、皮膚敏感等情況，已主動告知美甲師。<br>
+                    3. 若指甲已有裂痕、受傷、受撞擊、咬甲、摳甲等情況，可能影響施作效果及持久度。</p>
+                    
+                    <h4>二、施作後保固說明</h4>
+                    <p>本店提供施作日起 7 日內保固服務。保固範圍限於：非人為因素造成之凝膠脫落、凝膠大面積翹起、凝膠異常剝離。保固期間內請拍照並主動聯繫預約修補時間。</p>
+                    
+                    <h4>三、不列入保固範圍</h4>
+                    <p>以下情況恕不提供免費保固：撞擊、摳除、咬甲等人為因素；使用指甲開罐、摳貼貼紙、刮除物品等不當使用；經常接觸化學藥劑（清潔劑、漂白水等）；長時間泡水、泡溫泉、游泳；自行修剪、打磨或摳除凝膠；個人體質易出油、流汗量較高等因素影響持久度；他店修改、補甲或拆甲後產生之問題。</p>
+                    
+                    <h4>四、施作風險說明</h4>
+                    <p>本人了解：凝膠美甲並非永久性產品。維持時間因個人體質、生活習慣及保養方式而異。指甲若已有受損、過薄、剝離等狀況，持久度可能受到影響，凝膠美甲仍有脫落、斷裂之可能性。</p>
+                    
+                    <h4>五、施作後保養須知</h4>
+                    <p>避免以指甲作為工具使用。接觸清潔劑建議配戴手套。避免自行摳除凝膠。建議 3～4 週回店卸甲。</p>
+                    
+                    <p style="margin-top:15px; font-weight:bold;">本人已詳閱上述內容，並同意接受本次美甲服務。</p>
+                </div>
+
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="checkTerms1" required>
+                        <span>本人確認目前無指甲疾病、灰指甲、甲溝炎、皮病等，並已誠實告知特殊體質。</span>
+                    </label>
+                </div>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="checkTerms2" required>
+                        <span>本人已完全知悉 7 日保固範圍，並理解人為因素損壞不列入免費保固。</span>
+                    </label>
+                </div>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="checkTerms3" required>
+                        <span>本人已詳閱全篇內容，並同意將此線上同意書作為本次服務與預約之重要憑據。</span>
+                    </label>
+                </div>
+
+                <div class="signature-section">
+                    <div class="signature-header">
+                        <span style="font-weight:700;">顧客簽名 (手寫/打字) *</span>
+                        <div>
+                            <button type="button" class="btn-toggle-sig" id="toggleSigModeBtn">切換為打字簽名</button>
+                            <button type="button" class="btn-clear" id="clearSigBtn">清除手寫</button>
+                        </div>
+                    </div>
+                    <div class="signature-pad-container" id="canvasContainer">
+                        <canvas class="signature-canvas" id="sigCanvas"></canvas>
+                    </div>
+                    <input type="text" id="sigTextInput" class="form-control signature-input" placeholder="請在此輸入您的法定全名作為電子簽章">
+                </div>
+
+                <div class="signature-section">
+                    <div class="signature-header">
+                        <span style="font-weight:700; color:#8C7572;">美甲師簽名欄 (預約時隱藏)</span>
+                    </div>
+                    <div class="manicurist-mask">
+                        🔒 此欄位已由系統自動遮蔽。待老闆登入後台管理系統點擊此預約紀錄時，方可進行美甲師現場簽名。
+                    </div>
+                </div>
+
+                <div class="warning-banner">
+                    ⚠️ 注意：完工離店前，客戶已確認施作內容、顏色及造型無誤，離店後恕不接受因個人喜好、顏色認知差異或款式不符期待等因素要求免費重做或退款。
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-submit" id="submitFormBtn">確認無誤並送出預約申請</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        // 修正：在主要 import 注入 onSnapshot 函式
-        import { getFirestore, collection, addDoc, getDocs, query, where, serverTimestamp, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ===================================================
-        // FIREBASE 配置設定
-        // ===================================================
+        // ==========================================
+        // 1. FIREBASE 雲端資料庫配置
+        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
             authDomain: "beautiful-68dbc.firebaseapp.com",
@@ -591,139 +666,124 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 資料結構定義
-        const nailStyles = [
-            { id: 'style_1', name: '經典極簡單色凝膠', price: 900 },
-            { id: 'style_2', name: '法式優雅氣質漸層', price: 1300 },
-            { id: 'style_3', name: '奢華復古貓眼晶石', price: 1600 },
-            { id: 'style_4', name: '獨家日系手繪藝術', price: 2200 },
-            { id: 'style_5', name: '暈染大理石奢華風', price: 2000 }
-        ];
-
-        const addonServices = [
-            { id: 'addon_1', name: '本店溫和卸甲續作', price: 300 },
-            { id: 'addon_2', name: '他店安全卸甲', price: 500 },
-            { id: 'addon_3', name: '精細指緣深層保養', price: 400 },
-            { id: 'addon_4', name: '施華洛世奇水鑽(單指)', price: 150 }
-        ];
-
-        // 預設全域變數
+        // ==========================================
+        // 2. 初始化與動態資料庫讀取引擎
+        // ==========================================
+        let nailStyles = [];
+        let addonServices = [];
         let currentSelection = {
             selectedStyle: null,
-            selectedAddons: new Set(),
-            isFirstBooking: false
+            selectedAddons: new Set()
         };
 
-        // 新增：儲存後台抓取的折扣資料 (預設 8 折 / 0.8)
-        let dynamicDiscount = {
-            value: 80,   // 用於文字顯示，如 80 或 95
-            ratio: 0.8   // 用於金額計算，如 0.8 或 0.95
-        };
-
-        // 動態網頁元素生成
-        const styleGrid = document.getElementById('styleGrid');
-        const addonsList = document.getElementById('addonsList');
-        const clientPhoneInput = document.getElementById('clientPhone');
-        const discountRow = document.getElementById('discountRow');
-        const discountTitle = document.getElementById('discountTitle');
-
-        nailStyles.forEach(style => {
-            const card = document.createElement('div');
-            card.className = 'style-card';
-            card.dataset.id = style.id;
-            card.innerHTML = `
-                <div class="style-name">${style.name}</div>
-                <div class="style-price">$${style.price.toLocaleString()}</div>
-            `;
-            card.addEventListener('click', () => selectStyle(style));
-            styleGrid.appendChild(card);
-        });
-
-        addonServices.forEach(addon => {
-            const label = document.createElement('label');
-            label.className = 'addon-item';
-            label.innerHTML = `
-                <div class="addon-left">
-                    <input type="checkbox" value="${addon.id}" data-price="${addon.price}">
-                    <span>${addon.name}</span>
-                </div>
-                <span style="color:#FF6B8B; font-weight:700;">+$${addon.price}</span>
-            `;
-            label.querySelector('input').addEventListener('change', (e) => toggleAddon(e, addon));
-            addonsList.appendChild(label);
-        });
-
-        // ===================================================
-        // 修正：將所有動態監聽 Firebase 的功能正確放在 Script 區塊內
-        // ===================================================
-        onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
-            if (docSnap.exists()) {
-                const config = docSnap.data();
-                
-                // 1. 動態替換前端的 Title 門面文案
-                if(config.title) document.querySelector('header h1').innerText = config.title;
-                if(config.subtitle) document.querySelector('header p').innerText = config.subtitle;
-                
-                // 2. 動態折扣比例更換 (如：後台設定 85，代表 0.85 比例)
-                if (config.firstTimeDiscount) {
-                    dynamicDiscount.value = config.firstTimeDiscount;
-                    dynamicDiscount.ratio = config.firstTimeDiscount / 100;
-                    calculateTotal(); // 重新計算最新折扣
+        // 系統啟動載入程序
+        async function initSystem() {
+            try {
+                // A. 讀取標題與副標題設定
+                const configRef = doc(db, "system_config", "salon_info");
+                const configSnap = await getDoc(configRef);
+                if (configSnap.exists()) {
+                    const data = configSnap.data();
+                    if(data.title) document.getElementById('salonTitle').innerText = data.title;
+                    if(data.subtitle) document.getElementById('salonSubtitle').innerText = data.subtitle;
+                } else {
+                    // 若無設定，預先初始化一筆至資料庫以便管理
+                    await setDoc(configRef, { title: "DÉESSE NAIL ART", subtitle: "專業美甲藝術設計預約與線上訂價申請系統" });
                 }
 
-                // 3. 動態渲染前端下拉預約時段
-                const timeSelect = document.getElementById('bookingTime');
-                if (timeSelect) {
-                    timeSelect.innerHTML = '<option value="">請選擇時段</option>'; // 清空
-                    const slots = config.timeSlots || [];
-                    slots.sort().forEach(slot => {
-                        timeSelect.innerHTML += `<option value="${slot}">${slot}</option>`;
+                // B. 讀取核心美甲款式
+                const stylesCol = collection(db, "nail_styles");
+                const stylesSnapshot = await getDocs(stylesCol);
+                
+                if (stylesSnapshot.empty) {
+                    // 初次無資料時自動防呆初始化，確保資料庫有預設值連動
+                    const defaultStyles = [
+                        { id: 'style_1', name: '經典極簡單色凝膠', price: 900 },
+                        { id: 'style_2', name: '法式優雅氣質漸層', price: 1300 },
+                        { id: 'style_3', name: '奢華復古貓眼晶石', price: 1600 },
+                        { id: 'style_4', name: '獨家日系手繪藝術', price: 2200 },
+                        { id: 'style_5', name: '暈染大理石奢華風', price: 2000 }
+                    ];
+                    for(let s of defaultStyles){
+                        await setDoc(doc(db, "nail_styles", s.id), { name: s.name, price: s.price });
+                    }
+                    nailStyles = defaultStyles;
+                } else {
+                    nailStyles = [];
+                    stylesSnapshot.forEach(doc => {
+                        nailStyles.push({ id: doc.id, ...doc.data() });
                     });
                 }
 
-                // 4. 動態同步售後保固免責條款文案
-                const warrantyUl = document.getElementById('warrantyTermsList');
-                if (warrantyUl && config.warrantyTerms && config.warrantyTerms.length > 0) {
-                    warrantyUl.innerHTML = ''; // 清空預設靜態字
-                    config.warrantyTerms.forEach(term => {
-                        warrantyUl.innerHTML += `<li>${term}</li>`;
+                // C. 讀取附加服務
+                const addonsCol = collection(db, "addon_services");
+                const addonsSnapshot = await getDocs(addonsCol);
+
+                if (addonsSnapshot.empty) {
+                    const defaultAddons = [
+                        { id: 'addon_1', name: '本店溫和卸甲續作', price: 300 },
+                        { id: 'addon_2', name: '他店安全卸甲', price: 500 },
+                        { id: 'addon_3', name: '精細指緣深層保養', price: 400 },
+                        { id: 'addon_4', name: '施華洛世奇水鑽(單指)', price: 150 }
+                    ];
+                    for(let a of defaultAddons){
+                        await setDoc(doc(db, "addon_services", a.id), { name: a.name, price: a.price });
+                    }
+                    addonServices = defaultAddons;
+                } else {
+                    addonServices = [];
+                    addonsSnapshot.forEach(doc => {
+                        addonServices.push({ id: doc.id, ...doc.data() });
                     });
                 }
+
+                // 開始網頁元件渲染
+                renderUIComponents();
+
+            } catch (err) {
+                console.error("初始化資料庫連動失敗: ", err);
             }
-        });
-
-        // 格式化折扣文字 (例如將 80 轉成 '8折'，95 轉成 '95折')
-        function formatDiscountText(val) {
-            return (val % 10 === 0) ? (val / 10) + '折' : val + '折';
         }
 
-        // 監聽電話輸入，即時判定是否為初次預約，並非同步取得後台折扣設定
-        clientPhoneInput.addEventListener('blur', async () => {
-            const phone = clientPhoneInput.value.trim();
-            if (!phone) return;
+        // 渲染畫面元件
+        function renderUIComponents() {
+            const styleGrid = document.getElementById('styleGrid');
+            const addonsList = document.getElementById('addonsList');
+            styleGrid.innerHTML = "";
+            addonsList.innerHTML = "";
 
-            try {
-                // 1. 驗證是否為新客
-                const q = query(collection(db, "nail_bookings"), where("clientPhone", "==", phone));
-                const querySnapshot = await getDocs(q);
-                currentSelection.isFirstBooking = querySnapshot.empty;
+            // 動態產生核心款式
+            nailStyles.forEach(style => {
+                const card = document.createElement('div');
+                card.className = 'style-card';
+                card.dataset.id = style.id;
+                card.innerHTML = `
+                    <div class="style-name">${style.name}</div>
+                    <div class="style-price">$${style.price.toLocaleString()}</div>
+                `;
+                card.addEventListener('click', () => selectStyle(style));
+                styleGrid.appendChild(card);
+            });
 
-                // 2. 如果是新客，就去資料庫抓取系統設定的折扣
-                if (currentSelection.isFirstBooking) {
-                    const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
-                    if (docSnap.exists() && docSnap.data().firstTimeDiscount) {
-                        const configValue = docSnap.data().firstTimeDiscount; // 例如 95 或 80
-                        dynamicDiscount.value = configValue;
-                        dynamicDiscount.ratio = configValue / 100;            // 將 95 轉為 0.95
-                    }
-                }
-                
-                calculateTotal();
-            } catch (err) {
-                console.error("無法驗證新客身分或取得設定檔: ", err);
-            }
-        });
+            // 動態產生附加服務
+            addonServices.forEach(addon => {
+                const label = document.createElement('label');
+                label.className = 'addon-item';
+                label.innerHTML = `
+                    <div>
+                        <input type="checkbox" value="${addon.id}" data-price="${addon.price}">
+                        <span>${addon.name}</span>
+                    </div>
+                    <span style="color:#B8860B; font-weight:500;">+$${addon.price}</span>
+                `;
+                label.querySelector('input').addEventListener('change', (e) => toggleAddon(e, addon));
+                addonsList.appendChild(label);
+            });
+        }
 
+        // ==========================================
+        // 3. 計價核心控制（包含95折與介面同步）
+        // ==========================================
         function selectStyle(style) {
             document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
             currentSelection.selectedStyle = style;
@@ -748,149 +808,236 @@
             let addonPrice = 0;
             currentSelection.selectedAddons.forEach(item => addonPrice += item.price);
             
-            let total = stylePrice + addonPrice;
-            let discount = 0;
-
-            // 依據資料庫抓取的動態比例進行折扣計算
-            if (currentSelection.isFirstBooking && total > 0) {
-                // 計算折扣後的應付金額 (例如：總金額 * 0.95)
-                const discountedTotal = Math.round(total * dynamicDiscount.ratio);
-                // 算出被扣除的折扣金額，用於畫面上顯示減去的數字
-                discount = total - discountedTotal; 
-                total = discountedTotal;
-                
-                // 更新畫面顯示文字
-                const discountText = formatDiscountText(dynamicDiscount.value);
-                discountTitle.innerText = `✨ 新客初次體驗優惠 (${discountText})`;
-                discountRow.style.display = 'flex';
-                document.getElementById('summaryDiscount').innerText = `- $${discount.toLocaleString()}`;
-            } else {
-                discountRow.style.display = 'none';
-            }
+            const subtotal = stylePrice + addonPrice;
+            // 新客優惠 95 折計算
+            const total = Math.round(subtotal * 0.95);
+            const discount = subtotal - total;
 
             document.getElementById('summaryStylePrice').innerText = `$${stylePrice.toLocaleString()}`;
             document.getElementById('summaryAddonPrice').innerText = `$${addonPrice.toLocaleString()}`;
+            document.getElementById('summaryDiscount').innerText = `-$${discount.toLocaleString()}`;
             document.getElementById('summaryTotalPrice').innerText = `$${total.toLocaleString()}`;
 
             return { stylePrice, addonPrice, discount, total };
         }
 
-        // 表單提交與雲端庫重疊即時阻擋核心邏輯
-        const bookingForm = document.getElementById('bookingForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const errorAlert = document.getElementById('errorAlert');
-        const successModal = document.getElementById('successModal');
-        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
-        const successModalText = document.getElementById('successModalText');
+        // ==========================================
+        // 4. 彈出式視窗與手寫簽名核心引擎
+        // ==========================================
+        const modalOverlay = document.getElementById('modalOverlay');
+        const openModalBtn = document.getElementById('openModalBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const canvas = document.getElementById('sigCanvas');
+        const ctx = canvas.getContext('2d');
+        const clearSigBtn = document.getElementById('clearSigBtn');
+        const toggleSigModeBtn = document.getElementById('toggleSigModeBtn');
+        const sigTextInput = document.getElementById('sigTextInput');
+        const canvasContainer = document.getElementById('canvasContainer');
 
-        modalConfirmBtn.addEventListener('click', () => {
-            successModal.style.display = 'none';
+        let isDrawing = false;
+        let sigMode = 'canvas'; // 'canvas' 或 'text'
+
+        // 彈出視窗開關
+        openModalBtn.addEventListener('click', () => {
+            // 防呆：開啟前須先在外面選定日期、時段與美甲款式
+            if (!currentSelection.selectedStyle) {
+                alert("請先選擇一個核心美甲款式！");
+                return;
+            }
+            if (!document.getElementById('bookingDate').value || !document.getElementById('bookingTime').value) {
+                alert("請先選擇預約日期與時段！");
+                return;
+            }
+            modalOverlay.classList.add('active');
+            resizeCanvas();
         });
 
-        bookingForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            errorAlert.style.display = 'none';
+        closeModalBtn.addEventListener('click', () => modalOverlay.classList.remove('active'));
 
-            if (!currentSelection.selectedStyle) {
-                errorAlert.innerText = "請先選擇一項主要核心美甲款式！";
-                errorAlert.style.display = 'block';
+        // 調整簽名板寬度防變形
+        function resizeCanvas() {
+            canvas.width = canvasContainer.clientWidth;
+            canvas.height = canvasContainer.clientHeight;
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "#3A2E2B";
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // 手寫簽名板事件監聽 (滑鼠)
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+        });
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+        // 手寫簽名板事件監聽 (行動裝置觸控)
+        canvas.addEventListener('touchstart', (e) => {
+            if(e.touches.length === 1) {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                ctx.beginPath();
+                ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+                e.preventDefault();
+            }
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isDrawing) return;
+            if(e.touches.length === 1) {
+                const rect = canvas.getBoundingClientRect();
+                ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+                ctx.stroke();
+                e.preventDefault();
+            }
+        });
+        canvas.addEventListener('touchend', () => isDrawing = false);
+
+        // 清除簽名
+        clearSigBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // 切換打字/手寫模式
+        toggleSigModeBtn.addEventListener('click', () => {
+            if (sigMode === 'canvas') {
+                sigMode = 'text';
+                canvasContainer.style.display = 'none';
+                clearSigBtn.style.display = 'none';
+                sigTextInput.style.display = 'block';
+                toggleSigModeBtn.innerText = '切換為手寫簽名';
+            } else {
+                sigMode = 'canvas';
+                canvasContainer.style.display = 'block';
+                clearSigBtn.style.display = 'inline-block';
+                sigTextInput.style.display = 'none';
+                toggleSigModeBtn.innerText = '切換為打字簽名';
+                resizeCanvas();
+            }
+        });
+
+        // 檢查畫布是否為空
+        function isCanvasBlank() {
+            const blank = document.createElement('canvas');
+            blank.width = canvas.width;
+            blank.height = canvas.height;
+            return canvas.toDataURL() === blank.toDataURL();
+        }
+
+        // ==========================================
+        // 5. 資料完整驗證與儲存至 Firebase (與後台對應)
+        // ==========================================
+        const submitFormBtn = document.getElementById('submitFormBtn');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+
+        submitFormBtn.addEventListener('click', async () => {
+            // 擷取所有必填值
+            const clientName = document.getElementById('clientName').value.trim();
+            const clientPhone = document.getElementById('clientPhone').value.trim();
+            const bookingDate = document.getElementById('bookingDate').value;
+            const bookingTime = document.getElementById('bookingTime').value;
+            const notes = document.getElementById('notes').value.trim();
+            
+            const check1 = document.getElementById('checkTerms1').checked;
+            const check2 = document.getElementById('checkTerms2').checked;
+            const check3 = document.getElementById('checkTerms3').checked;
+
+            // 表單全資料驗證程序
+            if (!clientName || !clientPhone || !bookingDate || !bookingTime) {
+                alert("請填齊顧客姓名、電話、預約日期與時段！");
+                return;
+            }
+            if (!check1 || !check2 || !check3) {
+                alert("必須完整勾選並同意美甲服務合約的所有勾選項！");
                 return;
             }
 
-            const chosenDate = document.getElementById('bookingDate').value;
-            const chosenTime = document.getElementById('bookingTime').value;
-            const inputPhone = clientPhoneInput.value.trim();
-            let inputName = document.getElementById('clientName').value.trim();
-
-            if(!chosenTime) {
-                errorAlert.innerText = "請選擇預約時段！";
-                errorAlert.style.display = 'block';
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.innerText = "正在檢查時段預約狀態...";
-
-            try {
-                // 1. 重疊時間段檢查
-                const timeQuery = query(
-                    collection(db, "nail_bookings"), 
-                    where("bookingDate", "==", chosenDate), 
-                    where("bookingTime", "==", chosenTime)
-                );
-                const timeSnapshot = await getDocs(timeQuery);
-
-                if (!timeSnapshot.empty) {
-                    errorAlert.innerHTML = "⚠️ 系統通知：該時段已有其他客戶預約囉！<br>如有特殊情況請聯絡闆闆哦 ✨";
-                    errorAlert.style.display = 'block';
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "送出預約申請";
+            // 驗證簽名
+            let customerSignatureData = "";
+            if (sigMode === 'canvas') {
+                if (isCanvasBlank()) {
+                    alert("請完成手寫簽名以示負責！");
                     return;
                 }
-
-                // 2. 再次確保客戶狀態 (防跨裝置防禦)
-                const phoneQuery = query(collection(db, "nail_bookings"), where("clientPhone", "==", inputPhone));
-                const phoneSnapshot = await getDocs(phoneQuery);
-                const finalIsFirst = phoneSnapshot.empty;
-
-                submitBtn.innerText = "資料建立與儲存中...";
-                currentSelection.isFirstBooking = finalIsFirst;
-                const prices = calculateTotal();
-
-                // 3. 自動偵測：若為首次預約，在名稱前方加入紅字標記 (加在字串內讓闆闆後台一眼看出)
-                let finalDbName = inputName;
-                if (finalIsFirst) {
-                    finalDbName = `〔初〕${inputName}`;
+                customerSignatureData = canvas.toDataURL(); // 將手寫輸出為 Base64 字串存入資料庫
+            } else {
+                if (!sigTextInput.value.trim()) {
+                    alert("請輸入打字簽名全名！");
+                    return;
                 }
+                customerSignatureData = "[打字簽章] " + sigTextInput.value.trim();
+            }
 
-                const bookingData = {
-                    clientName: finalDbName, // 帶有〔初〕字標記的姓名
-                    isFirstTime: finalIsFirst, // 新增：布林值旗標，更方便後台系統作條件篩選(如紅字高亮)
-                    clientPhone: inputPhone,
-                    bookingDate: chosenDate,
-                    bookingTime: chosenTime,
-                    notes: document.getElementById('notes').value.trim(),
-                    selectedStyle: currentSelection.selectedStyle.name,
-                    selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
-                    priceCalculations: {
-                        basePrice: prices.stylePrice,
-                        addonPrice: prices.addonPrice,
-                        discountPrice: prices.discount,
-                        totalPrice: prices.total
-                    },
-                    createdAt: serverTimestamp()
-                };
+            // 通過所有驗證，進入傳輸程序
+            submitFormBtn.disabled = true;
+            submitFormBtn.innerText = "寫入雲端紀錄中...";
 
-                await addDoc(collection(db, "nail_bookings"), bookingData);
+            const prices = calculateTotal();
+
+            // 結構化封裝預約表單與合約資料庫欄位 (完美對應「闆闆後台管理系統.html」)
+            const bookingRecord = {
+                clientName: clientName,
+                clientPhone: clientPhone,
+                bookingDate: bookingDate,
+                bookingTime: bookingTime,
+                notes: notes,
+                selectedStyle: currentSelection.selectedStyle.name,
+                selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
+                priceCalculations: {
+                    basePrice: prices.stylePrice,
+                    addonPrice: prices.addonPrice,
+                    discountPrice: prices.discount,
+                    totalPrice: prices.total
+                },
+                agreedToTerms: true,
+                customerSignature: customerSignatureData, // 用戶端簽名
+                manicuristSignature: "",                 // 預約時留空，遮蔽待後台點擊時由美甲師現場補簽
+                status: "待確認",                         // 後台訂單管理狀態
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                // 將資料完整送進 nail_bookings 集合
+                await addDoc(collection(db, "nail_bookings"), bookingRecord);
                 
-                // 根據狀態客製化彈窗提示語與折數
-                if(finalIsFirst) {
-                    const finalDiscountText = formatDiscountText(dynamicDiscount.value);
-                    successModalText.innerHTML = `恭喜獲得初次體驗 ${finalDiscountText} 優惠！🎉<br>系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
-                } else {
-                    successModalText.innerHTML = `歡迎回來！系統預約申請已送出！<br>預估金額：$${prices.total.toLocaleString()}，我們將發送確認簡訊。`;
-                }
+                // 成功反饋與UI全面重置
+                modalOverlay.classList.remove('active');
+                successAlert.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                // 顯示彈出式成功提示
-                successModal.style.display = 'flex';
+                // 重置表單
+                document.getElementById('bookingStepForm').reset();
+                document.getElementById('clientName').value = "";
+                document.getElementById('clientPhone').value = "";
+                document.getElementById('checkTerms1').checked = false;
+                document.getElementById('checkTerms2').checked = false;
+                document.getElementById('checkTerms3').checked = false;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                sigTextInput.value = "";
                 
-                // 清空表單與還原畫面
-                bookingForm.reset();
                 document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
                 currentSelection.selectedStyle = null;
                 currentSelection.selectedAddons.clear();
-                currentSelection.isFirstBooking = false;
                 calculateTotal();
 
             } catch (error) {
-                console.error("Firebase Sync Error: ", error);
-                errorAlert.innerText = "雲端儲存失敗，請檢查 Firebase 配置。";
-                errorAlert.style.display = 'block';
+                console.error("寫入雲端失敗:", error);
+                alert("儲存失敗，請確認 Firebase 設定。");
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerText = "送出預約申請";
+                submitFormBtn.disabled = false;
+                submitFormBtn.innerText = "確認無誤並送出預約申請";
             }
         });
+
+        // 啟動系統
+        initSystem();
     </script>
 </body>
 </html>
