@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>神の指藝 | 闆闆專屬預約管理後台</title>
+    <title>神の指藝 | 闆闆專專屬預約管理後台</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -33,6 +33,36 @@
             padding: 30px 20px;
         }
 
+        /* 漢堡選單按鈕 */
+        .hamburger-btn {
+            background: none; border: none; color: white; font-size: 2rem; cursor: pointer; transition: var(--transition);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .hamburger-btn:hover { color: #EBEAEF; transform: scale(1.05); }
+
+        /* 側邊欄樣式 */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(43, 45, 66, 0.7); backdrop-filter: blur(5px);
+            z-index: 2500; display: none; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .sidebar {
+            position: fixed; top: 0; left: -320px; width: 300px; height: 100%; background: white; z-index: 2600; 
+            box-shadow: 4px 0 24px rgba(0,0,0,0.15); transition: left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); display: flex; flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 25px 20px; background: linear-gradient(135deg, #3D2C38 0%, #241922 100%); color: white; font-family: 'Cinzel', 'Noto Sans TC', serif; font-size: 1.2rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center;
+        }
+        .close-sidebar-btn { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; transition: var(--transition); }
+        .close-sidebar-btn:hover { color: var(--new-client-pink); transform: rotate(90deg); }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1; }
+        .sidebar-menu li { border-bottom: 1px solid #EBEAEF; }
+        .sidebar-menu li button { 
+            width: 100%; text-align: left; padding: 18px 20px; background: none; border: none; font-size: 1.05rem; 
+            color: var(--text-dark); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 12px; font-weight: 700; 
+        }
+        .sidebar-menu li button:hover { background: #F8F9FA; color: var(--accent-purple); padding-left: 25px; }
+        .sidebar-menu-title { padding: 15px 20px 5px 20px; font-size: 0.8rem; color: #888; font-weight: 700; background: #FAFAFC; }
+
         .dashboard-header {
             max-width: 1400px;
             margin: 0 auto 20px auto;
@@ -46,6 +76,12 @@
             box-shadow: var(--shadow);
             flex-wrap: wrap;
             gap: 15px;
+        }
+
+        .dashboard-header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
         .dashboard-header h1 {
@@ -83,79 +119,6 @@
             transform: translateY(-1px);
         }
 
-        /* 營運報告按鈕 */
-        .btn-report {
-            background-color: #E2E0E7;
-            color: var(--text-dark);
-            border: none;
-            padding: 10px 20px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-report:hover {
-            background-color: #D6D5DB;
-            transform: translateY(-1px);
-        }
-
-        /* 新增：耗材與電費按鈕 */
-        .btn-expense {
-            background-color: var(--warning-orange);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-expense:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        /* 營運政策設定欄位樣式 */
-        .settings-card {
-            max-width: 1400px;
-            margin: 0 auto 20px auto;
-            background: white;
-            padding: 18px 25px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .settings-title {
-            font-weight: 700;
-            color: var(--text-dark);
-            font-size: 1.05rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .settings-input-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
         .input-discount {
             width: 80px;
             padding: 8px 12px;
@@ -172,28 +135,11 @@
             border-color: var(--accent-purple);
         }
 
-        .btn-save-setting {
-            background-color: var(--success-green);
-            color: white;
-            border: none;
-            padding: 10px 22px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-        }
-
-        .btn-save-setting:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .btn-save-setting:disabled {
-            background-color: #A7F3D0;
-            cursor: not-allowed;
-        }
+        /* 編輯設定相關表格 */
+        .config-table-wrapper { width: 100%; max-height: 300px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #E2E0E7; border-radius: 8px; background: #FAFAFC;}
+        .config-table-wrapper table { min-width: unset; width: 100%; border-collapse: collapse; text-align: left;}
+        .config-table-wrapper th { background-color: #F1EFF5; padding: 12px 10px; font-size: 0.9rem; position: sticky; top: 0; z-index: 1;}
+        .config-table-wrapper td { padding: 10px; border-bottom: 1px solid #EBEAEF; vertical-align: middle; }
 
         /* 滑入式彈出提示視窗樣式 */
         .toast-notification {
@@ -287,7 +233,7 @@
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(43, 45, 66, 0.7); backdrop-filter: blur(5px);
-            z-index: 1000; justify-content: center; align-items: center;
+            z-index: 3000; justify-content: center; align-items: center;
             animation: fadeIn 0.3s ease;
         }
 
@@ -330,7 +276,7 @@
         .expense-input-row label { font-size: 0.85rem; font-weight: 700; color: #4A4E69; }
         .consumable-table-wrapper { width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid #E2E0E7; margin-top: 15px; }
         .consumable-table-wrapper table { min-width: unset; font-size: 0.9rem; margin-bottom: 0; }
-        .consumable-table-wrapper th { padding: 10px; font-size: 0.85rem; }
+        .consumable-table-wrapper th { padding: 10px; font-size: 0.85rem; position: static;}
         .consumable-table-wrapper td { padding: 10px; }
 
         .img-modal-content { max-width: 600px !important; padding: 30px; }
@@ -362,7 +308,8 @@
         .signature-input:focus { border-color: var(--success-green); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
 
         .modal-icon { font-size: 3.5rem; margin-bottom: 10px; }
-        .modal-content h3 { color: var(--danger-red); font-size: 1.4rem; margin-bottom: 10px; }
+        .modal-content h3 { color: var(--text-dark); font-size: 1.4rem; margin-bottom: 10px; }
+        #deleteModal .modal-content h3 { color: var(--danger-red); }
         .img-modal-content h3 { color: var(--accent-purple) !important; }
 
         .modal-actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
@@ -383,7 +330,6 @@
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-     
         /* 懸浮按鈕 */
         .fab-btn {
             position: fixed;
@@ -413,27 +359,37 @@
 </head>
 <body>
 
-    <div class="dashboard-header">
-        <div>
-            <h1>神の指藝 預約後台管理系統</h1>
-            <p>專屬闆闆的即時顧客清單（依照預約日期時間排序）</p>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span>✨ 闆闆管理選單</span>
+            <button class="close-sidebar-btn" id="closeSidebarBtn">×</button>
         </div>
-        <div class="header-actions">
-            <button class="btn-expense" id="expenseBtn">🛒 耗材進貨&電費</button>
-            <button class="btn-report" id="reportBtn">📊 營運報告</button>
-            <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
-        </div>
+        <div class="sidebar-menu-title">財務與營運</div>
+        <ul class="sidebar-menu">
+            <li><button id="menuExpenseBtn">🛒 耗材進貨 & 電費紀錄</button></li>
+            <li><button id="menuReportBtn">📊 營運財務報告</button></li>
+        </ul>
+        <div class="sidebar-menu-title">客戶預約專頁編輯</div>
+        <ul class="sidebar-menu">
+            <li><button id="menuDiscountBtn">⚙️ 優惠活動折扣設定</button></li>
+            <li><button id="menuStyleBtn">💅 新增或刪除款式與價錢</button></li>
+            <li><button id="menuAddonBtn">✨ 新增或刪除服務與價錢</button></li>
+            <li><button id="menuTitleBtn">📝 編輯專頁標題與副標題</button></li>
+        </ul>
     </div>
 
-    <div class="settings-card">
-        <div class="settings-title">⚙️ 營運政策與行銷設定</div>
-        <div class="settings-input-group">
-            <label for="discountConfigInput" style="font-size: 0.95rem; font-weight: 500; color: #4A4E69;">新客初次預約優惠：</label>
-            <input type="number" id="discountConfigInput" class="input-discount" min="10" max="99" value="95">
-            <span style="font-weight: 700; color: #2B2D42;">折</span>
-            <span style="font-size: 0.85rem; color: #888;">(例如輸入 90 代表 9 折，85 代表 85 折)</span>
+    <div class="dashboard-header">
+        <div class="dashboard-header-left">
+            <button class="hamburger-btn" id="openSidebarBtn">☰</button>
+            <div>
+                <h1>神の指藝 預約後台管理系統</h1>
+                <p>專屬闆闆的即時顧客清單（依照預約日期時間排序）</p>
+            </div>
         </div>
-        <button class="btn-save-setting" id="saveDiscountBtn">確認修改折扣</button>
+        <div class="header-actions">
+            <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
+        </div>
     </div>
 
     <div id="toastAlert" class="toast-notification">
@@ -458,7 +414,7 @@
                         <th>選擇核心款式</th>
                         <th>附加服務項目</th>
                         <th>實收總額</th>
-                        <th>保固與簽名</th> 
+                        <th>美甲服務同意書 & 完工簽名</th> 
                         <th>客戶備註需求</th>
                         <th>操作管理</th>
                     </tr>
@@ -466,6 +422,81 @@
                 <tbody id="bookingListTbody">
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <div id="discountModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>⚙️ 優惠活動折扣設定</h3>
+            <div style="margin: 25px 0; text-align: left; background:#FAFAFC; padding:20px; border-radius:12px; border:1px solid #E2E0E7;">
+                <label style="font-size: 0.95rem; font-weight: 700; color: #4A4E69; display:block; margin-bottom: 12px; text-align:center;">新客初次預約優惠折數：</label>
+                <div style="display: flex; align-items: center; gap: 10px; justify-content: center;">
+                    <input type="number" id="discountConfigInput" class="input-discount" min="10" max="99" value="95">
+                    <span style="font-weight: 700; color: #2B2D42;">折</span>
+                </div>
+                <div style="font-size: 0.85rem; color: #888; text-align:center; margin-top:10px;">(例如輸入 90 代表 9 折，85 代表 85 折)</div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeDiscountBtn">取消返回</button>
+                <button class="btn-modal btn-confirm-success" id="saveDiscountBtn">確認修改折扣</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="styleConfigModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 550px;">
+            <h3>💅 編輯核心款式項目及價錢</h3>
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px;">此處的設定將會即時連動至「客戶預約專頁」的選單中。</p>
+            <div class="config-table-wrapper">
+                <table>
+                    <thead><tr><th>款式名稱</th><th>價格 (元)</th><th style="text-align:center;">操作</th></tr></thead>
+                    <tbody id="styleListTbody"></tbody>
+                </table>
+            </div>
+            <button class="btn-refresh" id="addStyleRowBtn" style="width: 100%; margin-bottom: 20px;">➕ 新增款式項目</button>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeStyleModalBtn">取消返回</button>
+                <button class="btn-modal btn-confirm-success" id="saveStyleBtn">💾 儲存所有變更</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addonConfigModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 550px;">
+            <h3>✨ 編輯附加服務項目及價錢</h3>
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px;">此處的設定將會即時連動至「客戶預約專頁」的選單中。</p>
+            <div class="config-table-wrapper">
+                <table>
+                    <thead><tr><th>服務名稱</th><th>價格 (元)</th><th style="text-align:center;">操作</th></tr></thead>
+                    <tbody id="addonListTbody"></tbody>
+                </table>
+            </div>
+            <button class="btn-refresh" id="addAddonRowBtn" style="width: 100%; margin-bottom: 20px;">➕ 新增服務項目</button>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeAddonModalBtn">取消返回</button>
+                <button class="btn-modal btn-confirm-success" id="saveAddonBtn">💾 儲存所有變更</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="textConfigModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>📝 編輯專頁標題與副標題</h3>
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px;">自訂客戶在預約頁面第一眼看到的標題文案。</p>
+            <div style="margin: 20px 0; text-align: left; display:flex; flex-direction:column; gap:15px;">
+                <div>
+                    <label style="font-weight: 700; color: #4A4E69; margin-bottom:8px; display:block;">專頁主標題</label>
+                    <input type="text" id="pageTitleInput" class="signature-input" style="text-align: left;" placeholder="例如: 神の指藝 預約專頁">
+                </div>
+                <div>
+                    <label style="font-weight: 700; color: #4A4E69; margin-bottom:8px; display:block;">專頁副標題</label>
+                    <input type="text" id="pageSubtitleInput" class="signature-input" style="text-align: left;" placeholder="例如: 期待為您換上最美的色彩">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeTextModalBtn">取消返回</button>
+                <button class="btn-modal btn-confirm-success" id="saveTextBtn">💾 儲存標題變更</button>
+            </div>
         </div>
     </div>
 
@@ -496,8 +527,8 @@
                         <input type="number" id="itemQty" style="width: 80px;" class="input-discount" value="1" min="1">
                     </div>
                     <div>
-                        <label>單價 (元)</label>
-                        <input type="number" id="itemUnitPrice" style="width: 100px; text-align: left;" class="input-discount" min="0">
+                        <label>合計 (元)</label>
+                        <input type="number" id="itemTotal" style="width: 100px; text-align: left;" class="input-discount" min="0">
                     </div>
                     <div>
                         <button id="addItemBtn" class="btn-refresh" style="padding: 10px 15px;">新增</button>
@@ -561,9 +592,9 @@
 
     <div id="imageModal" class="modal-overlay">
         <div class="modal-content img-modal-content">
-            <h3>📑 顧客保固與簽名紀錄</h3>
+            <h3>📑 美甲服務同意書與電子簽名憑證</h3>
             <div class="preview-img-container">
-                <img id="previewImage" src="" alt="保固合約與簽名截圖">
+                <img id="previewImage" src="" alt="美甲服務同意書與美甲師接單簽名截圖">
             </div>
             <div class="modal-actions">
                 <button class="btn-modal btn-cancel" id="closeImgModalBtn">關閉視窗</button>
@@ -574,11 +605,11 @@
 
     <div id="completionModal" class="modal-overlay">
         <div class="modal-content complete-modal-content">
-            <h3>✨ 服務完成確認 ✨</h3>
+            <h3>✨ 美甲師確認接單與完工簽名 ✨</h3>
             <div class="completion-text">
-                請確認今日服務之項目是否符合您的需求。<br>
-                如對此次服務給與肯定請在此處簽上水水們的大名：
-                <strong>「在此感謝您的蒞臨，期待下次為您換上新色彩！」</strong>
+                請美甲師確認今日服務項目、核心款式與實收總額是否確實。<br>
+                確認無誤後請美甲師於下方簽名以茲負責，系統將即時產生內含客戶美甲服務同意內容與美甲師核可之電子憑證：
+                <strong>「美甲師確認本單服務內容符合規範，完工即刻生效並提供後續保固服務」</strong>
             </div>
             
             <div class="signature-area" id="signatureContainer">
@@ -586,13 +617,26 @@
             </div>
             
             <div class="signature-input-wrapper">
-                <input type="text" id="signatureInput" class="signature-input" placeholder="⌨️ 若不便手寫，亦可點擊此處使用鍵盤輸入姓名...">
+                <input type="text" id="signatureInput" class="signature-input" placeholder="⌨️ 若不便手寫，美甲師亦可點擊此處使用鍵盤輸入姓名核可...">
             </div>
 
             <div class="modal-actions">
                 <button class="btn-modal btn-cancel" id="cancelCompletionBtn">返回修改</button>
                 <button class="btn-modal btn-clear" id="clearSignatureBtn">清除重寫</button>
-                <button class="btn-modal btn-confirm-success" id="confirmCompletionBtn">✅ 確認送出</button>
+                <button class="btn-modal btn-confirm-success" id="confirmCompletionBtn">✅ 確認接單送出</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="fab-btn" id="fabSearchBtn">👧</button>
+    <div id="searchModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3>🔍 顧客快速搜尋</h3>
+            <input type="text" id="searchInput" class="signature-input" placeholder="輸入顧客姓名或電話...">
+            <div id="searchResultList" class="search-results">
+                </div>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeSearchBtn">關閉</button>
             </div>
         </div>
     </div>
@@ -625,11 +669,20 @@
         const screenshotsMap = new Map(); 
         let currentViewingImgData = null;
         let currentViewingClientName = '';
-        let globalDiscount = 95; 
-        let globalBookingsData = []; 
         
+        let globalBookingsData = []; 
         let globalExpensesData = {}; 
         let currentMonthConsumables = []; 
+
+        // 全域設定檔 (統一存放在 booking_config)
+        let globalConfig = {
+            firstTimeDiscount: 95,
+            pageTitle: "",
+            pageSubtitle: "",
+            styles: [],
+            addons: []
+        };
+        let globalDiscount = 95; 
 
         // --- DOM 元素抓取 ---
         const deleteModal = document.getElementById('deleteModal');
@@ -650,10 +703,8 @@
         const signatureContainer = document.getElementById('signatureContainer');
         
         const reportModal = document.getElementById('reportModal');
-        const reportBtn = document.getElementById('reportBtn');
         const closeReportBtn = document.getElementById('closeReportBtn');
 
-        const expenseBtn = document.getElementById('expenseBtn');
         const expenseModal = document.getElementById('expenseModal');
         const closeExpenseBtn = document.getElementById('closeExpenseBtn');
         const saveExpenseBtn = document.getElementById('saveExpenseBtn');
@@ -773,34 +824,20 @@
         addItemBtn.addEventListener('click', () => {
             const name = document.getElementById('itemName').value.trim();
             const qty = parseInt(document.getElementById('itemQty').value);
-            const unitPrice = parseInt(document.getElementById('itemUnitPrice').value);
+            const total = parseInt(document.getElementById('itemTotal').value);
 
-            if (!name || isNaN(qty) || isNaN(unitPrice) || qty < 1 || unitPrice < 0) {
-                alert("⚠️ 請填寫完整的品名、正確的數量與單價！");
+            if (!name || isNaN(qty) || isNaN(total) || qty < 1 || total < 0) {
+                alert("⚠️ 請填寫完整的品名、正確的數量與合計金額！");
                 return;
             }
 
-            const total = qty * unitPrice; // 自動計算總額
             currentMonthConsumables.push({ name, qty, total });
             renderConsumables();
 
             document.getElementById('itemName').value = '';
             document.getElementById('itemQty').value = '1';
-            document.getElementById('itemUnitPrice').value = '';
+            document.getElementById('itemTotal').value = '';
             document.getElementById('itemName').focus();
-        });
-
-        expenseBtn.addEventListener('click', () => {
-            const now = new Date();
-            const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-            document.getElementById('expenseMonthLabel').innerText = `目前紀錄月份：${now.getFullYear()} 年 ${now.getMonth() + 1} 月`;
-
-            const monthData = globalExpensesData[currentYearMonth] || { electricity: 0, consumables: [], totalConsumablesCost: 0 };
-            document.getElementById('electricityBillInput').value = monthData.electricity || 0;
-            currentMonthConsumables = monthData.consumables ? [...monthData.consumables] : [];
-
-            renderConsumables();
-            expenseModal.style.display = 'flex';
         });
 
         closeExpenseBtn.addEventListener('click', () => {
@@ -838,16 +875,427 @@
             }
         });
 
+        // --- 關閉完成確認對話框邏輯 ---
+        cancelCompletionBtn.addEventListener('click', () => {
+            completionModal.style.display = 'none';
+            targetCompleteId = null;
+        });
 
-        // --- 報表控制邏輯 ---
-        reportBtn.addEventListener('click', () => {
+        // --- 美甲師送出確認並將核章併入同意書憑證存入 Firebase ---
+        confirmCompletionBtn.addEventListener('click', async () => {
+            if (!targetCompleteId) return;
+
+            const typedName = signatureInput.value.trim();
+            const signatureDataUrl = signatureCanvas.toDataURL('image/png');
+            
+            if (!hasDrawn && typedName === '') {
+                alert('請美甲師在畫布上簽章，或在下方輸入框打上姓名確認接單唷！');
+                return;
+            }
+
+            try {
+                confirmCompletionBtn.innerText = "同意書憑證產生中...";
+                confirmCompletionBtn.disabled = true;
+
+                const modalActions = completionModal.querySelector('.modal-actions');
+                modalActions.style.display = 'none';
+
+                const modalContent = completionModal.querySelector('.complete-modal-content');
+                let finalScreenshotUrl = "";
+                
+                try {
+                    const capturedCanvas = await html2canvas(modalContent, {
+                        backgroundColor: '#FFFFFF',
+                        scale: 2, 
+                        logging: false,
+                        useCORS: true
+                    });
+                    finalScreenshotUrl = capturedCanvas.toDataURL('image/jpeg', 0.85);
+                } catch (screenshotError) {
+                    console.error("對話框擷取失敗，改採純簽名備份: ", screenshotError);
+                    finalScreenshotUrl = signatureDataUrl; 
+                }
+
+                modalActions.style.display = 'flex';
+
+                await updateDoc(doc(db, "nail_bookings", targetCompleteId), {
+                    status: "completed",
+                    manicuristSignature: hasDrawn ? signatureDataUrl : null,
+                    manicuristTypedName: typedName || null,
+                    warrantyScreenshot: finalScreenshotUrl, 
+                    completedAt: new Date().toISOString()
+                });
+
+                completionModal.style.display = 'none';
+                alert("✅ 接單核章成功！已更新美甲服務同意書與完工簽名憑證。");
+                await loadBookings(); 
+            } catch (error) {
+                console.error("更新美甲師完工狀態與簽名失敗: ", error);
+                alert("儲存失敗，請檢查網路連線！");
+                const modalActions = completionModal.querySelector('.modal-actions');
+                if (modalActions) modalActions.style.display = 'flex';
+            } finally {
+                confirmCompletionBtn.innerText = "✅ 確認接單送出";
+                confirmCompletionBtn.disabled = false;
+                targetCompleteId = null;
+            }
+        });
+
+        // --- 提醒吐司控制 ---
+        const toastAlert = document.getElementById('toastAlert');
+        document.getElementById('closeToastBtn').addEventListener('click', () => toastAlert.style.display = 'none');
+        document.getElementById('updateToastBtn').addEventListener('click', () => {
+            toastAlert.style.display = 'none';
+            loadBookings();
+        });
+
+        // --- 刪除控制邏輯 ---
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteModal.style.display = 'none';
+            targetDeleteId = null;
+        });
+
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!targetDeleteId) return;
+            try {
+                confirmDeleteBtn.innerText = "刪除中...";
+                confirmDeleteBtn.disabled = true;
+                await deleteDoc(doc(db, "nail_bookings", targetDeleteId));
+                deleteModal.style.display = 'none';
+                await loadBookings();
+            } catch (error) {
+                console.error("刪除失敗: ", error);
+                alert("刪除失敗，請檢查網路連線或權限設定！");
+            } finally {
+                confirmDeleteBtn.innerText = "確認刪除";
+                confirmDeleteBtn.disabled = false;
+                targetDeleteId = null;
+            }
+        });
+
+        // --- 圖片預覽與下載控制邏輯 ---
+        closeImgModalBtn.addEventListener('click', () => {
+            imageModal.style.display = 'none';
+            previewImage.src = '';
+            currentViewingImgData = null;
+            currentViewingClientName = '';
+        });
+
+        document.getElementById('bookingListTbody').addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-complete-row')) {
+                targetCompleteId = e.target.getAttribute('data-id');
+                completionModal.style.display = 'flex';
+                
+                setTimeout(resizeCanvas, 50); 
+                ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+                signatureInput.value = '';
+                hasDrawn = false;
+            }
+
+            if (e.target.classList.contains('btn-view-img')) {
+                const id = e.target.getAttribute('data-id');
+                const rawName = e.target.getAttribute('data-name');
+                
+                currentViewingClientName = rawName ? rawName.replace(/〔初〕/g, '').trim() : '客戶';
+                currentViewingImgData = screenshotsMap.get(id);
+
+                if (currentViewingImgData) {
+                    previewImage.src = currentViewingImgData;
+                    imageModal.style.display = 'flex';
+                }
+            }
+
+            if (e.target.classList.contains('btn-delete-row')) {
+                targetDeleteId = e.target.getAttribute('data-id');
+                deleteModal.style.display = 'flex';
+            }
+        });
+
+        downloadImgBtn.addEventListener('click', () => {
+            if (!currentViewingImgData) return;
+            const link = document.createElement('a');
+            link.href = currentViewingImgData;
+            link.download = `${currentViewingClientName}_美甲服務同意書_簽名紀錄.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // --- 音效提示 ---
+        function playNotificationChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine'; osc1.frequency.setValueAtTime(659.25, now);
+                gain1.gain.setValueAtTime(0.2, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc1.connect(gain1); gain1.connect(ctx.destination);
+                osc1.start(now); osc1.stop(now + 0.3);
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine'; osc2.frequency.setValueAtTime(880.00, now + 0.1);
+                gain2.gain.setValueAtTime(0.2, now + 0.1); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                osc2.connect(gain2); gain2.connect(ctx.destination);
+                osc2.start(now + 0.1); osc2.stop(now + 0.5);
+            } catch (e) {
+                console.warn("瀏覽器尚未授權音效播放: ", e);
+            }
+        }
+
+        // --- 核心資料載入與渲染（新增美甲服務同意書讀取流程） ---
+        async function loadBookings() {
+            const tbody = document.getElementById('bookingListTbody');
+            const loading = document.getElementById('loading');
+            const table = document.getElementById('bookingTable');
+            
+            toastAlert.style.display = 'none'; 
+            loading.style.display = 'block';
+            table.style.display = 'none';
+            tbody.innerHTML = '';
+            screenshotsMap.clear(); 
+
+            await fetchSystemConfig();
+            await loadExpenses(); 
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "nail_bookings"));
+                let rawList = [];
+                
+                querySnapshot.forEach((doc) => {
+                    rawList.push({ id: doc.id, ...doc.data() });
+                });
+                
+                globalBookingsData = rawList;
+
+                rawList.sort((a, b) => {
+                    if (a.bookingDate !== b.bookingDate) return a.bookingDate.localeCompare(b.bookingDate);
+                    return a.bookingTime.localeCompare(b.bookingTime);
+                });
+
+                const timeCounts = {};
+                rawList.forEach(item => {
+                    const key = `${item.bookingDate}_${item.bookingTime}`;
+                    timeCounts[key] = (timeCounts[key] || 0) + 1;
+                    
+                    // 優先抓取美甲服務同意書與核章憑證快照
+                    if (item.warrantyScreenshot) {
+                        screenshotsMap.set(item.id, item.warrantyScreenshot);
+                    } else if (item.consentScreenshot) {
+                        screenshotsMap.set(item.id, item.consentScreenshot);
+                    }
+                });
+
+                if(rawList.length === 0) {
+                    loading.innerText = "目前雲端尚無預約客戶預約資料。";
+                    return;
+                }
+
+                rawList.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const key = `${item.bookingDate}_${item.bookingTime}`;
+                    const isOverlap = timeCounts[key] > 1;
+                    
+                    if (isOverlap) tr.className = 'overlap-row'; 
+
+                    let addonsHTML = '';
+                    if (item.selectedAddons && item.selectedAddons.length > 0) {
+                        item.selectedAddons.forEach((addon, index) => {
+                            addonsHTML += `<span class="addon-tag">${index + 1}. ${addon}</span>`;
+                        });
+                    } else {
+                        addonsHTML = '<span style="color:#aaa; font-size:0.85rem;">無</span>';
+                    }
+
+                    const isNewGuest = item.isFirstTime === true || (item.clientName && item.clientName.includes('〔初〕'));
+                    let nameHTML = '';
+                    if (isNewGuest) {
+                        let cleanName = item.clientName ? item.clientName.replace('〔初〕', '') : '未填';
+                        nameHTML = `<span class="client-name new-guest">〔初〕${cleanName}</span>`;
+                    } else {
+                        nameHTML = `<span class="client-name">${item.clientName || '未填'}</span>`;
+                    }
+
+                    const isCompleted = item.status === "completed";
+                    if (isCompleted) {
+                        nameHTML += `<br><span class="status-completed" style="margin-top: 5px;">✅ 美甲師已接單完工</span>`;
+                    }
+
+                    let priceHTML = '';
+                    if (item.priceCalculations) {
+                        const total = item.priceCalculations.totalPrice.toLocaleString();
+                        const base = item.priceCalculations.basePrice;
+                        const addon = item.priceCalculations.addonPrice;
+                        const discount = item.priceCalculations.discountPrice || 0;
+
+                        if (isNewGuest && discount > 0) {
+                            const originalSum = base + addon;
+                            priceHTML = `
+                                <span class="total-price">$${total}
+                                    <span class="price-discount-tag">現折 ${globalDiscount} 折 (-$${discount.toLocaleString()})</span>
+                                    <span class="price-detail-sub">原價: $${originalSum.toLocaleString()}</span>
+                                </span>`;
+                        } else {
+                            priceHTML = `<span class="total-price">$${total}</span>`;
+                        }
+                    } else {
+                        priceHTML = `<span class="total-price">$0</span>`;
+                    }
+
+                    let screenshotHTML = '';
+                    if (item.warrantyScreenshot || item.consentScreenshot) {
+                        screenshotHTML = `<button class="btn-view-img" data-id="${item.id}" data-name="${item.clientName || '客戶'}">👁️ 查看同意書</button>`;
+                    } else {
+                        screenshotHTML = `<span style="color:#aaa; font-size:0.85rem;">無電子簽署紀錄</span>`;
+                    }
+
+                    let completeBtnHTML = isCompleted 
+                        ? '' 
+                        : `<button class="btn-complete-row" data-id="${item.id}">✅ 接單簽名</button>`;
+
+                    tr.innerHTML = `
+                        <td>
+                            <div class="datetime-badge">
+                                <span class="date-item">📅 ${item.bookingDate}</span>
+                                <span class="time-item">${item.bookingTime}</span>
+                                ${isOverlap ? '<span class="overlap-warning">⚠️ 時段重複重疊！</span>' : ''}
+                            </div>
+                        </td>
+                        <td>${nameHTML}</td>
+                        <td><strong>${item.clientPhone || '未填'}</strong></td>
+                        <td>${item.selectedStyle || '未選擇'}</td>
+                        <td>${addonsHTML}</td>
+                        <td>${priceHTML}</td>
+                        <td style="text-align:center;">${screenshotHTML}</td> <td><div class="notes-text">${item.notes || '<span style="color:#ccc;">無備註</span>'}</div></td>
+                        <td>
+                            <div class="action-btns">
+                                ${completeBtnHTML}
+                                <button class="btn-delete-row" data-id="${item.id}">🗑️ 刪除</button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                loading.style.display = 'none';
+                table.style.display = 'table';
+
+            } catch (error) {
+                console.error("讀取後台失敗: ", error);
+                loading.innerText = "讀取雲端資料失敗，請確認 Firebase 設定或權限規則。";
+            }
+        }
+
+        // --- Firebase 即時監聽 ---
+        let isFirstListeningLoad = true;
+        onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
+            if (isFirstListeningLoad) {
+                isFirstListeningLoad = false;
+                return;
+            }
+            const hasNewBooking = snapshot.docChanges().some(change => change.type === "added");
+            if (hasNewBooking) {
+                toastAlert.style.display = 'flex';
+                playNotificationChime();
+            }
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', loadBookings);
+
+        // ===================================================
+        // 漢堡選單與各種設定編輯 (全面串接 Firebase)
+        // ===================================================
+
+        // --- 側邊漢堡選單控制 ---
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        document.getElementById('openSidebarBtn').addEventListener('click', () => {
+            sidebarOverlay.style.display = 'block';
+            setTimeout(() => { 
+                sidebarOverlay.style.opacity = '1'; 
+                sidebar.style.left = '0'; 
+            }, 10);
+        });
+
+        function closeSidebar() {
+            sidebar.style.left = '-320px';
+            sidebarOverlay.style.opacity = '0';
+            setTimeout(() => { sidebarOverlay.style.display = 'none'; }, 300);
+        }
+
+        document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // --- 通用儲存設定至 Firebase 函式 ---
+        async function updateSystemConfig(updateData, btnElement, defaultText) {
+            try {
+                btnElement.innerText = "儲存中...";
+                btnElement.disabled = true;
+
+                await setDoc(doc(db, "system_settings", "booking_config"), {
+                    ...updateData,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+
+                globalConfig = { ...globalConfig, ...updateData };
+                alert("🎉 設定已成功儲存！您的預約專頁已同步更新。");
+                return true;
+            } catch (error) {
+                console.error("儲存設定失敗: ", error);
+                alert("儲存雲端失敗，請確認網路連線與權限設定！");
+                return false;
+            } finally {
+                btnElement.innerText = defaultText;
+                btnElement.disabled = false;
+            }
+        }
+
+        // --- 讀取全域設定 ---
+        async function fetchSystemConfig() {
+            try {
+                const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    globalConfig = { ...globalConfig, ...data };
+                    
+                    if (globalConfig.firstTimeDiscount) {
+                        globalDiscount = globalConfig.firstTimeDiscount;
+                        document.getElementById('discountConfigInput').value = globalDiscount;
+                    }
+                }
+            } catch (error) {
+                console.error("讀取系統設定失敗: ", error);
+            }
+        }
+
+        // --- 選單 1: 耗材與電費 ---
+        document.getElementById('menuExpenseBtn').addEventListener('click', () => {
+            closeSidebar();
+            const now = new Date();
+            const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            document.getElementById('expenseMonthLabel').innerText = `目前紀錄月份：${now.getFullYear()} 年 ${now.getMonth() + 1} 月`;
+
+            const monthData = globalExpensesData[currentYearMonth] || { electricity: 0, consumables: [], totalConsumablesCost: 0 };
+            document.getElementById('electricityBillInput').value = monthData.electricity || 0;
+            currentMonthConsumables = monthData.consumables ? [...monthData.consumables] : [];
+
+            renderConsumables();
+            expenseModal.style.display = 'flex';
+        });
+
+        // --- 選單 2: 營運報表 ---
+        document.getElementById('menuReportBtn').addEventListener('click', () => {
+            closeSidebar();
             const now = new Date();
             const currentYear = now.getFullYear().toString();
             const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
             const currentYearMonth = `${currentYear}-${currentMonth}`;
 
-            let monthlyGross = 0; 
-            let annualGross = 0; 
+            let monthlyGross = 0;
+            let annualGross = 0;
 
             globalBookingsData.forEach(item => {
                 if (item.status === "completed" && item.priceCalculations) {
@@ -891,372 +1339,125 @@
             reportModal.style.display = 'flex';
         });
 
-        closeReportBtn.addEventListener('click', () => {
-            reportModal.style.display = 'none';
+        closeReportBtn.addEventListener('click', () => { reportModal.style.display = 'none'; });
+
+        // --- 選單 3: 優惠折扣設定 (與 Firebase 連動) ---
+        const discountModal = document.getElementById('discountModal');
+        document.getElementById('menuDiscountBtn').addEventListener('click', () => {
+            closeSidebar();
+            discountModal.style.display = 'flex';
         });
-
-        cancelCompletionBtn.addEventListener('click', () => {
-            completionModal.style.display = 'none';
-            targetCompleteId = null;
-        });
-
-        confirmCompletionBtn.addEventListener('click', async () => {
-            if (!targetCompleteId) return;
-
-            const typedName = signatureInput.value.trim();
-            const signatureDataUrl = signatureCanvas.toDataURL('image/png');
-            
-            if (!hasDrawn && typedName === '') {
-                alert('請水水在畫布上簽名，或在下方輸入框打上姓名唷！');
-                return;
-            }
-
-            try {
-                confirmCompletionBtn.innerText = "保固圖檔上傳中...";
-                confirmCompletionBtn.disabled = true;
-
-                const modalActions = completionModal.querySelector('.modal-actions');
-                modalActions.style.display = 'none';
-
-                const modalContent = completionModal.querySelector('.complete-modal-content');
-                let finalScreenshotUrl = "";
-                
-                try {
-                    const capturedCanvas = await html2canvas(modalContent, {
-                        backgroundColor: '#FFFFFF',
-                        scale: 2, 
-                        logging: false,
-                        useCORS: true
-                    });
-                    finalScreenshotUrl = capturedCanvas.toDataURL('image/jpeg', 0.85);
-                } catch (screenshotError) {
-                    console.error("對話框擷取失敗，改採純簽名備份: ", screenshotError);
-                    finalScreenshotUrl = signatureDataUrl; 
-                }
-
-                modalActions.style.display = 'flex';
-
-                await updateDoc(doc(db, "nail_bookings", targetCompleteId), {
-                    status: "completed",
-                    clientSignature: hasDrawn ? signatureDataUrl : null,
-                    clientTypedName: typedName || null,
-                    warrantyScreenshot: finalScreenshotUrl, 
-                    completedAt: new Date().toISOString()
-                });
-
-                completionModal.style.display = 'none';
-                alert("✅ 感謝水水！已完成服務並為您建立保固截圖紀錄。");
-                await loadBookings(); 
-            } catch (error) {
-                console.error("更新完成狀態與截圖失敗: ", error);
-                alert("儲存失敗，請檢查網路連線！");
-                const modalActions = completionModal.querySelector('.modal-actions');
-                if (modalActions) modalActions.style.display = 'flex';
-            } finally {
-                confirmCompletionBtn.innerText = "✅ 確認送出";
-                confirmCompletionBtn.disabled = false;
-                targetCompleteId = null;
-            }
-        });
-
-        closeToastBtn.addEventListener('click', () => toastAlert.style.display = 'none');
-        updateToastBtn.addEventListener('click', () => {
-            toastAlert.style.display = 'none';
-            loadBookings();
-        });
-
-        cancelDeleteBtn.addEventListener('click', () => {
-            deleteModal.style.display = 'none';
-            targetDeleteId = null;
-        });
-
-        confirmDeleteBtn.addEventListener('click', async () => {
-            if (!targetDeleteId) return;
-            try {
-                confirmDeleteBtn.innerText = "刪除中...";
-                confirmDeleteBtn.disabled = true;
-                await deleteDoc(doc(db, "nail_bookings", targetDeleteId));
-                deleteModal.style.display = 'none';
-                await loadBookings();
-            } catch (error) {
-                console.error("刪除失敗: ", error);
-                alert("刪除失敗，請檢查網路連線或權限設定！");
-            } finally {
-                confirmDeleteBtn.innerText = "確認刪除";
-                confirmDeleteBtn.disabled = false;
-                targetDeleteId = null;
-            }
-        });
-
-        closeImgModalBtn.addEventListener('click', () => {
-            imageModal.style.display = 'none';
-            previewImage.src = '';
-            currentViewingImgData = null;
-            currentViewingClientName = '';
-        });
-
-        document.getElementById('bookingListTbody').addEventListener('click', (e) => {
-            if (e.target.classList.contains('btn-complete-row')) {
-                targetCompleteId = e.target.getAttribute('data-id');
-                completionModal.style.display = 'flex';
-                
-                setTimeout(resizeCanvas, 50); 
-                ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
-                signatureInput.value = '';
-                hasDrawn = false;
-            }
-
-            if (e.target.classList.contains('btn-view-img')) {
-                const id = e.target.getAttribute('data-id');
-                const rawName = e.target.getAttribute('data-name');
-                
-                currentViewingClientName = rawName ? rawName.replace(/〔初〕/g, '').trim() : '客戶';
-                currentViewingImgData = screenshotsMap.get(id);
-
-                if (currentViewingImgData) {
-                    previewImage.src = currentViewingImgData;
-                    imageModal.style.display = 'flex';
-                }
-            }
-
-            if (e.target.classList.contains('btn-delete-row')) {
-                targetDeleteId = e.target.getAttribute('data-id');
-                deleteModal.style.display = 'flex';
-            }
-        });
-
-        downloadImgBtn.addEventListener('click', () => {
-            if (!currentViewingImgData) return;
-            const link = document.createElement('a');
-            link.href = currentViewingImgData;
-            link.download = `${currentViewingClientName}_保固簽名紀錄.jpg`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-
-        function playNotificationChime() {
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                const ctx = new AudioContext();
-                const now = ctx.currentTime;
-                const osc1 = ctx.createOscillator();
-                const gain1 = ctx.createGain();
-                osc1.type = 'sine'; osc1.frequency.setValueAtTime(659.25, now);
-                gain1.gain.setValueAtTime(0.2, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc1.connect(gain1); gain1.connect(ctx.destination);
-                osc1.start(now); osc1.stop(now + 0.3);
-                const osc2 = ctx.createOscillator();
-                const gain2 = ctx.createGain();
-                osc2.type = 'sine'; osc2.frequency.setValueAtTime(880.00, now + 0.1);
-                gain2.gain.setValueAtTime(0.2, now + 0.1); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-                osc2.connect(gain2); gain2.connect(ctx.destination);
-                osc2.start(now + 0.1); osc2.stop(now + 0.5);
-            } catch (e) {
-                console.warn("瀏覽器尚未授權音效播放: ", e);
-            }
-        }
-
-        async function fetchDiscountConfig() {
-            try {
-                const docSnap = await getDoc(doc(db, "system_settings", "booking_config"));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.firstTimeDiscount) {
-                        globalDiscount = data.firstTimeDiscount;
-                        document.getElementById('discountConfigInput').value = globalDiscount;
-                    }
-                }
-            } catch (error) {
-                console.error("讀取折扣設定失敗: ", error);
-            }
-        }
-
+        document.getElementById('closeDiscountBtn').addEventListener('click', () => discountModal.style.display = 'none');
         document.getElementById('saveDiscountBtn').addEventListener('click', async () => {
             const inputVal = parseInt(document.getElementById('discountConfigInput').value);
             if (isNaN(inputVal) || inputVal < 10 || inputVal > 99) {
                 alert("請輸入有效的折數（介於 10 到 99 之間，例如 95 代表 95 折）");
                 return;
             }
-
             const btn = document.getElementById('saveDiscountBtn');
-            try {
-                btn.innerText = "變更儲存中...";
-                btn.disabled = true;
-
-                await setDoc(doc(db, "system_settings", "booking_config"), {
-                    firstTimeDiscount: inputVal,
-                    updatedAt: new Date().toISOString()
-                }, { merge: true });
-
+            const success = await updateSystemConfig({ firstTimeDiscount: inputVal }, btn, "確認修改折扣");
+            if (success) {
                 globalDiscount = inputVal;
-                alert(`🎉 折扣已成功修改為 ${globalDiscount} 折！列表與預約專頁將即時連動。`);
+                discountModal.style.display = 'none';
                 await loadBookings();
-            } catch (error) {
-                console.error("儲存折扣失敗: ", error);
-                alert("儲存雲端失敗，請確認網路連線與權限設定！");
-            } finally {
-                btn.innerText = "確認修改折扣";
-                btn.disabled = false;
             }
         });
 
-        async function loadBookings() {
-            const tbody = document.getElementById('bookingListTbody');
-            const loading = document.getElementById('loading');
-            const table = document.getElementById('bookingTable');
-            
-            toastAlert.style.display = 'none'; 
-            loading.style.display = 'block';
-            table.style.display = 'none';
-            tbody.innerHTML = '';
-            screenshotsMap.clear(); 
-
-            await fetchDiscountConfig();
-            await loadExpenses(); 
-
-            try {
-                const querySnapshot = await getDocs(collection(db, "nail_bookings"));
-                let rawList = [];
-                
-                querySnapshot.forEach((doc) => {
-                    rawList.push({ id: doc.id, ...doc.data() });
-                });
-                
-                globalBookingsData = rawList;
-
-                rawList.sort((a, b) => {
-                    if (a.bookingDate !== b.bookingDate) return a.bookingDate.localeCompare(b.bookingDate);
-                    return a.bookingTime.localeCompare(b.bookingTime);
-                });
-
-                const timeCounts = {};
-                rawList.forEach(item => {
-                    const key = `${item.bookingDate}_${item.bookingTime}`;
-                    timeCounts[key] = (timeCounts[key] || 0) + 1;
-                    
-                    if (item.warrantyScreenshot) {
-                        screenshotsMap.set(item.id, item.warrantyScreenshot);
-                    }
-                });
-
-                if(rawList.length === 0) {
-                    loading.innerText = "目前雲端尚無預約客戶預約資料。";
-                    return;
+        // --- 處理動態表格列的刪除按鈕代理 ---
+        function handleTableDeleteDelegation(tbodyId) {
+            document.getElementById(tbodyId).addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-delete-row')) {
+                    e.target.closest('tr').remove();
                 }
+            });
+        }
+        handleTableDeleteDelegation('styleListTbody');
+        handleTableDeleteDelegation('addonListTbody');
 
-                rawList.forEach(item => {
-                    const tr = document.createElement('tr');
-                    const key = `${item.bookingDate}_${item.bookingTime}`;
-                    const isOverlap = timeCounts[key] > 1;
-                    
-                    if (isOverlap) tr.className = 'overlap-row'; 
+        // --- 選單 4: 款式與價錢編輯 (同步連動 Firebase) ---
+        const styleConfigModal = document.getElementById('styleConfigModal');
+        document.getElementById('menuStyleBtn').addEventListener('click', () => {
+            closeSidebar();
+            const tbody = document.getElementById('styleListTbody');
+            tbody.innerHTML = '';
+            (globalConfig.styles || []).forEach(item => {
+                addConfigRow(tbody, item.name, item.price);
+            });
+            styleConfigModal.style.display = 'flex';
+        });
+        document.getElementById('closeStyleModalBtn').addEventListener('click', () => styleConfigModal.style.display = 'none');
+        document.getElementById('addStyleRowBtn').addEventListener('click', () => addConfigRow(document.getElementById('styleListTbody')));
+        document.getElementById('saveStyleBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveStyleBtn');
+            const styles = extractTableData('styleListTbody');
+            const success = await updateSystemConfig({ styles: styles }, btn, "💾 儲存所有變更");
+            if (success) styleConfigModal.style.display = 'none';
+        });
 
-                    let addonsHTML = '';
-                    if (item.selectedAddons && item.selectedAddons.length > 0) {
-                        item.selectedAddons.forEach((addon, index) => {
-                            addonsHTML += `<span class="addon-tag">${index + 1}. ${addon}</span>`;
-                        });
-                    } else {
-                        addonsHTML = '<span style="color:#aaa; font-size:0.85rem;">無</span>';
-                    }
+        // --- 選單 5: 附加服務與價錢編輯 (同步連動 Firebase) ---
+        const addonConfigModal = document.getElementById('addonConfigModal');
+        document.getElementById('menuAddonBtn').addEventListener('click', () => {
+            closeSidebar();
+            const tbody = document.getElementById('addonListTbody');
+            tbody.innerHTML = '';
+            (globalConfig.addons || []).forEach(item => {
+                addConfigRow(tbody, item.name, item.price);
+            });
+            addonConfigModal.style.display = 'flex';
+        });
+        document.getElementById('closeAddonModalBtn').addEventListener('click', () => addonConfigModal.style.display = 'none');
+        document.getElementById('addAddonRowBtn').addEventListener('click', () => addConfigRow(document.getElementById('addonListTbody')));
+        document.getElementById('saveAddonBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveAddonBtn');
+            const addons = extractTableData('addonListTbody');
+            const success = await updateSystemConfig({ addons: addons }, btn, "💾 儲存所有變更");
+            if (success) addonConfigModal.style.display = 'none';
+        });
 
-                    const isNewGuest = item.isFirstTime === true || (item.clientName && item.clientName.includes('〔初〕'));
-                    let nameHTML = '';
-                    if (isNewGuest) {
-                        let cleanName = item.clientName ? item.clientName.replace('〔初〕', '') : '未填';
-                        nameHTML = `<span class="client-name new-guest">〔初〕${cleanName}</span>`;
-                    } else {
-                        nameHTML = `<span class="client-name">${item.clientName || '未填'}</span>`;
-                    }
-
-                    const isCompleted = item.status === "completed";
-                    if (isCompleted) {
-                        nameHTML += `<br><span class="status-completed" style="margin-top: 5px;">✅ 服務已完成</span>`;
-                    }
-
-                    let priceHTML = '';
-                    if (item.priceCalculations) {
-                        const total = item.priceCalculations.totalPrice.toLocaleString();
-                        const base = item.priceCalculations.basePrice;
-                        const addon = item.priceCalculations.addonPrice;
-                        const discount = item.priceCalculations.discountPrice || 0;
-
-                        if (isNewGuest && discount > 0) {
-                            const originalSum = base + addon;
-                            priceHTML = `
-                                <span class="total-price">$${total}
-                                    <span class="price-discount-tag">現折 ${globalDiscount} 折 (-$${discount.toLocaleString()})</span>
-                                    <span class="price-detail-sub">原價: $${originalSum.toLocaleString()}</span>
-                                </span>`;
-                        } else {
-                            priceHTML = `<span class="total-price">$${total}</span>`;
-                        }
-                    } else {
-                        priceHTML = `<span class="total-price">$0</span>`;
-                    }
-
-                    let screenshotHTML = '';
-                    if (item.warrantyScreenshot) {
-                        screenshotHTML = `<button class="btn-view-img" data-id="${item.id}" data-name="${item.clientName || '客戶'}">👁️ 查看紀錄</button>`;
-                    } else {
-                        screenshotHTML = `<span style="color:#aaa; font-size:0.85rem;">無電子紀錄</span>`;
-                    }
-
-                    let completeBtnHTML = isCompleted 
-                        ? '' 
-                        : `<button class="btn-complete-row" data-id="${item.id}">✅ 完成</button>`;
-
-                    tr.innerHTML = `
-                        <td>
-                            <div class="datetime-badge">
-                                <span class="date-item">📅 ${item.bookingDate}</span>
-                                <span class="time-item">${item.bookingTime}</span>
-                                ${isOverlap ? '<span class="overlap-warning">⚠️ 時段重複重疊！</span>' : ''}
-                            </div>
-                        </td>
-                        <td>${nameHTML}</td>
-                        <td><strong>${item.clientPhone || '未填'}</strong></td>
-                        <td>${item.selectedStyle || '未選擇'}</td>
-                        <td>${addonsHTML}</td>
-                        <td>${priceHTML}</td>
-                        <td style="text-align:center;">${screenshotHTML}</td> <td><div class="notes-text">${item.notes || '<span style="color:#ccc;">無備註</span>'}</div></td>
-                        <td>
-                            <div class="action-btns">
-                                ${completeBtnHTML}
-                                <button class="btn-delete-row" data-id="${item.id}">🗑️ 刪除</button>
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
-                loading.style.display = 'none';
-                table.style.display = 'table';
-
-            } catch (error) {
-                console.error("讀取後台失敗: ", error);
-                loading.innerText = "讀取雲端資料失敗，請確認 Firebase 設定或權限規則。";
-            }
+        // 建立新 Row 的通用函式
+        function addConfigRow(tbody, name = "", price = 0) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="input-discount row-name-input" style="width: 100%; text-align:left;" placeholder="輸入名稱" value="${name}"></td>
+                <td><input type="number" class="input-discount row-price-input" style="width: 80px;" value="${price}" min="0"></td>
+                <td style="text-align:center;"><button class="btn-delete-row" style="padding: 6px 12px;">刪除</button></td>
+            `;
+            tbody.appendChild(tr);
         }
 
-        let isFirstListeningLoad = true;
-        onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
-            if (isFirstListeningLoad) {
-                isFirstListeningLoad = false;
-                return;
-            }
-            const hasNewBooking = snapshot.docChanges().some(change => change.type === "added");
-            if (hasNewBooking) {
-                toastAlert.style.display = 'flex';
-                playNotificationChime();
-            }
+        // 讀取表格資料的通用函式
+        function extractTableData(tbodyId) {
+            const rows = document.getElementById(tbodyId).querySelectorAll('tr');
+            let data = [];
+            rows.forEach(row => {
+                const name = row.querySelector('.row-name-input').value.trim();
+                const price = parseInt(row.querySelector('.row-price-input').value);
+                if(name && !isNaN(price)) {
+                    data.push({ name, price });
+                }
+            });
+            return data;
+        }
+
+        // --- 選單 6: 標題與副標題編輯 (同步連動 Firebase) ---
+        const textConfigModal = document.getElementById('textConfigModal');
+        document.getElementById('menuTitleBtn').addEventListener('click', () => {
+            closeSidebar();
+            document.getElementById('pageTitleInput').value = globalConfig.pageTitle || '';
+            document.getElementById('pageSubtitleInput').value = globalConfig.pageSubtitle || '';
+            textConfigModal.style.display = 'flex';
+        });
+        document.getElementById('closeTextModalBtn').addEventListener('click', () => textConfigModal.style.display = 'none');
+        document.getElementById('saveTextBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('saveTextBtn');
+            const title = document.getElementById('pageTitleInput').value.trim();
+            const subtitle = document.getElementById('pageSubtitleInput').value.trim();
+            const success = await updateSystemConfig({ pageTitle: title, pageSubtitle: subtitle }, btn, "💾 儲存標題變更");
+            if (success) textConfigModal.style.display = 'none';
         });
 
-        document.getElementById('refreshBtn').addEventListener('click', loadBookings);
-        loadBookings();
-        
+
+        // --- 搜尋功能控制 ---
         const fabSearchBtn = document.getElementById('fabSearchBtn');
         const searchModal = document.getElementById('searchModal');
         const closeSearchBtn = document.getElementById('closeSearchBtn');
@@ -1313,22 +1514,10 @@
                 });
             }
         });
+
+        // 初始化系統載入
+        loadBookings();
         
     </script>
-    
-    <button class="fab-btn" id="fabSearchBtn">👧</button>
-
-<div id="searchModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 500px;">
-        <h3>🔍 顧客快速搜尋</h3>
-        <input type="text" id="searchInput" class="signature-input" placeholder="輸入顧客姓名或電話...">
-        <div id="searchResultList" class="search-results">
-            </div>
-        <div class="modal-actions">
-            <button class="btn-modal btn-cancel" id="closeSearchBtn">關閉</button>
-        </div>
-    </div>
-</div>
-
 </body>
 </html>
