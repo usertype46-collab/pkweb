@@ -6,6 +6,9 @@
     <title>神の指藝Beautiful moment. | 【客製凝膠美甲｜預約制美甲】</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
         /* --- 全局樣式與變數 --- */
         :root {
@@ -88,7 +91,7 @@
             border: 1px solid rgba(232, 215, 208, 0.5);
         }
 
-        /* --- 款式選擇區 (Grid Cards) --- */
+        /* --- 款式選擇區 --- */
         .style-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -145,7 +148,7 @@
             font-size: 1.2rem;
         }
 
-        /* --- 加選項目 (Checkboxes) --- */
+        /* --- 加選項目 --- */
         .addons-list {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -268,6 +271,11 @@
             opacity: 0.9;
             transform: translateY(-2px);
         }
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
 
         /* --- 彈出式對話框 (Modal) --- */
         .modal-overlay {
@@ -341,7 +349,7 @@
             border: 1px solid #E8D7D0;
             padding: 20px;
             border-radius: 8px;
-            height: 250px;
+            height: 220px;
             overflow-y: auto;
             font-size: 0.95rem;
             margin-bottom: 20px;
@@ -463,6 +471,23 @@
             background: #FAF8F6;
         }
 
+        /* --- 下方成功收據預覽區樣式 --- */
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .receipt-table th, .receipt-table td {
+            border: 1px solid #E8D7D0;
+            padding: 12px;
+            text-align: left;
+        }
+        .receipt-table th {
+            background-color: #FDF9F5;
+            width: 30%;
+            color: #3A2E2B;
+        }
+
         /* --- 訊息提示 --- */
         .alert {
             padding: 15px;
@@ -495,7 +520,7 @@
         <div class="section-panel" style="height: fit-content;">
             <h2><span>✦</span> 步驟三：選擇時間與小計</h2>
             
-            <div class="alert alert-success" id="successAlert">系統預約申請成功！我們將會發送簡訊確認。</div>
+            <div class="alert alert-success" id="successAlert">系統預約申請成功！憑證已生成於網頁最下方。</div>
             <div class="alert alert-error" id="errorAlert">請填寫所有必填欄位並選擇款式。</div>
 
             <form id="bookingStepForm">
@@ -543,6 +568,47 @@
                 <button type="button" class="btn-trigger" id="openModalBtn">詳細閱讀美甲服務同意書並簽名</button>
             </form>
         </div>
+
+        <div class="section-panel" id="successReceiptSection" style="display: none; grid-column: 1 / -1; margin-top: 20px;">
+            <h2 style="color: var(--accent-color); border-bottom: 2px solid var(--accent-color);"><span>✓</span> 您的預約確認憑證（已成功送出）</h2>
+            
+            <div id="receiptCaptureArea" style="background: #FFFFFF; padding: 30px; border: 2px solid #E8D7D0; border-radius: 12px; position: relative;">
+                <h3 style="text-align: center; font-size: 1.6rem; color: #3A2E2B; margin-bottom: 5px; font-family: 'Cinzel', serif;">Beautiful moment.</h3>
+                <p style="text-align: center; font-size: 0.9rem; color: #8C7572; margin-bottom: 25px;">線上預約服務確認單暨電子合約憑證</p>
+                
+                <table class="receipt-table">
+                    <tr><th>預約單號 (ID)</th><td id="recId" style="font-weight: bold; color: var(--accent-color);">-</td></tr>
+                    <tr><th>顧客真實姓名</th><td id="recName">-</td></tr>
+                    <tr><th>顧客聯絡電話</th><td id="recPhone">-</td></tr>
+                    <tr><th>預約施作日期</th><td id="recDate" style="font-weight: 500;">-</td></tr>
+                    <tr><th>預約時段</th><td id="recTime">-</td></tr>
+                    <tr><th>所選核心款式</th><td id="recStyle">-</td></tr>
+                    <tr><th>進階附加服務</th><td id="recAddons">-</td></tr>
+                    <tr><th>預估應付總計</th><td id="recTotal" style="font-size: 1.2rem; font-weight: 700; color: var(--accent-color);">-</td></tr>
+                    <tr><th>備註需求</th><td id="recNotes">-</td></tr>
+                </table>
+
+                <div style="margin-top: 20px; background: #FAF6F4; padding: 15px; border-radius: 6px; font-size: 0.85rem; color: #5A4E4D; border: 1px solid #E8D7D0;">
+                    <p><strong>🔒 電子合約簽署聲明：</strong> 本人已於線上詳細閱讀並完全同意「美甲服務同意書」之所有服務條款、施作風險與 7 日保固權益規範，並簽署下方電子簽章作為本次商務預約之法律效益依據。</p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; padding-top: 15px; border-top: 1px dashed #DCD1CC;">
+                    <div style="font-size: 0.85rem; color: #8C7572;">
+                        <div>系統收單時間：<span id="recTimestamp">-</span></div>
+                        <div>網址憑證備份：已同步安全存檔於雲端資料庫</div>
+                    </div>
+                    <div style="text-align: center; min-width: 180px;">
+                        <p style="font-size: 0.85rem; color: #8C7572; margin-bottom: 5px;">顧客電子簽章欄位</p>
+                        <img id="recSignatureImg" src="" alt="手寫簽名" style="max-height: 70px; display: none; margin: 0 auto;">
+                        <span id="recSignatureText" style="font-size: 1.2rem; font-weight: 700; color: #3A2E2B; border-bottom: 2px solid #3A2E2B; padding: 0 10px; display: none;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-submit" id="downloadPdfBtn" style="margin-top: 20px; background: linear-gradient(90deg, #6C5CE7 0%, #4A00E0 100%); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);">
+                📥 下載此預約憑證 PDF 檔
+            </button>
+        </div>
     </div>
 
     <div class="modal-overlay" id="modalOverlay">
@@ -551,7 +617,7 @@
                 <span>美甲服務合約簽署與確認資料</span>
                 <button class="modal-close" id="closeModalBtn">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="modalCaptureTarget">
                 
                 <h3 style="margin-bottom:15px; font-size:1.1rem; color:var(--accent-color);">【顧客聯繫資料填寫】</h3>
                 <div class="form-row">
@@ -645,8 +711,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // 【修正亮點】引入 onSnapshot 達成設定檔即時監聽與雙向同步
         import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // 增強引入：Firebase Storage 處理套件組
+        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         // ==========================================
         // 1. FIREBASE 雲端資料庫配置
@@ -664,49 +731,42 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const storage = getStorage(app); // 初始化儲存空間
 
         // ==========================================
-        // 2. 初始化與動態資料庫即時同步引擎 (雙向同步核心)
+        // 2. 初始化與動態資料庫即時同步引擎
         // ==========================================
         let nailStyles = [];
         let addonServices = [];
-        let systemDiscount = 0.95; // 預設 95折
+        let systemDiscount = 0.95; 
         
         let currentSelection = {
             selectedStyle: null,
             selectedAddons: new Set()
         };
 
-        // 系統啟動載入程序：對準後台的 system_settings/booking_config 做即時監聽
         function initSystem() {
             const configRef = doc(db, "system_settings", "booking_config");
             
-            // onSnapshot: 只要後台更改了標題、價錢、款式或折數，客戶端瞬間重繪
             onSnapshot(configRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    
-                    // A. 更新標題與副標題
                     if (data.pageTitle) document.getElementById('salonTitle').innerText = data.pageTitle;
                     if (data.pageSubtitle) document.getElementById('salonSubtitle').innerText = data.pageSubtitle;
                     
-                    // B. 更新折扣比例
                     if (data.firstTimeDiscount) {
                         systemDiscount = data.firstTimeDiscount / 100;
                         document.getElementById('discountLabelTitle').innerText = `新客優惠活動 (${data.firstTimeDiscount}折)`;
                     }
 
-                    // C. 更新核心美甲款式與附加服務
                     nailStyles = data.styles || [];
                     addonServices = data.addons || [];
 
-                    // D. 重繪畫面元件並重新計算金額 (確保同步後選擇不跑版)
                     currentSelection.selectedStyle = null;
                     currentSelection.selectedAddons.clear();
                     renderUIComponents();
                     calculateTotal();
                 } else {
-                    // 若無設定，預先初始化一筆與後台結構相符的資料
                     const defaultData = {
                         pageTitle: "Beautiful moment.",
                         pageSubtitle: "神の指藝預約與線上訂價申請系統",
@@ -728,18 +788,16 @@
             });
         }
 
-        // 渲染畫面元件
         function renderUIComponents() {
             const styleGrid = document.getElementById('styleGrid');
             const addonsList = document.getElementById('addonsList');
             styleGrid.innerHTML = "";
             addonsList.innerHTML = "";
 
-            // 動態產生核心款式
-            nailStyles.forEach((style, index) => {
+            nailStyles.forEach((style) => {
                 const card = document.createElement('div');
                 card.className = 'style-card';
-                card.dataset.name = style.name; // 改用 name 作為唯一識別
+                card.dataset.name = style.name; 
                 card.innerHTML = `
                     <div class="style-name">${style.name}</div>
                     <div class="style-price">$${style.price.toLocaleString()}</div>
@@ -748,8 +806,7 @@
                 styleGrid.appendChild(card);
             });
 
-            // 動態產生附加服務
-            addonServices.forEach((addon, index) => {
+            addonServices.forEach((addon) => {
                 const label = document.createElement('label');
                 label.className = 'addon-item';
                 label.innerHTML = `
@@ -765,7 +822,7 @@
         }
 
         // ==========================================
-        // 3. 計價核心控制（包含連動折扣與介面同步）
+        // 3. 計價核心控制
         // ==========================================
         function selectStyle(style) {
             document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
@@ -792,7 +849,6 @@
             currentSelection.selectedAddons.forEach(item => addonPrice += item.price);
             
             const subtotal = stylePrice + addonPrice;
-            // 套用即時同步的系統折扣 (例如 systemDiscount 為 0.95 或 0.9)
             const total = Math.round(subtotal * systemDiscount);
             const discount = subtotal - total;
 
@@ -805,7 +861,7 @@
         }
 
         // ==========================================
-        // 4. 彈出式視窗與手寫簽名核心引擎 (維持不變)
+        // 4. 彈出式視窗與手寫簽名核心引擎（修正防消失 Bug）
         // ==========================================
         const modalOverlay = document.getElementById('modalOverlay');
         const openModalBtn = document.getElementById('openModalBtn');
@@ -819,6 +875,8 @@
 
         let isDrawing = false;
         let sigMode = 'canvas'; 
+        let canvasWidth = 0;
+        let canvasHeight = 0;
 
         openModalBtn.addEventListener('click', () => {
             if (!currentSelection.selectedStyle) {
@@ -828,20 +886,52 @@
                 alert("請先選擇預約日期與時段！"); return;
             }
             modalOverlay.classList.add('active');
+            
+            // 每次打開 Modal 時重設並初始化畫布尺寸
+            canvasWidth = 0;
+            canvasHeight = 0;
             resizeCanvas();
         });
 
         closeModalBtn.addEventListener('click', () => modalOverlay.classList.remove('active'));
 
+        // 【重大修正：防簽名消失機制】加入高精度檢查與底層重繪還原
         function resizeCanvas() {
-            canvas.width = canvasContainer.clientWidth;
-            canvas.height = canvasContainer.clientHeight;
+            const currentWidth = canvasContainer.clientWidth;
+            const currentHeight = canvasContainer.clientHeight;
+            
+            // 唯有當前容器物理寬高真正產生異動時，才進行重設，排除移動端滾動時的虛擬 resize 擾亂
+            if (canvasWidth === currentWidth && canvasHeight === currentHeight) {
+                return; 
+            }
+            
+            let backupData = null;
+            if (canvasWidth > 0 && canvasHeight > 0 && !isCanvasBlank()) {
+                backupData = canvas.toDataURL(); // 自動記憶現有筆跡
+            }
+            
+            canvasWidth = currentWidth;
+            canvasHeight = currentHeight;
+            canvas.width = currentWidth;
+            canvas.height = currentHeight;
+            
             ctx.lineWidth = 3;
             ctx.lineCap = "round";
             ctx.strokeStyle = "#3A2E2B";
+            
+            // 如果先前有筆跡，原地等比還原回畫布中
+            if (backupData) {
+                let img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = backupData;
+            }
         }
+        // 監聽視窗變化，使用安全機制處理機制
         window.addEventListener('resize', resizeCanvas);
 
+        // 滑鼠與觸控事件
         canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
         canvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); });
         canvas.addEventListener('mouseup', () => isDrawing = false);
@@ -880,10 +970,11 @@
         }
 
         // ==========================================
-        // 5. 資料傳輸與 Firebase 寫入
+        // 5. 資料傳輸與 Firebase 儲存與截圖機制
         // ==========================================
         const submitFormBtn = document.getElementById('submitFormBtn');
         const successAlert = document.getElementById('successAlert');
+        const successReceiptSection = document.getElementById('successReceiptSection');
 
         submitFormBtn.addEventListener('click', async () => {
             const clientName = document.getElementById('clientName').value.trim();
@@ -905,46 +996,103 @@
 
             let customerSignatureData = "";
             if (sigMode === 'canvas') {
-                if (isCanvasBlank()) { alert("請完成手寫簽名以示負責！"); return; }
-                customerSignatureData = canvas.toDataURL(); 
+                if (isCanvasBlank()) { alert("請完成手寫簽名！"); return; }
+                customerSignatureData = canvas.toDataURL(); // 取得 base64 簽名圖檔數據
             } else {
                 if (!sigTextInput.value.trim()) { alert("請輸入打字簽名全名！"); return; }
                 customerSignatureData = "[打字簽章] " + sigTextInput.value.trim();
             }
 
+            // 鎖定送出按鈕
             submitFormBtn.disabled = true;
-            submitFormBtn.innerText = "寫入雲端紀錄中...";
+            submitFormBtn.innerText = "產生簽署截圖中...";
 
             const prices = calculateTotal();
-
-            const bookingRecord = {
-                clientName: clientName,
-                clientPhone: clientPhone,
-                bookingDate: bookingDate,
-                bookingTime: bookingTime,
-                notes: notes,
-                selectedStyle: currentSelection.selectedStyle.name,
-                selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
-                priceCalculations: {
-                    basePrice: prices.stylePrice,
-                    addonPrice: prices.addonPrice,
-                    discountPrice: prices.discount,
-                    totalPrice: prices.total
-                },
-                agreedToTerms: true,
-                customerSignature: customerSignatureData, 
-                status: "待確認",                         
-                createdAt: serverTimestamp()
-            };
+            const nowString = new Date().toLocaleString('zh-TW');
 
             try {
-                // 客戶端送出資料，由於後台已套用 onSnapshot，後台會在送出瞬間自動增加該列
-                await addDoc(collection(db, "nail_bookings"), bookingRecord);
+                // 先在背景動態將填寫的資料、勾選狀態、簽名渲染到網頁下方的憑證區域中，準備進行精準快照
+                document.getElementById('recName').innerText = clientName;
+                document.getElementById('recPhone').innerText = clientPhone;
+                document.getElementById('recDate').innerText = bookingDate;
+                document.getElementById('recTime').innerText = bookingTime;
+                document.getElementById('recStyle').innerText = currentSelection.selectedStyle.name;
+                document.getElementById('recAddons').innerText = Array.from(currentSelection.selectedAddons).map(item => item.name).join('、') || '無';
+                document.getElementById('recTotal').innerText = `$${prices.total.toLocaleString()}`;
+                document.getElementById('recNotes').innerText = notes || '無額外備註需求';
+                document.getElementById('recTimestamp').innerText = nowString;
+
+                if (sigMode === 'canvas') {
+                    document.getElementById('recSignatureText').style.display = 'none';
+                    const targetImg = document.getElementById('recSignatureImg');
+                    targetImg.src = customerSignatureData;
+                    targetImg.style.display = 'block';
+                } else {
+                    document.getElementById('recSignatureImg').style.display = 'none';
+                    const targetTxt = document.getElementById('recSignatureText');
+                    targetTxt.innerText = sigTextInput.value.trim();
+                    targetTxt.style.display = 'inline-block';
+                }
+
+                // 強制讓隱藏的成功表單區域短暫渲染顯示，以便 html2canvas 進行光柵化快照
+                successReceiptSection.style.display = 'block';
+
+                // 執行 html2canvas 網頁快照技術
+                const targetArea = document.getElementById('receiptCaptureArea');
+                const capturedCanvas = await html2canvas(targetArea, {
+                    scale: 2, 
+                    backgroundColor: '#FFFFFF',
+                    useCORS: true
+                });
+                const screenshotBase64 = capturedCanvas.toDataURL('image/png');
+
+                submitFormBtn.innerText = "上傳電子合約雲端中...";
+
+                // 將這張截圖上傳到 Firebase Storage 中儲存
+                const screenshotFilename = `warranty_receipts/${Date.now()}_${clientPhone}.png`;
+                const storageRef = ref(storage, screenshotFilename);
+                await uploadString(storageRef, screenshotBase64, 'data_url');
                 
+                // 取得雲端圖片公開瀏覽網址
+                const firebaseUrl = await getDownloadURL(storageRef);
+
+                // 建構要寫入 Firestore nail_bookings 集合的資料結構
+                const bookingRecord = {
+                    clientName: clientName,
+                    clientPhone: clientPhone,
+                    bookingDate: bookingDate,
+                    bookingTime: bookingTime,
+                    notes: notes,
+                    selectedStyle: currentSelection.selectedStyle.name,
+                    selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
+                    priceCalculations: {
+                        basePrice: prices.stylePrice,
+                        addonPrice: prices.addonPrice,
+                        discountPrice: prices.discount,
+                        totalPrice: prices.total
+                    },
+                    agreedToTerms: true,
+                    customerSignature: customerSignatureData, 
+                    status: "待確認",
+                    warrantyScreenshot: firebaseUrl, // 完美對接！上傳的同意書圖片網址寫入此欄位
+                    createdAt: serverTimestamp()
+                };
+
+                // 送進 nail_bookings
+                const docRef = await addDoc(collection(db, "nail_bookings"), bookingRecord);
+                
+                // 將產生的 Document ID 回填至網頁下方的表單中
+                document.getElementById('recId').innerText = docRef.id;
+
+                // 關閉 Modal、顯示上方成功橫幅，並順暢滾動到下方憑證處
                 modalOverlay.classList.remove('active');
                 successAlert.style.display = 'block';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                setTimeout(() => {
+                    document.getElementById('successReceiptSection').scrollIntoView({ behavior: 'smooth' });
+                }, 400);
 
+                // 重置主要預約表單欄位，防範重複送出
                 document.getElementById('bookingStepForm').reset();
                 document.getElementById('clientName').value = "";
                 document.getElementById('clientPhone').value = "";
@@ -953,18 +1101,56 @@
                 document.getElementById('checkTerms3').checked = false;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 sigTextInput.value = "";
-                
                 document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
                 currentSelection.selectedStyle = null;
                 currentSelection.selectedAddons.clear();
                 calculateTotal();
 
             } catch (error) {
-                console.error("寫入雲端失敗:", error);
-                alert("儲存失敗，請確認 Firebase 設定。");
+                console.error("寫入雲端或截圖失敗:", error);
+                alert("儲存失敗，請確認 Firebase 安全規則設定與 Storage 權限。");
             } finally {
                 submitFormBtn.disabled = false;
                 submitFormBtn.innerText = "確認無誤並送出預約申請";
+            }
+        });
+
+        // ==========================================
+        // 6. 新增功能：下載 PDF 檔案控制
+        // ==========================================
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        downloadPdfBtn.addEventListener('click', async () => {
+            downloadPdfBtn.disabled = true;
+            downloadPdfBtn.innerText = "正在調用 PDF 模組引擎...";
+
+            try {
+                const element = document.getElementById('receiptCaptureArea');
+                // 再次利用 html2canvas 渲染當前最終帶有單號的內容
+                const pdfCanvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#FFFFFF'
+                });
+                const imgData = pdfCanvas.toDataURL('image/png');
+
+                const { jsPDF } = window.jspdf;
+                // 設定為標準 A4 尺寸
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 190; // 留白邊距
+                const imgHeight = (pdfCanvas.height * imgWidth) / pdfCanvas.width;
+                
+                // 置中寫入 PDF 頁面
+                pdf.addImage(imgData, 'PNG', 10, 15, imgWidth, imgHeight);
+                
+                const recIdText = document.getElementById('recId').innerText;
+                pdf.save(`美甲預約憑證單_${recIdText}.pdf`);
+                
+                alert("🎉 PDF 憑證下載成功！");
+            } catch (err) {
+                console.error("導出 PDF 發生致命錯誤:", err);
+                alert("匯出 PDF 失敗：" + err.message);
+            } finally {
+                downloadPdfBtn.disabled = false;
+                downloadPdfBtn.innerText = "📥 下載此預約憑證 PDF 檔";
             }
         });
 
