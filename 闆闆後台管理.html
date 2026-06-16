@@ -43,6 +43,8 @@
             border-radius: 16px;
             color: white;
             box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .dashboard-header h1 {
@@ -55,6 +57,11 @@
             font-size: 0.95rem;
             opacity: 0.8;
             margin-top: 5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
         }
 
         .btn-refresh {
@@ -71,6 +78,27 @@
 
         .btn-refresh:hover {
             opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* 營運報告按鈕 */
+        .btn-report {
+            background-color: #E2E0E7;
+            color: var(--text-dark);
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-report:hover {
+            background-color: #D6D5DB;
             transform: translateY(-1px);
         }
 
@@ -214,39 +242,22 @@
         .price-discount-tag { color: var(--new-client-pink); font-size: 0.75rem; font-weight: 700; }
         .notes-text { font-size: 0.85rem; color: #666; max-width: 200px; word-break: break-all; }
 
-        /* 重疊警示 */
         tr.overlap-row { background-color: var(--danger-bg) !important; color: var(--danger-red) !important; }
         tr.overlap-row .client-name:not(.new-guest), tr.overlap-row .total-price, tr.overlap-row .date-item { color: var(--danger-red) !important; }
         tr.overlap-row .time-item { background-color: #FFD2D2 !important; color: var(--danger-red) !important; }
         .overlap-warning { display: block; color: white; background-color: var(--danger-red); font-size: 0.75rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 5px; text-align: center; width: fit-content; }
 
-        /* 狀態標籤 */
         .status-completed { display: inline-block; background-color: #D1FAE5; color: #065F46; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; border: 1px solid #A7F3D0; }
 
-        /* 按鈕群組 */
         .action-btns { display: flex; gap: 8px; flex-direction: column; }
 
-        .btn-complete-row {
-            background-color: #ECFDF5;
-            color: var(--success-green);
-            border: 1px solid #A7F3D0;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+        .btn-complete-row { background-color: #ECFDF5; color: var(--success-green); border: 1px solid #A7F3D0; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition); }
         .btn-complete-row:hover { background-color: var(--success-green); color: white; }
 
-        .btn-view-img {
-            background-color: #E8F0FE; color: #1967D2; border: 1px solid #D2E3FC; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition);
-        }
+        .btn-view-img { background-color: #E8F0FE; color: #1967D2; border: 1px solid #D2E3FC; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition); }
         .btn-view-img:hover { background-color: #1967D2; color: white; }
 
-        .btn-delete-row {
-            background-color: white; color: var(--danger-red); border: 1px solid #FAD2CF; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition);
-        }
+        .btn-delete-row { background-color: white; color: var(--danger-red); border: 1px solid #FAD2CF; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: var(--transition); }
         .btn-delete-row:hover { background-color: var(--danger-red); color: white; border-color: var(--danger-red); }
 
         /* 彈窗 Modal 共用與專屬樣式 */
@@ -263,12 +274,35 @@
             animation: slideUp 0.3s ease; position: relative;
         }
 
-        /* 圖片預覽彈窗調整 */
+        /* 營運報告彈窗樣式 */
+        .report-modal-content { max-width: 550px !important; padding: 30px; }
+        .report-modal-content h3 { color: var(--text-dark); font-size: 1.5rem; margin-bottom: 20px; font-family: 'Cinzel', 'Noto Sans TC', sans-serif; }
+        .report-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        .report-card {
+            background: #FAFAFC;
+            border: 1px solid #E2E0E7;
+            border-radius: 12px;
+            padding: 20px 15px;
+            flex: 1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .report-title { font-size: 0.95rem; font-weight: 700; color: #4A4E69; }
+        .report-value { font-size: 2rem; font-weight: 800; color: var(--accent-purple); font-family: 'Cinzel', serif; }
+        .report-subtitle { font-size: 0.8rem; color: #888; font-weight: 500; }
+        .report-note { font-size: 0.8rem; color: var(--success-green); margin-bottom: 20px; text-align: left; background: #ECFDF5; padding: 10px; border-radius: 8px; }
+
         .img-modal-content { max-width: 600px !important; padding: 30px; }
         .preview-img-container { width: 100%; max-height: 60vh; overflow-y: auto; border: 2px dashed #E2E0E7; border-radius: 12px; margin-bottom: 20px; background: #FAFAFC; }
         .preview-img-container img { width: 100%; height: auto; display: block; }
 
-        /* 完成服務對話框專屬樣式 */
         .complete-modal-content { max-width: 650px !important; padding: 30px; }
         .complete-modal-content h3 { color: var(--success-green) !important; font-size: 1.5rem; margin-bottom: 15px; }
         
@@ -314,6 +348,12 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* RWD 微調 */
+        @media(max-width: 768px) {
+            .report-grid { flex-direction: column; gap: 15px; }
+            .report-card { width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -323,7 +363,10 @@
             <h1>神の指藝 預約後台管理系統</h1>
             <p>專屬闆闆的即時顧客清單（依照預約日期時間排序）</p>
         </div>
-        <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
+        <div class="header-actions">
+            <button class="btn-report" id="reportBtn">📊 營運報告</button>
+            <button class="btn-refresh" id="refreshBtn">整理/重整資料</button>
+        </div>
     </div>
 
     <div class="settings-card">
@@ -366,6 +409,28 @@
                 <tbody id="bookingListTbody">
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <div id="reportModal" class="modal-overlay">
+        <div class="modal-content report-modal-content">
+            <h3>📊 營運財務報告</h3>
+            <div class="report-note">💡 系統僅採計狀態為「✅ 服務已完成」的預約紀錄作為實收營業額。</div>
+            <div class="report-grid">
+                <div class="report-card">
+                    <div class="report-title">本月累計營業額</div>
+                    <div class="report-value" id="monthlyRevenueValue">$0</div>
+                    <div class="report-subtitle" id="monthlyRevenueLabel"></div>
+                </div>
+                <div class="report-card">
+                    <div class="report-title">年度累計營業額</div>
+                    <div class="report-value" id="annualRevenueValue">$0</div>
+                    <div class="report-subtitle" id="annualRevenueLabel"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeReportBtn">關閉視窗</button>
+            </div>
         </div>
     </div>
 
@@ -422,7 +487,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc, onSnapshot, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        // 引入 html2canvas 支援對話框內容高畫質數位截圖功能
         import html2canvas from "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm";
 
         // ===================================================
@@ -449,6 +513,7 @@
         let currentViewingImgData = null;
         let currentViewingClientName = '';
         let globalDiscount = 95; 
+        let globalBookingsData = []; // 新增：用於存儲所有訂單資料，以利報表計算
 
         // --- DOM 元素抓取 ---
         const deleteModal = document.getElementById('deleteModal');
@@ -467,6 +532,12 @@
         const signatureCanvas = document.getElementById('signatureCanvas');
         const signatureInput = document.getElementById('signatureInput');
         const signatureContainer = document.getElementById('signatureContainer');
+        
+        // 報表 DOM
+        const reportModal = document.getElementById('reportModal');
+        const reportBtn = document.getElementById('reportBtn');
+        const closeReportBtn = document.getElementById('closeReportBtn');
+
         const ctx = signatureCanvas.getContext('2d');
         let isDrawing = false;
         let hasDrawn = false; 
@@ -537,6 +608,47 @@
             }
         });
 
+        // --- 報表控制邏輯 ---
+        reportBtn.addEventListener('click', () => {
+            const now = new Date();
+            const currentYear = now.getFullYear().toString();
+            // 月份補零 (例如：6月 -> '06')
+            const currentMonth = (now.getMonth() + 1).toString().padStart(2, '0');
+            const currentYearMonth = `${currentYear}-${currentMonth}`;
+
+            let monthlyTotal = 0;
+            let annualTotal = 0;
+
+            globalBookingsData.forEach(item => {
+                // 僅計算已完成且有金額資料的訂單
+                if (item.status === "completed" && item.priceCalculations) {
+                    const bookingDate = item.bookingDate || ""; // 預期格式: YYYY-MM-DD
+                    const price = item.priceCalculations.totalPrice || 0;
+
+                    // 判斷是否為本年
+                    if (bookingDate.startsWith(currentYear)) {
+                        annualTotal += price;
+                    }
+                    // 判斷是否為本月
+                    if (bookingDate.startsWith(currentYearMonth)) {
+                        monthlyTotal += price;
+                    }
+                }
+            });
+
+            // 渲染報表畫面
+            document.getElementById('monthlyRevenueValue').innerText = `$${monthlyTotal.toLocaleString()}`;
+            document.getElementById('monthlyRevenueLabel').innerText = `結算至 ${currentYear}年${currentMonth}月`;
+            document.getElementById('annualRevenueValue').innerText = `$${annualTotal.toLocaleString()}`;
+            document.getElementById('annualRevenueLabel').innerText = `結算至 ${currentYear}年度`;
+
+            reportModal.style.display = 'flex';
+        });
+
+        closeReportBtn.addEventListener('click', () => {
+            reportModal.style.display = 'none';
+        });
+
         // --- 關閉完成確認對話框邏輯 ---
         cancelCompletionBtn.addEventListener('click', () => {
             completionModal.style.display = 'none';
@@ -559,18 +671,16 @@
                 confirmCompletionBtn.innerText = "保固圖檔上傳中...";
                 confirmCompletionBtn.disabled = true;
 
-                // 1. 暫時隱藏下方的按鈕操作列，避免干擾截圖畫面美觀
                 const modalActions = completionModal.querySelector('.modal-actions');
                 modalActions.style.display = 'none';
 
-                // 2. 擷取對話框元素內容
                 const modalContent = completionModal.querySelector('.complete-modal-content');
                 let finalScreenshotUrl = "";
                 
                 try {
                     const capturedCanvas = await html2canvas(modalContent, {
                         backgroundColor: '#FFFFFF',
-                        scale: 2, // 2倍高畫質提升字體解析度
+                        scale: 2, 
                         logging: false,
                         useCORS: true
                     });
@@ -580,15 +690,13 @@
                     finalScreenshotUrl = signatureDataUrl; 
                 }
 
-                // 3. 還原按鈕原先顯示
                 modalActions.style.display = 'flex';
 
-                // 4. 將完成狀態與截圖資料同步回傳至雲端
                 await updateDoc(doc(db, "nail_bookings", targetCompleteId), {
                     status: "completed",
                     clientSignature: hasDrawn ? signatureDataUrl : null,
                     clientTypedName: typedName || null,
-                    warrantyScreenshot: finalScreenshotUrl, // 將產生的對話框截圖存入對應欄位
+                    warrantyScreenshot: finalScreenshotUrl, 
                     completedAt: new Date().toISOString()
                 });
 
@@ -726,7 +834,7 @@
             }
         }
 
-        // --- 確認修改並儲存全域折扣設定至雲端（已與預約專頁共用同一個資料路徑） ---
+        // --- 確認修改並儲存全域折扣設定至雲端 ---
         document.getElementById('saveDiscountBtn').addEventListener('click', async () => {
             const inputVal = parseInt(document.getElementById('discountConfigInput').value);
             if (isNaN(inputVal) || inputVal < 10 || inputVal > 99) {
@@ -777,6 +885,9 @@
                 querySnapshot.forEach((doc) => {
                     rawList.push({ id: doc.id, ...doc.data() });
                 });
+                
+                // 存入全域變數供報表計算使用
+                globalBookingsData = rawList;
 
                 rawList.sort((a, b) => {
                     if (a.bookingDate !== b.bookingDate) return a.bookingDate.localeCompare(b.bookingDate);
