@@ -479,19 +479,17 @@
 <body>
 
     <header>
-        <h1 id="salonTitle">DÉESSE NAIL ART</h1>
-        <p id="salonSubtitle">專業美甲藝術設計預約與線上訂價申請系統</p>
+        <h1 id="salonTitle">載入中...</h1>
+        <p id="salonSubtitle">請稍候</p>
     </header>
 
     <div class="container">
         <div class="section-panel">
             <h2><span>✦</span> 步驟一：選擇核心美甲款式</h2>
-            <div class="style-grid" id="styleGrid">
-                </div>
+            <div class="style-grid" id="styleGrid"></div>
 
             <h2><span>✦</span> 步驟二：進階附加服務</h2>
-            <div class="addons-list" id="addonsList">
-                </div>
+            <div class="addons-list" id="addonsList"></div>
         </div>
 
         <div class="section-panel" style="height: fit-content;">
@@ -532,7 +530,7 @@
                         <span id="summaryAddonPrice">$0</span>
                     </div>
                     <div class="price-row discount-row">
-                        <span>新客優惠活動 (95折)</span>
+                        <span id="discountLabelTitle">新客優惠活動 (95折)</span>
                         <span id="summaryDiscount">-$0</span>
                     </div>
                     <div class="price-total">
@@ -647,7 +645,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        // 【修正亮點】引入 onSnapshot 達成設定檔即時監聽與雙向同步
+        import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // ==========================================
         // 1. FIREBASE 雲端資料庫配置
@@ -667,82 +666,66 @@
         const db = getFirestore(app);
 
         // ==========================================
-        // 2. 初始化與動態資料庫讀取引擎
+        // 2. 初始化與動態資料庫即時同步引擎 (雙向同步核心)
         // ==========================================
         let nailStyles = [];
         let addonServices = [];
+        let systemDiscount = 0.95; // 預設 95折
+        
         let currentSelection = {
             selectedStyle: null,
             selectedAddons: new Set()
         };
 
-        // 系統啟動載入程序
-        async function initSystem() {
-            try {
-                // A. 讀取標題與副標題設定
-                const configRef = doc(db, "system_config", "salon_info");
-                const configSnap = await getDoc(configRef);
-                if (configSnap.exists()) {
-                    const data = configSnap.data();
-                    if(data.title) document.getElementById('salonTitle').innerText = data.title;
-                    if(data.subtitle) document.getElementById('salonSubtitle').innerText = data.subtitle;
-                } else {
-                    // 若無設定，預先初始化一筆至資料庫以便管理
-                    await setDoc(configRef, { title: "DÉESSE NAIL ART", subtitle: "專業美甲藝術設計預約與線上訂價申請系統" });
-                }
-
-                // B. 讀取核心美甲款式
-                const stylesCol = collection(db, "nail_styles");
-                const stylesSnapshot = await getDocs(stylesCol);
-                
-                if (stylesSnapshot.empty) {
-                    // 初次無資料時自動防呆初始化，確保資料庫有預設值連動
-                    const defaultStyles = [
-                        { id: 'style_1', name: '經典極簡單色凝膠', price: 900 },
-                        { id: 'style_2', name: '法式優雅氣質漸層', price: 1300 },
-                        { id: 'style_3', name: '奢華復古貓眼晶石', price: 1600 },
-                        { id: 'style_4', name: '獨家日系手繪藝術', price: 2200 },
-                        { id: 'style_5', name: '暈染大理石奢華風', price: 2000 }
-                    ];
-                    for(let s of defaultStyles){
-                        await setDoc(doc(db, "nail_styles", s.id), { name: s.name, price: s.price });
+        // 系統啟動載入程序：對準後台的 system_settings/booking_config 做即時監聽
+        function initSystem() {
+            const configRef = doc(db, "system_settings", "booking_config");
+            
+            // onSnapshot: 只要後台更改了標題、價錢、款式或折數，客戶端瞬間重繪
+            onSnapshot(configRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    // A. 更新標題與副標題
+                    if (data.pageTitle) document.getElementById('salonTitle').innerText = data.pageTitle;
+                    if (data.pageSubtitle) document.getElementById('salonSubtitle').innerText = data.pageSubtitle;
+                    
+                    // B. 更新折扣比例
+                    if (data.firstTimeDiscount) {
+                        systemDiscount = data.firstTimeDiscount / 100;
+                        document.getElementById('discountLabelTitle').innerText = `新客優惠活動 (${data.firstTimeDiscount}折)`;
                     }
-                    nailStyles = defaultStyles;
+
+                    // C. 更新核心美甲款式與附加服務
+                    nailStyles = data.styles || [];
+                    addonServices = data.addons || [];
+
+                    // D. 重繪畫面元件並重新計算金額 (確保同步後選擇不跑版)
+                    currentSelection.selectedStyle = null;
+                    currentSelection.selectedAddons.clear();
+                    renderUIComponents();
+                    calculateTotal();
                 } else {
-                    nailStyles = [];
-                    stylesSnapshot.forEach(doc => {
-                        nailStyles.push({ id: doc.id, ...doc.data() });
-                    });
+                    // 若無設定，預先初始化一筆與後台結構相符的資料
+                    const defaultData = {
+                        pageTitle: "DÉESSE NAIL ART",
+                        pageSubtitle: "專業美甲藝術設計預約與線上訂價申請系統",
+                        firstTimeDiscount: 95,
+                        styles: [
+                            { name: '經典極簡單色凝膠', price: 900 },
+                            { name: '法式優雅氣質漸層', price: 1300 },
+                            { name: '奢華復古貓眼晶石', price: 1600 }
+                        ],
+                        addons: [
+                            { name: '本店溫和卸甲續作', price: 300 },
+                            { name: '他店安全卸甲', price: 500 }
+                        ]
+                    };
+                    setDoc(configRef, defaultData);
                 }
-
-                // C. 讀取附加服務
-                const addonsCol = collection(db, "addon_services");
-                const addonsSnapshot = await getDocs(addonsCol);
-
-                if (addonsSnapshot.empty) {
-                    const defaultAddons = [
-                        { id: 'addon_1', name: '本店溫和卸甲續作', price: 300 },
-                        { id: 'addon_2', name: '他店安全卸甲', price: 500 },
-                        { id: 'addon_3', name: '精細指緣深層保養', price: 400 },
-                        { id: 'addon_4', name: '施華洛世奇水鑽(單指)', price: 150 }
-                    ];
-                    for(let a of defaultAddons){
-                        await setDoc(doc(db, "addon_services", a.id), { name: a.name, price: a.price });
-                    }
-                    addonServices = defaultAddons;
-                } else {
-                    addonServices = [];
-                    addonsSnapshot.forEach(doc => {
-                        addonServices.push({ id: doc.id, ...doc.data() });
-                    });
-                }
-
-                // 開始網頁元件渲染
-                renderUIComponents();
-
-            } catch (err) {
-                console.error("初始化資料庫連動失敗: ", err);
-            }
+            }, (error) => {
+                console.error("即時同步設定失敗: ", error);
+            });
         }
 
         // 渲染畫面元件
@@ -753,10 +736,10 @@
             addonsList.innerHTML = "";
 
             // 動態產生核心款式
-            nailStyles.forEach(style => {
+            nailStyles.forEach((style, index) => {
                 const card = document.createElement('div');
                 card.className = 'style-card';
-                card.dataset.id = style.id;
+                card.dataset.name = style.name; // 改用 name 作為唯一識別
                 card.innerHTML = `
                     <div class="style-name">${style.name}</div>
                     <div class="style-price">$${style.price.toLocaleString()}</div>
@@ -766,12 +749,12 @@
             });
 
             // 動態產生附加服務
-            addonServices.forEach(addon => {
+            addonServices.forEach((addon, index) => {
                 const label = document.createElement('label');
                 label.className = 'addon-item';
                 label.innerHTML = `
                     <div>
-                        <input type="checkbox" value="${addon.id}" data-price="${addon.price}">
+                        <input type="checkbox" value="${addon.name}" data-price="${addon.price}">
                         <span>${addon.name}</span>
                     </div>
                     <span style="color:#B8860B; font-weight:500;">+$${addon.price}</span>
@@ -782,12 +765,12 @@
         }
 
         // ==========================================
-        // 3. 計價核心控制（包含95折與介面同步）
+        // 3. 計價核心控制（包含連動折扣與介面同步）
         // ==========================================
         function selectStyle(style) {
             document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
             currentSelection.selectedStyle = style;
-            const selectedCard = document.querySelector(`.style-card[data-id="${style.id}"]`);
+            const selectedCard = document.querySelector(`.style-card[data-name="${style.name}"]`);
             if (selectedCard) selectedCard.classList.add('selected');
             calculateTotal();
         }
@@ -797,7 +780,7 @@
                 currentSelection.selectedAddons.add(addon);
             } else {
                 currentSelection.selectedAddons.forEach(item => {
-                    if(item.id === addon.id) currentSelection.selectedAddons.delete(item);
+                    if(item.name === addon.name) currentSelection.selectedAddons.delete(item);
                 });
             }
             calculateTotal();
@@ -809,8 +792,8 @@
             currentSelection.selectedAddons.forEach(item => addonPrice += item.price);
             
             const subtotal = stylePrice + addonPrice;
-            // 新客優惠 95 折計算
-            const total = Math.round(subtotal * 0.95);
+            // 套用即時同步的系統折扣 (例如 systemDiscount 為 0.95 或 0.9)
+            const total = Math.round(subtotal * systemDiscount);
             const discount = subtotal - total;
 
             document.getElementById('summaryStylePrice').innerText = `$${stylePrice.toLocaleString()}`;
@@ -822,7 +805,7 @@
         }
 
         // ==========================================
-        // 4. 彈出式視窗與手寫簽名核心引擎
+        // 4. 彈出式視窗與手寫簽名核心引擎 (維持不變)
         // ==========================================
         const modalOverlay = document.getElementById('modalOverlay');
         const openModalBtn = document.getElementById('openModalBtn');
@@ -835,18 +818,14 @@
         const canvasContainer = document.getElementById('canvasContainer');
 
         let isDrawing = false;
-        let sigMode = 'canvas'; // 'canvas' 或 'text'
+        let sigMode = 'canvas'; 
 
-        // 彈出視窗開關
         openModalBtn.addEventListener('click', () => {
-            // 防呆：開啟前須先在外面選定日期、時段與美甲款式
             if (!currentSelection.selectedStyle) {
-                alert("請先選擇一個核心美甲款式！");
-                return;
+                alert("請先選擇一個核心美甲款式！"); return;
             }
             if (!document.getElementById('bookingDate').value || !document.getElementById('bookingTime').value) {
-                alert("請先選擇預約日期與時段！");
-                return;
+                alert("請先選擇預約日期與時段！"); return;
             }
             modalOverlay.classList.add('active');
             resizeCanvas();
@@ -854,7 +833,6 @@
 
         closeModalBtn.addEventListener('click', () => modalOverlay.classList.remove('active'));
 
-        // 調整簽名板寬度防變形
         function resizeCanvas() {
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
@@ -864,81 +842,50 @@
         }
         window.addEventListener('resize', resizeCanvas);
 
-        // 手寫簽名板事件監聽 (滑鼠)
-        canvas.addEventListener('mousedown', (e) => {
-            isDrawing = true;
-            ctx.beginPath();
-            ctx.moveTo(e.offsetX, e.offsetY);
-        });
-        canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
-        });
+        canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+        canvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); });
         canvas.addEventListener('mouseup', () => isDrawing = false);
         canvas.addEventListener('mouseleave', () => isDrawing = false);
 
-        // 手寫簽名板事件監聽 (行動裝置觸控)
         canvas.addEventListener('touchstart', (e) => {
             if(e.touches.length === 1) {
-                isDrawing = true;
-                const rect = canvas.getBoundingClientRect();
-                ctx.beginPath();
-                ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-                e.preventDefault();
+                isDrawing = true; const rect = canvas.getBoundingClientRect();
+                ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault();
             }
-        });
+        }, {passive: false});
         canvas.addEventListener('touchmove', (e) => {
             if (!isDrawing) return;
             if(e.touches.length === 1) {
-                const rect = canvas.getBoundingClientRect();
-                ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-                ctx.stroke();
-                e.preventDefault();
+                const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+                ctx.stroke(); e.preventDefault();
             }
-        });
+        }, {passive: false});
         canvas.addEventListener('touchend', () => isDrawing = false);
 
-        // 清除簽名
-        clearSigBtn.addEventListener('click', () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
+        clearSigBtn.addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
 
-        // 切換打字/手寫模式
         toggleSigModeBtn.addEventListener('click', () => {
             if (sigMode === 'canvas') {
-                sigMode = 'text';
-                canvasContainer.style.display = 'none';
-                clearSigBtn.style.display = 'none';
-                sigTextInput.style.display = 'block';
-                toggleSigModeBtn.innerText = '切換為手寫簽名';
+                sigMode = 'text'; canvasContainer.style.display = 'none'; clearSigBtn.style.display = 'none';
+                sigTextInput.style.display = 'block'; toggleSigModeBtn.innerText = '切換為手寫簽名';
             } else {
-                sigMode = 'canvas';
-                canvasContainer.style.display = 'block';
-                clearSigBtn.style.display = 'inline-block';
-                sigTextInput.style.display = 'none';
-                toggleSigModeBtn.innerText = '切換為打字簽名';
-                resizeCanvas();
+                sigMode = 'canvas'; canvasContainer.style.display = 'block'; clearSigBtn.style.display = 'inline-block';
+                sigTextInput.style.display = 'none'; toggleSigModeBtn.innerText = '切換為打字簽名'; resizeCanvas();
             }
         });
 
-        // 檢查畫布是否為空
         function isCanvasBlank() {
-            const blank = document.createElement('canvas');
-            blank.width = canvas.width;
-            blank.height = canvas.height;
+            const blank = document.createElement('canvas'); blank.width = canvas.width; blank.height = canvas.height;
             return canvas.toDataURL() === blank.toDataURL();
         }
 
         // ==========================================
-        // 5. 資料完整驗證與儲存至 Firebase (與後台對應)
+        // 5. 資料傳輸與 Firebase 寫入
         // ==========================================
         const submitFormBtn = document.getElementById('submitFormBtn');
         const successAlert = document.getElementById('successAlert');
-        const errorAlert = document.getElementById('errorAlert');
 
         submitFormBtn.addEventListener('click', async () => {
-            // 擷取所有必填值
             const clientName = document.getElementById('clientName').value.trim();
             const clientPhone = document.getElementById('clientPhone').value.trim();
             const bookingDate = document.getElementById('bookingDate').value;
@@ -949,39 +896,27 @@
             const check2 = document.getElementById('checkTerms2').checked;
             const check3 = document.getElementById('checkTerms3').checked;
 
-            // 表單全資料驗證程序
             if (!clientName || !clientPhone || !bookingDate || !bookingTime) {
-                alert("請填齊顧客姓名、電話、預約日期與時段！");
-                return;
+                alert("請填齊顧客姓名、電話、預約日期與時段！"); return;
             }
             if (!check1 || !check2 || !check3) {
-                alert("必須完整勾選並同意美甲服務合約的所有勾選項！");
-                return;
+                alert("必須完整勾選並同意美甲服務合約的所有勾選項！"); return;
             }
 
-            // 驗證簽名
             let customerSignatureData = "";
             if (sigMode === 'canvas') {
-                if (isCanvasBlank()) {
-                    alert("請完成手寫簽名以示負責！");
-                    return;
-                }
-                customerSignatureData = canvas.toDataURL(); // 將手寫輸出為 Base64 字串存入資料庫
+                if (isCanvasBlank()) { alert("請完成手寫簽名以示負責！"); return; }
+                customerSignatureData = canvas.toDataURL(); 
             } else {
-                if (!sigTextInput.value.trim()) {
-                    alert("請輸入打字簽名全名！");
-                    return;
-                }
+                if (!sigTextInput.value.trim()) { alert("請輸入打字簽名全名！"); return; }
                 customerSignatureData = "[打字簽章] " + sigTextInput.value.trim();
             }
 
-            // 通過所有驗證，進入傳輸程序
             submitFormBtn.disabled = true;
             submitFormBtn.innerText = "寫入雲端紀錄中...";
 
             const prices = calculateTotal();
 
-            // 結構化封裝預約表單與合約資料庫欄位 (完美對應「闆闆後台管理系統.html」)
             const bookingRecord = {
                 clientName: clientName,
                 clientPhone: clientPhone,
@@ -997,22 +932,19 @@
                     totalPrice: prices.total
                 },
                 agreedToTerms: true,
-                customerSignature: customerSignatureData, // 用戶端簽名
-                manicuristSignature: "",                 // 預約時留空，遮蔽待後台點擊時由美甲師現場補簽
-                status: "待確認",                         // 後台訂單管理狀態
+                customerSignature: customerSignatureData, 
+                status: "待確認",                         
                 createdAt: serverTimestamp()
             };
 
             try {
-                // 將資料完整送進 nail_bookings 集合
+                // 客戶端送出資料，由於後台已套用 onSnapshot，後台會在送出瞬間自動增加該列
                 await addDoc(collection(db, "nail_bookings"), bookingRecord);
                 
-                // 成功反饋與UI全面重置
                 modalOverlay.classList.remove('active');
                 successAlert.style.display = 'block';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                // 重置表單
                 document.getElementById('bookingStepForm').reset();
                 document.getElementById('clientName').value = "";
                 document.getElementById('clientPhone').value = "";
