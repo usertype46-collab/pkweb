@@ -8,6 +8,8 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         /* --- 全局樣式與變數 --- */
@@ -216,7 +218,6 @@
                 <button class="modal-close" id="closeModalBtn">&times;</button>
             </div>
             <div class="modal-body" id="modalCaptureTarget">
-                
                 <h3 style="margin-bottom:15px; font-size:1.1rem; color:var(--accent-color);">【顧客聯繫資料填寫】</h3>
                 <div class="form-row">
                     <div class="form-group">
@@ -233,44 +234,29 @@
                 <div class="agreement-box">
                     <h4 style="margin-top:0;">美甲服務同意書</h4>
                     <p>本人已了解本次美甲服務內容，並同意以下事項：</p>
-                    
                     <h4>一、施作前注意事項</h4>
                     <p>1. 本人目前無指甲疾病、灰指甲、甲溝炎、香港腳、皮膚傳染疾病等狀況。<br>
                     2. 若有懷孕、特殊疾病、藥物治療中、皮膚敏感等情況，已主動告知美甲師。<br>
                     3. 若指甲已有裂痕、受傷、受撞擊、咬甲、摳甲等情況，可能影響施作效果及持久度。</p>
-                    
                     <h4>二、施作後保固說明</h4>
                     <p>本店提供施作日起 7 日內保固服務。保固範圍限於：非人為因素造成之凝膠脫落、凝膠大面積翹起、凝膠異常剝離。保固期間內請拍照並主動聯繫預約修補時間。</p>
-                    
                     <h4>三、不列入保固範圍</h4>
-                    <p>以下情況恕不提供免費保固：撞擊、摳除、咬甲等人為因素；使用指甲開罐、摳貼貼紙、刮除物品等不當使用；經常接觸化學藥劑（清潔劑、漂白水等）；長時間泡水、泡溫泉、游泳；自行修剪、打磨或摳除凝膠；個人體質易出油、流汗量較高等因素影響持久度；他店修改、補甲或拆甲後產生之問題。</p>
-                    
+                    <p>以下情況恕不提供免費保固：撞擊、摳除、咬甲等人為因素；使用指甲開罐、摳貼貼紙、刮除物品等不當使用；經常接觸化學藥劑；長時間泡水、泡溫泉、游泳；自行修剪、打磨或摳除凝膠；個人體質易出油、流汗量較高等因素影響持久度；他店修改、補甲或拆甲後產生之問題。</p>
                     <h4>四、施作風險說明</h4>
                     <p>本人了解：凝膠美甲並非永久性產品。維持時間因個人體質、生活習慣及保養方式而異。指甲若已有受損、過薄、剝離等狀況，持久度可能受到影響，凝膠美甲仍有脫落、斷裂之可能性。</p>
-                    
                     <h4>五、施作後保養須知</h4>
                     <p>避免以指甲作為工具使用。接觸清潔劑建議配戴手套。避免自行摳除凝膠。建議 3～4 週回店卸甲。</p>
-                    
                     <p style="margin-top:15px; font-weight:bold;">本人已詳閱上述內容，並同意接受本次美甲服務。</p>
                 </div>
 
                 <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="checkTerms1" required>
-                        <span>本人確認目前無指甲疾病、灰指甲、甲溝炎、皮病等，並已誠實告知特殊體質。</span>
-                    </label>
+                    <label><input type="checkbox" id="checkTerms1" required><span>本人確認目前無指甲疾病、灰指甲、甲溝炎、皮病等，並已誠實告知特殊體質。</span></label>
                 </div>
                 <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="checkTerms2" required>
-                        <span>本人已完全知悉 7 日保固範圍，並理解人為因素損壞不列入免費保固。</span>
-                    </label>
+                    <label><input type="checkbox" id="checkTerms2" required><span>本人已完全知悉 7 日保固範圍，並理解人為因素損壞不列入免費保固。</span></label>
                 </div>
                 <div class="checkbox-group">
-                    <label>
-                        <input type="checkbox" id="checkTerms3" required>
-                        <span>本人已詳閱全篇內容，並同意將此線上同意書作為本次服務與預約之重要憑據。</span>
-                    </label>
+                    <label><input type="checkbox" id="checkTerms3" required><span>本人已詳閱全篇內容，並同意將此線上同意書作為本次服務與預約之重要憑據。</span></label>
                 </div>
 
                 <div class="signature-section">
@@ -291,14 +277,10 @@
                     <div class="signature-header">
                         <span style="font-weight:700; color:#8C7572;">美甲師簽名欄 (預約時隱藏)</span>
                     </div>
-                    <div class="manicurist-mask">
-                        🔒 此欄位已由系統自動遮蔽。待老闆登入後台管理系統點擊此預約紀錄時，方可進行美甲師現場簽名。
-                    </div>
+                    <div class="manicurist-mask">🔒 此欄位已由系統自動遮蔽。待老闆登入後台管理系統點擊此預約紀錄時，方可進行美甲師現場簽名。</div>
                 </div>
 
-                <div class="warning-banner">
-                    ⚠️ 注意：完工離店前，客戶已確認施作內容、顏色及造型無誤，離店後恕不接受因個人喜好、顏色認知差異或款式不符期待等因素要求免費重做或退款。
-                </div>
+                <div class="warning-banner">⚠️ 注意：完工離店前，客戶已確認施作內容、顏色及造型無誤，離店後恕不接受因個人喜好、顏色認知差異或款式不符期待等因素要求免費重做或退款。</div>
             </div>
             
             <div class="modal-footer">
@@ -308,13 +290,12 @@
     </div>
 
     <script type="module">
+        // ----------------------------------------------------
+        // 1. 初始化 Firebase Firestore (保留資料庫邏輯)
+        // ----------------------------------------------------
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-        // ==========================================
-        // 1. FIREBASE 雲端資料庫配置
-        // ==========================================
+        
         const firebaseConfig = {
             apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
             authDomain: "beautiful-68dbc.firebaseapp.com",
@@ -325,102 +306,94 @@
             appId: "1:348466975949:web:44eb81d962fe957fa34584",
             measurementId: "G-3V4FDPJCQ0"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app); 
+
+        // ----------------------------------------------------
+        // 2. 初始化 Supabase (用於儲存圖檔)
+        // ----------------------------------------------------
+        const { createClient } = supabase;
+        
+        // 🔴 請替換為您在 Supabase 後台取得的專案 URL 與 API 金鑰
+        const supabaseUrl = 'https://hyvcfxwoewvbpfzvfdnn.supabase.co';
+        const supabaseAnonKey = 'sb_publishable_TR5C2Zc7eOj9uUosUUsX4g_KbBOwey2';
+        
+        const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+
+        // ----------------------------------------------------
+        // Base64 轉換 Blob 輔助函數 (用於 Supabase 上傳)
+        // ----------------------------------------------------
+        function b64toBlob(b64Data, contentType='', sliceSize=512) {
+            const byteCharacters = atob(b64Data);
+            const byteArrays = [];
+            for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                const slice = byteCharacters.slice(offset, offset + sliceSize);
+                const byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+            return new Blob(byteArrays, {type: contentType});
+        }
 
         // ==========================================
-        // 2. 初始化與動態資料庫即時同步引擎
+        // 系統邏輯與變數 (保留不變)
         // ==========================================
         let nailStyles = [];
         let addonServices = [];
         let systemDiscount = 0.95; 
         
-        let currentSelection = {
-            selectedStyle: null,
-            selectedAddons: new Set()
-        };
+        let currentSelection = { selectedStyle: null, selectedAddons: new Set() };
 
         function initSystem() {
             const configRef = doc(db, "system_settings", "booking_config");
-            
             onSnapshot(configRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (data.pageTitle) document.getElementById('salonTitle').innerText = data.pageTitle;
                     if (data.pageSubtitle) document.getElementById('salonSubtitle').innerText = data.pageSubtitle;
-                    
                     if (data.firstTimeDiscount) {
                         systemDiscount = data.firstTimeDiscount / 100;
                         document.getElementById('discountLabelTitle').innerText = `新客優惠活動 (${data.firstTimeDiscount}折)`;
                     }
-
                     nailStyles = data.styles || [];
                     addonServices = data.addons || [];
-
                     currentSelection.selectedStyle = null;
                     currentSelection.selectedAddons.clear();
                     renderUIComponents();
                     calculateTotal();
                 } else {
                     const defaultData = {
-                        pageTitle: "Beautiful moment.",
-                        pageSubtitle: "神の指藝預約與線上訂價申請系統",
+                        pageTitle: "Beautiful moment.", pageSubtitle: "神の指藝預約與線上訂價申請系統",
                         firstTimeDiscount: 95,
-                        styles: [
-                            { name: '經典極簡單色凝膠', price: 900 },
-                            { name: '法式優雅氣質漸層', price: 1300 },
-                            { name: '奢華復古貓眼晶石', price: 1600 }
-                        ],
-                        addons: [
-                            { name: '本店溫和卸甲續作', price: 300 },
-                            { name: '他店安全卸甲', price: 500 }
-                        ]
+                        styles: [{ name: '經典極簡單色凝膠', price: 900 }, { name: '法式優雅氣質漸層', price: 1300 }, { name: '奢華復古貓眼晶石', price: 1600 }],
+                        addons: [{ name: '本店溫和卸甲續作', price: 300 }, { name: '他店安全卸甲', price: 500 }]
                     };
                     setDoc(configRef, defaultData);
                 }
-            }, (error) => {
-                console.error("即時同步設定失敗: ", error);
             });
         }
 
         function renderUIComponents() {
             const styleGrid = document.getElementById('styleGrid');
             const addonsList = document.getElementById('addonsList');
-            styleGrid.innerHTML = "";
-            addonsList.innerHTML = "";
+            styleGrid.innerHTML = ""; addonsList.innerHTML = "";
 
             nailStyles.forEach((style) => {
-                const card = document.createElement('div');
-                card.className = 'style-card';
-                card.dataset.name = style.name; 
-                card.innerHTML = `
-                    <div class="style-name">${style.name}</div>
-                    <div class="style-price">$${style.price.toLocaleString()}</div>
-                `;
-                card.addEventListener('click', () => selectStyle(style));
-                styleGrid.appendChild(card);
+                const card = document.createElement('div'); card.className = 'style-card'; card.dataset.name = style.name; 
+                card.innerHTML = `<div class="style-name">${style.name}</div><div class="style-price">$${style.price.toLocaleString()}</div>`;
+                card.addEventListener('click', () => selectStyle(style)); styleGrid.appendChild(card);
             });
 
             addonServices.forEach((addon) => {
-                const label = document.createElement('label');
-                label.className = 'addon-item';
-                label.innerHTML = `
-                    <div>
-                        <input type="checkbox" value="${addon.name}" data-price="${addon.price}">
-                        <span>${addon.name}</span>
-                    </div>
-                    <span style="color:#B8860B; font-weight:500;">+$${addon.price}</span>
-                `;
-                label.querySelector('input').addEventListener('change', (e) => toggleAddon(e, addon));
-                addonsList.appendChild(label);
+                const label = document.createElement('label'); label.className = 'addon-item';
+                label.innerHTML = `<div><input type="checkbox" value="${addon.name}" data-price="${addon.price}"><span>${addon.name}</span></div><span style="color:#B8860B; font-weight:500;">+$${addon.price}</span>`;
+                label.querySelector('input').addEventListener('change', (e) => toggleAddon(e, addon)); addonsList.appendChild(label);
             });
         }
 
-        // ==========================================
-        // 3. 計價核心控制
-        // ==========================================
         function selectStyle(style) {
             document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
             currentSelection.selectedStyle = style;
@@ -430,13 +403,8 @@
         }
 
         function toggleAddon(e, addon) {
-            if (e.target.checked) {
-                currentSelection.selectedAddons.add(addon);
-            } else {
-                currentSelection.selectedAddons.forEach(item => {
-                    if(item.name === addon.name) currentSelection.selectedAddons.delete(item);
-                });
-            }
+            if (e.target.checked) currentSelection.selectedAddons.add(addon);
+            else currentSelection.selectedAddons.forEach(item => { if(item.name === addon.name) currentSelection.selectedAddons.delete(item); });
             calculateTotal();
         }
 
@@ -444,7 +412,6 @@
             const stylePrice = currentSelection.selectedStyle ? currentSelection.selectedStyle.price : 0;
             let addonPrice = 0;
             currentSelection.selectedAddons.forEach(item => addonPrice += item.price);
-            
             const subtotal = stylePrice + addonPrice;
             const total = Math.round(subtotal * systemDiscount);
             const discount = subtotal - total;
@@ -453,12 +420,11 @@
             document.getElementById('summaryAddonPrice').innerText = `$${addonPrice.toLocaleString()}`;
             document.getElementById('summaryDiscount').innerText = `-$${discount.toLocaleString()}`;
             document.getElementById('summaryTotalPrice').innerText = `$${total.toLocaleString()}`;
-
             return { stylePrice, addonPrice, discount, total };
         }
 
         // ==========================================
-        // 4. 彈出式視窗與手寫簽名核心引擎
+        // 簽名與對話框事件 (包含 Resize 修正)
         // ==========================================
         const modalOverlay = document.getElementById('modalOverlay');
         const openModalBtn = document.getElementById('openModalBtn');
@@ -472,21 +438,13 @@
 
         let isDrawing = false;
         let sigMode = 'canvas'; 
-        let canvasWidth = 0;
-        let canvasHeight = 0;
+        let canvasWidth = 0; let canvasHeight = 0;
 
         openModalBtn.addEventListener('click', () => {
-            if (!currentSelection.selectedStyle) {
-                alert("請先選擇一個核心美甲款式！"); return;
-            }
-            if (!document.getElementById('bookingDate').value || !document.getElementById('bookingTime').value) {
-                alert("請先選擇預約日期與時段！"); return;
-            }
+            if (!currentSelection.selectedStyle) { alert("請先選擇一個核心美甲款式！"); return; }
+            if (!document.getElementById('bookingDate').value || !document.getElementById('bookingTime').value) { alert("請先選擇預約日期與時段！"); return; }
             modalOverlay.classList.add('active');
-            
-            canvasWidth = 0;
-            canvasHeight = 0;
-            resizeCanvas();
+            canvasWidth = 0; canvasHeight = 0; resizeCanvas();
         });
 
         closeModalBtn.addEventListener('click', () => modalOverlay.classList.remove('active'));
@@ -494,31 +452,17 @@
         function resizeCanvas() {
             const currentWidth = canvasContainer.clientWidth;
             const currentHeight = canvasContainer.clientHeight;
-            
-            if (canvasWidth === currentWidth && canvasHeight === currentHeight) {
-                return; 
-            }
+            if (canvasWidth === currentWidth && canvasHeight === currentHeight) return; 
             
             let backupData = null;
-            if (canvasWidth > 0 && canvasHeight > 0 && !isCanvasBlank()) {
-                backupData = canvas.toDataURL(); 
-            }
+            if (canvasWidth > 0 && canvasHeight > 0 && !isCanvasBlank()) backupData = canvas.toDataURL(); 
             
-            canvasWidth = currentWidth;
-            canvasHeight = currentHeight;
-            canvas.width = currentWidth;
-            canvas.height = currentHeight;
-            
-            ctx.lineWidth = 3;
-            ctx.lineCap = "round";
-            ctx.strokeStyle = "#3A2E2B";
+            canvasWidth = currentWidth; canvasHeight = currentHeight;
+            canvas.width = currentWidth; canvas.height = currentHeight;
+            ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#3A2E2B";
             
             if (backupData) {
-                let img = new Image();
-                img.onload = function() {
-                    ctx.drawImage(img, 0, 0);
-                };
-                img.src = backupData;
+                let img = new Image(); img.onload = function() { ctx.drawImage(img, 0, 0); }; img.src = backupData;
             }
         }
         window.addEventListener('resize', resizeCanvas);
@@ -529,17 +473,11 @@
         canvas.addEventListener('mouseleave', () => isDrawing = false);
 
         canvas.addEventListener('touchstart', (e) => {
-            if(e.touches.length === 1) {
-                isDrawing = true; const rect = canvas.getBoundingClientRect();
-                ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault();
-            }
+            if(e.touches.length === 1) { isDrawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); }
         }, {passive: false});
         canvas.addEventListener('touchmove', (e) => {
             if (!isDrawing) return;
-            if(e.touches.length === 1) {
-                const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
-                ctx.stroke(); e.preventDefault();
-            }
+            if(e.touches.length === 1) { const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); ctx.stroke(); e.preventDefault(); }
         }, {passive: false});
         canvas.addEventListener('touchend', () => isDrawing = false);
 
@@ -547,11 +485,9 @@
 
         toggleSigModeBtn.addEventListener('click', () => {
             if (sigMode === 'canvas') {
-                sigMode = 'text'; canvasContainer.style.display = 'none'; clearSigBtn.style.display = 'none';
-                sigTextInput.style.display = 'block'; toggleSigModeBtn.innerText = '切換為手寫簽名';
+                sigMode = 'text'; canvasContainer.style.display = 'none'; clearSigBtn.style.display = 'none'; sigTextInput.style.display = 'block'; toggleSigModeBtn.innerText = '切換為手寫簽名';
             } else {
-                sigMode = 'canvas'; canvasContainer.style.display = 'block'; clearSigBtn.style.display = 'inline-block';
-                sigTextInput.style.display = 'none'; toggleSigModeBtn.innerText = '切換為打字簽名'; resizeCanvas();
+                sigMode = 'canvas'; canvasContainer.style.display = 'block'; clearSigBtn.style.display = 'inline-block'; sigTextInput.style.display = 'none'; toggleSigModeBtn.innerText = '切換為打字簽名'; resizeCanvas();
             }
         });
 
@@ -561,7 +497,7 @@
         }
 
         // ==========================================
-        // 5. 資料傳輸與 Firebase 儲存與截圖機制
+        // 傳輸至 Firebase DB 與 Supabase Storage (核心修改區塊)
         // ==========================================
         const submitFormBtn = document.getElementById('submitFormBtn');
         const successAlert = document.getElementById('successAlert');
@@ -578,12 +514,8 @@
             const check2 = document.getElementById('checkTerms2').checked;
             const check3 = document.getElementById('checkTerms3').checked;
 
-            if (!clientName || !clientPhone || !bookingDate || !bookingTime) {
-                alert("請填齊顧客姓名、電話、預約日期與時段！"); return;
-            }
-            if (!check1 || !check2 || !check3) {
-                alert("必須完整勾選並同意美甲服務合約的所有勾選項！"); return;
-            }
+            if (!clientName || !clientPhone || !bookingDate || !bookingTime) { alert("請填齊顧客姓名、電話、預約日期與時段！"); return; }
+            if (!check1 || !check2 || !check3) { alert("必須完整勾選並同意美甲服務合約的所有勾選項！"); return; }
 
             let customerSignatureData = "";
             if (sigMode === 'canvas') {
@@ -601,6 +533,7 @@
             const nowString = new Date().toLocaleString('zh-TW');
 
             try {
+                // 1. 填入資料到截圖區塊
                 document.getElementById('recName').innerText = clientName;
                 document.getElementById('recPhone').innerText = clientPhone;
                 document.getElementById('recDate').innerText = bookingDate;
@@ -625,29 +558,48 @@
 
                 successReceiptSection.style.display = 'block';
 
-                // ========================================================
-                // 核心修改點：【極致瘦身版】解析度降至 0.6，品質 0.3
-                // ========================================================
+                // 2. 利用 html2canvas 產生圖片 Base64
                 const targetArea = document.getElementById('receiptCaptureArea');
                 const capturedCanvas = await html2canvas(targetArea, {
-                    scale: 0.6, // 解析度縮小至 60%，減輕手機記憶體負擔
+                    scale: 0.6,
                     backgroundColor: '#FFFFFF',
-                    logging: false, // 關閉日誌提速
+                    logging: false,
                     useCORS: true
                 });
-                
-                // 改用 JPEG 格式並套用 30% 超高壓縮比
                 const screenshotBase64 = capturedCanvas.toDataURL('image/jpeg', 0.3);
-                console.log("圖檔壓縮完成，大小約:", Math.round(screenshotBase64.length / 1024), "KB");
 
                 submitFormBtn.innerText = "上傳電子合約雲端中...";
 
-                const screenshotFilename = `warranty_receipts/${Date.now()}_${clientPhone}.jpg`;
-                const storageRef = ref(storage, screenshotFilename);
-                await uploadString(storageRef, screenshotBase64, 'data_url');
+                // 3. 處理圖片並上傳至 Supabase
+                // 將 Base64 去掉開頭的 data:image/jpeg;base64,
+                const pureBase64 = screenshotBase64.split(',')[1];
+                const imageBlob = b64toBlob(pureBase64, 'image/jpeg');
                 
-                const firebaseUrl = await getDownloadURL(storageRef);
+                // 定義檔名
+                const screenshotFilename = `${Date.now()}_${clientPhone}.jpg`;
+                
+                // 執行 Supabase 儲存桶上傳
+                const { data: uploadData, error: uploadError } = await supabaseClient
+                    .storage
+                    .from('receipts') // 👉 對應您在 Supabase 建立的儲存桶名稱
+                    .upload(screenshotFilename, imageBlob, {
+                        contentType: 'image/jpeg',
+                        upsert: false
+                    });
 
+                if (uploadError) {
+                    throw new Error("Supabase 上傳失敗：" + uploadError.message);
+                }
+
+                // 取得 Supabase 公開圖片網址
+                const { data: publicUrlData } = supabaseClient
+                    .storage
+                    .from('receipts')
+                    .getPublicUrl(screenshotFilename);
+                    
+                const finalImageUrl = publicUrlData.publicUrl;
+
+                // 4. 將預約資料與 Supabase 圖片網址寫入 Firebase 資料庫
                 const bookingRecord = {
                     clientName: clientName,
                     clientPhone: clientPhone,
@@ -665,47 +617,29 @@
                     agreedToTerms: true,
                     customerSignature: customerSignatureData, 
                     status: "待確認",
-                    warrantyScreenshot: firebaseUrl,
+                    warrantyScreenshot: finalImageUrl, // 這裡現在存的是 Supabase 的網址
                     createdAt: serverTimestamp()
                 };
 
                 const docRef = await addDoc(collection(db, "nail_bookings"), bookingRecord);
-                
                 document.getElementById('recId').innerText = docRef.id;
 
+                // 5. 成功後 UI 復原與清空
                 modalOverlay.classList.remove('active');
                 successAlert.style.display = 'block';
                 
-                setTimeout(() => {
-                    document.getElementById('successReceiptSection').scrollIntoView({ behavior: 'smooth' });
-                }, 400);
+                setTimeout(() => { document.getElementById('successReceiptSection').scrollIntoView({ behavior: 'smooth' }); }, 400);
 
                 document.getElementById('bookingStepForm').reset();
-                document.getElementById('clientName').value = "";
-                document.getElementById('clientPhone').value = "";
-                document.getElementById('checkTerms1').checked = false;
-                document.getElementById('checkTerms2').checked = false;
-                document.getElementById('checkTerms3').checked = false;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                sigTextInput.value = "";
+                document.getElementById('clientName').value = ""; document.getElementById('clientPhone').value = "";
+                document.getElementById('checkTerms1').checked = false; document.getElementById('checkTerms2').checked = false; document.getElementById('checkTerms3').checked = false;
+                ctx.clearRect(0, 0, canvas.width, canvas.height); sigTextInput.value = "";
                 document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
-                currentSelection.selectedStyle = null;
-                currentSelection.selectedAddons.clear();
-                calculateTotal();
+                currentSelection.selectedStyle = null; currentSelection.selectedAddons.clear(); calculateTotal();
 
             } catch (error) {
                 console.error("寫入雲端或截圖失敗:", error);
-                
-                let errorMessage = "未知錯誤";
-                if (error.code === 'storage/unauthorized') {
-                    errorMessage = "Storage 權限不足，請檢查 Firebase Storage 安全規則。";
-                } else if (error.code === 'permission-denied') {
-                    errorMessage = "Firestore 權限不足，請檢查資料庫安全規則。";
-                } else {
-                    errorMessage = error.message;
-                }
-                alert("儲存失敗：" + errorMessage);
-                
+                alert("儲存失敗：" + error.message);
             } finally {
                 submitFormBtn.disabled = false;
                 submitFormBtn.innerText = "確認無誤並送出預約申請";
@@ -713,42 +647,27 @@
         });
 
         // ==========================================
-        // 6. 新增功能：下載 PDF 檔案控制
+        // 下載 PDF 功能保留
         // ==========================================
         const downloadPdfBtn = document.getElementById('downloadPdfBtn');
         downloadPdfBtn.addEventListener('click', async () => {
-            downloadPdfBtn.disabled = true;
-            downloadPdfBtn.innerText = "正在調用 PDF 模組引擎...";
-
+            downloadPdfBtn.disabled = true; downloadPdfBtn.innerText = "正在調用 PDF 模組引擎...";
             try {
                 const element = document.getElementById('receiptCaptureArea');
-                const pdfCanvas = await html2canvas(element, {
-                    scale: 2, // PDF維持高解析度
-                    backgroundColor: '#FFFFFF'
-                });
+                const pdfCanvas = await html2canvas(element, { scale: 2, backgroundColor: '#FFFFFF' });
                 const imgData = pdfCanvas.toDataURL('image/jpeg', 0.8);
-
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 190; 
-                const imgHeight = (pdfCanvas.height * imgWidth) / pdfCanvas.width;
-                
+                const imgWidth = 190; const imgHeight = (pdfCanvas.height * imgWidth) / pdfCanvas.width;
                 pdf.addImage(imgData, 'JPEG', 10, 15, imgWidth, imgHeight);
-                
                 const recIdText = document.getElementById('recId').innerText;
                 pdf.save(`美甲預約憑證單_${recIdText}.pdf`);
-                
                 alert("🎉 PDF 憑證下載成功！");
-            } catch (err) {
-                console.error("導出 PDF 發生致命錯誤:", err);
-                alert("匯出 PDF 失敗：" + err.message);
-            } finally {
-                downloadPdfBtn.disabled = false;
-                downloadPdfBtn.innerText = "📥 下載此預約憑證 PDF 檔";
+            } catch (err) { alert("匯出 PDF 失敗：" + err.message); } finally {
+                downloadPdfBtn.disabled = false; downloadPdfBtn.innerText = "📥 下載此預約憑證 PDF 檔";
             }
         });
 
-        // 啟動系統
         initSystem();
     </script>
 </body>
