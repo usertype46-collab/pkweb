@@ -8,8 +8,6 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         /* --- 全局樣式與變數 --- */
@@ -88,7 +86,6 @@
         .btn-clear { background: #EFEAE6; border: none; padding: 5px 12px; font-size: 0.85rem; border-radius: 4px; cursor: pointer; color: #5A4E4D; }
         .btn-toggle-sig { background: none; border: none; color: #B8860B; font-size: 0.85rem; cursor: pointer; text-decoration: underline; }
 
-        .manicurist-mask { background: #EFEAE6; color: #8C7572; text-align: center; padding: 30px; border-radius: 6px; font-style: italic; border: 1px dashed #CDCDCD; }
         .warning-banner { background: #FFF2E6; border: 1px solid #FFD9B3; color: #B35900; padding: 15px; border-radius: 8px; font-size: 0.9rem; margin: 20px 0; font-weight: 500; }
         .modal-footer { padding: 20px; border-top: 1px solid #E8D7D0; background: #FAF8F6; }
 
@@ -193,20 +190,26 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; padding-top: 15px; border-top: 1px dashed #DCD1CC;">
-                    <div style="font-size: 0.85rem; color: #8C7572;">
+                    <div style="font-size: 0.85rem; color: #8C7572; flex: 1;">
                         <div>系統收單時間：<span id="recTimestamp">-</span></div>
-                        <div>網址憑證備份：已同步安全存檔於雲端資料庫</div>
+                        <div>網址憑證備份：待美甲師後台簽署確認後，將同步生成最終雲端電子合約。</div>
                     </div>
-                    <div style="text-align: center; min-width: 180px;">
-                        <p style="font-size: 0.85rem; color: #8C7572; margin-bottom: 5px;">顧客電子簽章欄位</p>
-                        <img id="recSignatureImg" src="" alt="手寫簽名" style="max-height: 70px; display: none; margin: 0 auto;">
-                        <span id="recSignatureText" style="font-size: 1.2rem; font-weight: 700; color: #3A2E2B; border-bottom: 2px solid #3A2E2B; padding: 0 10px; display: none;"></span>
+                    <div style="text-align: center; min-width: 140px; margin-right: 15px;">
+                        <p style="font-size: 0.85rem; color: #8C7572; margin-bottom: 5px;">顧客電子簽章</p>
+                        <img id="recSignatureImg" src="" alt="手寫簽名" style="max-height: 60px; display: none; margin: 0 auto;">
+                        <span id="recSignatureText" style="font-size: 1.1rem; font-weight: 700; color: #3A2E2B; border-bottom: 2px solid #3A2E2B; padding: 0 10px; display: none;"></span>
+                    </div>
+                    <div style="text-align: center; min-width: 140px;">
+                        <p style="font-size: 0.85rem; color: #8C7572; margin-bottom: 5px;">美甲師電子簽章</p>
+                        <img id="recTechSignatureImg" src="" alt="手寫簽名" style="max-height: 60px; display: none; margin: 0 auto;">
+                        <span id="recTechSignatureText" style="font-size: 1.1rem; font-weight: 700; color: #3A2E2B; border-bottom: 2px solid #3A2E2B; padding: 0 10px; display: none;"></span>
+                        <span id="recTechSignaturePending" style="font-size: 0.9rem; color: #B35900; display: inline-block;">(待後台確認補簽)</span>
                     </div>
                 </div>
             </div>
 
             <button type="button" class="btn-submit" id="downloadPdfBtn" style="margin-top: 20px; background: linear-gradient(90deg, #6C5CE7 0%, #4A00E0 100%); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);">
-                📥 下載此預約憑證 PDF 檔
+                📥 下載此預約憑證 PDF 檔 (供個人留存)
             </button>
         </div>
     </div>
@@ -273,23 +276,20 @@
                     <input type="text" id="sigTextInput" class="form-control signature-input" placeholder="請在此輸入您的法定全名作為電子簽章">
                 </div>
 
-                <div class="signature-section">
+                <div class="signature-section" id="techSignatureSection">
                     <div class="signature-header">
-                        <span style="font-weight:700;">美甲師簽名（手寫/打字）*</span>
-                    </div>
-                    <button type="button" class="btn-toggle-sig" id="toggleSigModeBtn">切換為打字簽名</button>
-                            <button type="button" class="btn-clear" id="clearSigBtn">清除手寫</button>
+                        <span style="font-weight:700; color:#8C7572;">美甲師簽名欄 (可留空，供預約後補簽)</span>
+                        <div>
+                            <button type="button" class="btn-toggle-sig" id="toggleTechSigModeBtn" style="color: #6C5CE7;">切換為打字簽名</button>
+                            <button type="button" class="btn-clear" id="clearTechSigBtn">清除手寫</button>
                         </div>
                     </div>
-                    <div class="signature-pad-container" id="canvasContainer">
-                        <canvas class="signature-canvas" id="sigCanvas"></canvas>
+                    <div class="signature-pad-container" id="techCanvasContainer" style="border-color: #6C5CE7;">
+                        <canvas class="signature-canvas" id="techSigCanvas"></canvas>
                     </div>
-                    <input type="text" id="sigTextInput" class="form-control signature-input" placeholder="請在此輸入您的法定全名作為電子簽章">
+                    <input type="text" id="techSigTextInput" class="form-control signature-input" placeholder="美甲師可在此輸入打字簽名" style="border-color: #6C5CE7;">
                 </div>
 
-                <div class="signature-section">
-                    <div class="signature-header">
-            
                 <div class="warning-banner">⚠️ 注意：完工離店前，客戶已確認施作內容、顏色及造型無誤，離店後恕不接受因個人喜好、顏色認知差異或款式不符期待等因素要求免費重做或退款。</div>
             </div>
             
@@ -300,9 +300,6 @@
     </div>
 
     <script type="module">
-        // ----------------------------------------------------
-        // 1. 初始化 Firebase Firestore (保留資料庫邏輯)
-        // ----------------------------------------------------
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         
@@ -319,42 +316,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ----------------------------------------------------
-        // 2. 初始化 Supabase (用於儲存圖檔)
-        // ----------------------------------------------------
-        const { createClient } = supabase;
-        
-        // 🔴 請替換為您在 Supabase 後台取得的專案 URL 與 API 金鑰
-        const supabaseUrl = 'https://hyvcfxwoewvbpfzvfdnn.supabase.co';
-        const supabaseAnonKey = 'sb_publishable_TR5C2Zc7eOj9uUosUUsX4g_KbBOwey2';
-        
-        const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
-
-        // ----------------------------------------------------
-        // Base64 轉換 Blob 輔助函數 (用於 Supabase 上傳)
-        // ----------------------------------------------------
-        function b64toBlob(b64Data, contentType='', sliceSize=512) {
-            const byteCharacters = atob(b64Data);
-            const byteArrays = [];
-            for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-                const slice = byteCharacters.slice(offset, offset + sliceSize);
-                const byteNumbers = new Array(slice.length);
-                for (let i = 0; i < slice.length; i++) {
-                    byteNumbers[i] = slice.charCodeAt(i);
-                }
-                const byteArray = new Uint8Array(byteNumbers);
-                byteArrays.push(byteArray);
-            }
-            return new Blob(byteArrays, {type: contentType});
-        }
-
         // ==========================================
-        // 系統邏輯與變數 (保留不變)
+        // 系統邏輯與變數
         // ==========================================
         let nailStyles = [];
         let addonServices = [];
         let systemDiscount = 0.95; 
-        
         let currentSelection = { selectedStyle: null, selectedAddons: new Set() };
 
         function initSystem() {
@@ -374,14 +341,6 @@
                     currentSelection.selectedAddons.clear();
                     renderUIComponents();
                     calculateTotal();
-                } else {
-                    const defaultData = {
-                        pageTitle: "神の指藝Beautiful moment.", pageSubtitle: "神の指藝預約與線上訂價申請系統",
-                        firstTimeDiscount: 95,
-                        styles: [{ name: '經典極簡單色凝膠', price: 900 }, { name: '法式優雅氣質漸層', price: 1300 }, { name: '奢華復古貓眼晶石', price: 1600 }],
-                        addons: [{ name: '本店溫和卸甲續作', price: 300 }, { name: '他店安全卸甲', price: 500 }]
-                    };
-                    setDoc(configRef, defaultData);
                 }
             });
         }
@@ -434,11 +393,13 @@
         }
 
         // ==========================================
-        // 簽名與對話框事件 (包含 Resize 修正)
+        // 雙重簽名版邏輯 (顧客 & 美甲師)
         // ==========================================
         const modalOverlay = document.getElementById('modalOverlay');
         const openModalBtn = document.getElementById('openModalBtn');
         const closeModalBtn = document.getElementById('closeModalBtn');
+        
+        // 顧客簽名
         const canvas = document.getElementById('sigCanvas');
         const ctx = canvas.getContext('2d');
         const clearSigBtn = document.getElementById('clearSigBtn');
@@ -446,68 +407,84 @@
         const sigTextInput = document.getElementById('sigTextInput');
         const canvasContainer = document.getElementById('canvasContainer');
 
-        let isDrawing = false;
-        let sigMode = 'canvas'; 
+        // 美甲師簽名
+        const techCanvas = document.getElementById('techSigCanvas');
+        const techCtx = techCanvas.getContext('2d');
+        const clearTechSigBtn = document.getElementById('clearTechSigBtn');
+        const toggleTechSigModeBtn = document.getElementById('toggleTechSigModeBtn');
+        const techSigTextInput = document.getElementById('techSigTextInput');
+        const techCanvasContainer = document.getElementById('techCanvasContainer');
+
+        let isDrawing = false; let isTechDrawing = false;
+        let sigMode = 'canvas'; let techSigMode = 'canvas'; 
         let canvasWidth = 0; let canvasHeight = 0;
+        let techCanvasWidth = 0; let techCanvasHeight = 0;
 
         openModalBtn.addEventListener('click', () => {
             if (!currentSelection.selectedStyle) { alert("請先選擇一個核心美甲款式！"); return; }
             if (!document.getElementById('bookingDate').value || !document.getElementById('bookingTime').value) { alert("請先選擇預約日期與時段！"); return; }
             modalOverlay.classList.add('active');
-            canvasWidth = 0; canvasHeight = 0; resizeCanvas();
+            canvasWidth = 0; canvasHeight = 0; techCanvasWidth = 0; techCanvasHeight = 0;
+            resizeCanvas(); resizeTechCanvas();
         });
 
         closeModalBtn.addEventListener('click', () => modalOverlay.classList.remove('active'));
 
         function resizeCanvas() {
-            const currentWidth = canvasContainer.clientWidth;
-            const currentHeight = canvasContainer.clientHeight;
+            const currentWidth = canvasContainer.clientWidth; const currentHeight = canvasContainer.clientHeight;
             if (canvasWidth === currentWidth && canvasHeight === currentHeight) return; 
-            
-            let backupData = null;
-            if (canvasWidth > 0 && canvasHeight > 0 && !isCanvasBlank()) backupData = canvas.toDataURL(); 
-            
+            let backupData = null; if (canvasWidth > 0 && canvasHeight > 0 && !isCanvasBlank(canvas)) backupData = canvas.toDataURL(); 
             canvasWidth = currentWidth; canvasHeight = currentHeight;
             canvas.width = currentWidth; canvas.height = currentHeight;
             ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#3A2E2B";
-            
-            if (backupData) {
-                let img = new Image(); img.onload = function() { ctx.drawImage(img, 0, 0); }; img.src = backupData;
-            }
+            if (backupData) { let img = new Image(); img.onload = function() { ctx.drawImage(img, 0, 0); }; img.src = backupData; }
         }
-        window.addEventListener('resize', resizeCanvas);
 
+        function resizeTechCanvas() {
+            const currentWidth = techCanvasContainer.clientWidth; const currentHeight = techCanvasContainer.clientHeight;
+            if (techCanvasWidth === currentWidth && techCanvasHeight === currentHeight) return; 
+            let backupData = null; if (techCanvasWidth > 0 && techCanvasHeight > 0 && !isCanvasBlank(techCanvas)) backupData = techCanvas.toDataURL(); 
+            techCanvasWidth = currentWidth; techCanvasHeight = currentHeight;
+            techCanvas.width = currentWidth; techCanvas.height = currentHeight;
+            techCtx.lineWidth = 3; techCtx.lineCap = "round"; techCtx.strokeStyle = "#6C5CE7";
+            if (backupData) { let img = new Image(); img.onload = function() { techCtx.drawImage(img, 0, 0); }; img.src = backupData; }
+        }
+
+        window.addEventListener('resize', () => { resizeCanvas(); resizeTechCanvas(); });
+
+        // 綁定顧客簽名板事件
         canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
         canvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); });
-        canvas.addEventListener('mouseup', () => isDrawing = false);
-        canvas.addEventListener('mouseleave', () => isDrawing = false);
-
-        canvas.addEventListener('touchstart', (e) => {
-            if(e.touches.length === 1) { isDrawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); }
-        }, {passive: false});
-        canvas.addEventListener('touchmove', (e) => {
-            if (!isDrawing) return;
-            if(e.touches.length === 1) { const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); ctx.stroke(); e.preventDefault(); }
-        }, {passive: false});
+        canvas.addEventListener('mouseup', () => isDrawing = false); canvas.addEventListener('mouseleave', () => isDrawing = false);
+        canvas.addEventListener('touchstart', (e) => { if(e.touches.length === 1) { isDrawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); } }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { if (!isDrawing) return; if(e.touches.length === 1) { const rect = canvas.getBoundingClientRect(); ctx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); ctx.stroke(); e.preventDefault(); } }, {passive: false});
         canvas.addEventListener('touchend', () => isDrawing = false);
-
         clearSigBtn.addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
-
         toggleSigModeBtn.addEventListener('click', () => {
-            if (sigMode === 'canvas') {
-                sigMode = 'text'; canvasContainer.style.display = 'none'; clearSigBtn.style.display = 'none'; sigTextInput.style.display = 'block'; toggleSigModeBtn.innerText = '切換為手寫簽名';
-            } else {
-                sigMode = 'canvas'; canvasContainer.style.display = 'block'; clearSigBtn.style.display = 'inline-block'; sigTextInput.style.display = 'none'; toggleSigModeBtn.innerText = '切換為打字簽名'; resizeCanvas();
-            }
+            if (sigMode === 'canvas') { sigMode = 'text'; canvasContainer.style.display = 'none'; clearSigBtn.style.display = 'none'; sigTextInput.style.display = 'block'; toggleSigModeBtn.innerText = '切換為手寫簽名'; } 
+            else { sigMode = 'canvas'; canvasContainer.style.display = 'block'; clearSigBtn.style.display = 'inline-block'; sigTextInput.style.display = 'none'; toggleSigModeBtn.innerText = '切換為打字簽名'; resizeCanvas(); }
         });
 
-        function isCanvasBlank() {
-            const blank = document.createElement('canvas'); blank.width = canvas.width; blank.height = canvas.height;
-            return canvas.toDataURL() === blank.toDataURL();
+        // 綁定美甲師簽名板事件
+        techCanvas.addEventListener('mousedown', (e) => { isTechDrawing = true; techCtx.beginPath(); techCtx.moveTo(e.offsetX, e.offsetY); });
+        techCanvas.addEventListener('mousemove', (e) => { if (!isTechDrawing) return; techCtx.lineTo(e.offsetX, e.offsetY); techCtx.stroke(); });
+        techCanvas.addEventListener('mouseup', () => isTechDrawing = false); techCanvas.addEventListener('mouseleave', () => isTechDrawing = false);
+        techCanvas.addEventListener('touchstart', (e) => { if(e.touches.length === 1) { isTechDrawing = true; const rect = techCanvas.getBoundingClientRect(); techCtx.beginPath(); techCtx.moveTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); e.preventDefault(); } }, {passive: false});
+        techCanvas.addEventListener('touchmove', (e) => { if (!isTechDrawing) return; if(e.touches.length === 1) { const rect = techCanvas.getBoundingClientRect(); techCtx.lineTo(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top); techCtx.stroke(); e.preventDefault(); } }, {passive: false});
+        techCanvas.addEventListener('touchend', () => isTechDrawing = false);
+        clearTechSigBtn.addEventListener('click', () => techCtx.clearRect(0, 0, techCanvas.width, techCanvas.height));
+        toggleTechSigModeBtn.addEventListener('click', () => {
+            if (techSigMode === 'canvas') { techSigMode = 'text'; techCanvasContainer.style.display = 'none'; clearTechSigBtn.style.display = 'none'; techSigTextInput.style.display = 'block'; toggleTechSigModeBtn.innerText = '切換為手寫簽名'; } 
+            else { techSigMode = 'canvas'; techCanvasContainer.style.display = 'block'; clearTechSigBtn.style.display = 'inline-block'; techSigTextInput.style.display = 'none'; toggleTechSigModeBtn.innerText = '切換為打字簽名'; resizeTechCanvas(); }
+        });
+
+        function isCanvasBlank(checkCanvas) {
+            const blank = document.createElement('canvas'); blank.width = checkCanvas.width; blank.height = checkCanvas.height;
+            return checkCanvas.toDataURL() === blank.toDataURL();
         }
 
         // ==========================================
-        // 傳輸至 Firebase DB 與 Supabase Storage (核心修改區塊)
+        // 傳輸至 Firebase DB (無截圖上傳邏輯)
         // ==========================================
         const submitFormBtn = document.getElementById('submitFormBtn');
         const successAlert = document.getElementById('successAlert');
@@ -520,30 +497,56 @@
             const bookingTime = document.getElementById('bookingTime').value;
             const notes = document.getElementById('notes').value.trim();
             
-            const check1 = document.getElementById('checkTerms1').checked;
-            const check2 = document.getElementById('checkTerms2').checked;
-            const check3 = document.getElementById('checkTerms3').checked;
-
             if (!clientName || !clientPhone || !bookingDate || !bookingTime) { alert("請填齊顧客姓名、電話、預約日期與時段！"); return; }
-            if (!check1 || !check2 || !check3) { alert("必須完整勾選並同意美甲服務合約的所有勾選項！"); return; }
+            if (!document.getElementById('checkTerms1').checked || !document.getElementById('checkTerms2').checked || !document.getElementById('checkTerms3').checked) { alert("必須完整勾選並同意美甲服務合約的所有勾選項！"); return; }
 
+            // 處理顧客簽名 (必填)
             let customerSignatureData = "";
             if (sigMode === 'canvas') {
-                if (isCanvasBlank()) { alert("請完成手寫簽名！"); return; }
+                if (isCanvasBlank(canvas)) { alert("請完成顧客手寫簽名！"); return; }
                 customerSignatureData = canvas.toDataURL();
             } else {
-                if (!sigTextInput.value.trim()) { alert("請輸入打字簽名全名！"); return; }
+                if (!sigTextInput.value.trim()) { alert("請輸入顧客打字簽名全名！"); return; }
                 customerSignatureData = "[打字簽章] " + sigTextInput.value.trim();
             }
 
+            // 處理美甲師簽名 (非必填)
+            let techSignatureData = null;
+            if (techSigMode === 'canvas' && !isCanvasBlank(techCanvas)) {
+                techSignatureData = techCanvas.toDataURL();
+            } else if (techSigMode === 'text' && techSigTextInput.value.trim()) {
+                techSignatureData = "[打字簽章] " + techSigTextInput.value.trim();
+            }
+
             submitFormBtn.disabled = true;
-            submitFormBtn.innerText = "產生簽署截圖中...";
+            submitFormBtn.innerText = "資料儲存中...";
 
             const prices = calculateTotal();
             const nowString = new Date().toLocaleString('zh-TW');
 
             try {
-                // 1. 填入資料到截圖區塊
+                // 1. 將預約資料寫入 Firebase 資料庫 (不上傳截圖)
+                const bookingRecord = {
+                    clientName: clientName,
+                    clientPhone: clientPhone,
+                    bookingDate: bookingDate,
+                    bookingTime: bookingTime,
+                    notes: notes,
+                    selectedStyle: currentSelection.selectedStyle.name,
+                    selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
+                    priceCalculations: { basePrice: prices.stylePrice, addonPrice: prices.addonPrice, discountPrice: prices.discount, totalPrice: prices.total },
+                    agreedToTerms: true,
+                    customerSignature: customerSignatureData, 
+                    techSignature: techSignatureData, // 可能為 null
+                    status: "待確認",
+                    warrantyScreenshot: null, // 前端不產截圖網址
+                    createdAt: serverTimestamp()
+                };
+
+                const docRef = await addDoc(collection(db, "nail_bookings"), bookingRecord);
+                
+                // 2. 顯示憑證畫面
+                document.getElementById('recId').innerText = docRef.id;
                 document.getElementById('recName').innerText = clientName;
                 document.getElementById('recPhone').innerText = clientPhone;
                 document.getElementById('recDate').innerText = bookingDate;
@@ -554,101 +557,50 @@
                 document.getElementById('recNotes').innerText = notes || '無額外備註需求';
                 document.getElementById('recTimestamp').innerText = nowString;
 
+                // 顯示顧客簽名
                 if (sigMode === 'canvas') {
                     document.getElementById('recSignatureText').style.display = 'none';
-                    const targetImg = document.getElementById('recSignatureImg');
-                    targetImg.src = customerSignatureData;
-                    targetImg.style.display = 'block';
+                    document.getElementById('recSignatureImg').src = customerSignatureData;
+                    document.getElementById('recSignatureImg').style.display = 'block';
                 } else {
                     document.getElementById('recSignatureImg').style.display = 'none';
-                    const targetTxt = document.getElementById('recSignatureText');
-                    targetTxt.innerText = sigTextInput.value.trim();
-                    targetTxt.style.display = 'inline-block';
+                    document.getElementById('recSignatureText').innerText = sigTextInput.value.trim();
+                    document.getElementById('recSignatureText').style.display = 'inline-block';
+                }
+
+                // 顯示美甲師簽名 (若有)
+                const techPendingTag = document.getElementById('recTechSignaturePending');
+                if (techSignatureData) {
+                    techPendingTag.style.display = 'none';
+                    if (techSignatureData.startsWith('[打字簽章]')) {
+                        document.getElementById('recTechSignatureImg').style.display = 'none';
+                        document.getElementById('recTechSignatureText').innerText = techSignatureData.replace('[打字簽章]', '').trim();
+                        document.getElementById('recTechSignatureText').style.display = 'inline-block';
+                    } else {
+                        document.getElementById('recTechSignatureText').style.display = 'none';
+                        document.getElementById('recTechSignatureImg').src = techSignatureData;
+                        document.getElementById('recTechSignatureImg').style.display = 'block';
+                    }
+                } else {
+                    techPendingTag.style.display = 'inline-block';
                 }
 
                 successReceiptSection.style.display = 'block';
-
-                // 2. 利用 html2canvas 產生圖片 Base64
-                const targetArea = document.getElementById('receiptCaptureArea');
-                const capturedCanvas = await html2canvas(targetArea, {
-                    scale: 2,
-                    backgroundColor: '#FFFFFF',
-                    logging: false,
-                    useCORS: true
-                });
-                const screenshotBase64 = capturedCanvas.toDataURL('image/jpeg', 0.3);
-
-                submitFormBtn.innerText = "上傳電子合約雲端中...";
-
-                // 3. 處理圖片並上傳至 Supabase
-                // 將 Base64 去掉開頭的 data:image/jpeg;base64,
-                const pureBase64 = screenshotBase64.split(',')[1];
-                const imageBlob = b64toBlob(pureBase64, 'image/jpeg');
-                
-                // 定義檔名
-                const screenshotFilename = `${Date.now()}_${clientPhone}.jpg`;
-                
-                // 執行 Supabase 儲存桶上傳
-                const { data: uploadData, error: uploadError } = await supabaseClient
-                    .storage
-                    .from('receipts') // 👉 對應您在 Supabase 建立的儲存桶名稱
-                    .upload(screenshotFilename, imageBlob, {
-                        contentType: 'image/jpeg',
-                        upsert: false
-                    });
-
-                if (uploadError) {
-                    throw new Error("Supabase 上傳失敗：" + uploadError.message);
-                }
-
-                // 取得 Supabase 公開圖片網址
-                const { data: publicUrlData } = supabaseClient
-                    .storage
-                    .from('receipts')
-                    .getPublicUrl(screenshotFilename);
-                    
-                const finalImageUrl = publicUrlData.publicUrl;
-
-                // 4. 將預約資料與 Supabase 圖片網址寫入 Firebase 資料庫
-                const bookingRecord = {
-                    clientName: clientName,
-                    clientPhone: clientPhone,
-                    bookingDate: bookingDate,
-                    bookingTime: bookingTime,
-                    notes: notes,
-                    selectedStyle: currentSelection.selectedStyle.name,
-                    selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
-                    priceCalculations: {
-                        basePrice: prices.stylePrice,
-                        addonPrice: prices.addonPrice,
-                        discountPrice: prices.discount,
-                        totalPrice: prices.total
-                    },
-                    agreedToTerms: true,
-                    customerSignature: customerSignatureData, 
-                    status: "待確認",
-                    warrantyScreenshot: finalImageUrl, // 這裡現在存的是 Supabase 的網址
-                    createdAt: serverTimestamp()
-                };
-
-                const docRef = await addDoc(collection(db, "nail_bookings"), bookingRecord);
-                document.getElementById('recId').innerText = docRef.id;
-
-                // 5. 成功後 UI 復原與清空
                 modalOverlay.classList.remove('active');
                 successAlert.style.display = 'block';
                 
                 setTimeout(() => { document.getElementById('successReceiptSection').scrollIntoView({ behavior: 'smooth' }); }, 400);
 
+                // 3. 成功後 UI 清空
                 document.getElementById('bookingStepForm').reset();
                 document.getElementById('clientName').value = ""; document.getElementById('clientPhone').value = "";
                 document.getElementById('checkTerms1').checked = false; document.getElementById('checkTerms2').checked = false; document.getElementById('checkTerms3').checked = false;
                 ctx.clearRect(0, 0, canvas.width, canvas.height); sigTextInput.value = "";
+                techCtx.clearRect(0, 0, techCanvas.width, techCanvas.height); techSigTextInput.value = "";
                 document.querySelectorAll('.style-card').forEach(card => card.classList.remove('selected'));
                 currentSelection.selectedStyle = null; currentSelection.selectedAddons.clear(); calculateTotal();
 
             } catch (error) {
-                console.error("寫入雲端或截圖失敗:", error);
                 alert("儲存失敗：" + error.message);
             } finally {
                 submitFormBtn.disabled = false;
@@ -657,7 +609,7 @@
         });
 
         // ==========================================
-        // 下載 PDF 功能保留
+        // 下載 PDF 功能保留 (由前端產生畫面即可下載)
         // ==========================================
         const downloadPdfBtn = document.getElementById('downloadPdfBtn');
         downloadPdfBtn.addEventListener('click', async () => {
@@ -674,7 +626,7 @@
                 pdf.save(`美甲預約憑證單_${recIdText}.pdf`);
                 alert("🎉 PDF 憑證下載成功！");
             } catch (err) { alert("匯出 PDF 失敗：" + err.message); } finally {
-                downloadPdfBtn.disabled = false; downloadPdfBtn.innerText = "📥 下載此預約憑證 PDF 檔";
+                downloadPdfBtn.disabled = false; downloadPdfBtn.innerText = "📥 下載此預約憑證 PDF 檔 (供個人留存)";
             }
         });
 
