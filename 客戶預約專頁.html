@@ -561,7 +561,7 @@
                 // 2. 利用 html2canvas 產生圖片 Base64
                 const targetArea = document.getElementById('receiptCaptureArea');
                 const capturedCanvas = await html2canvas(targetArea, {
-                    scale: 0.6,
+                    scale: 1,
                     backgroundColor: '#FFFFFF',
                     logging: false,
                     useCORS: true
