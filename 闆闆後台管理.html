@@ -187,6 +187,7 @@
         </ul>
         <div class="sidebar-menu-title">客戶預約專頁編輯</div>
         <ul class="sidebar-menu">
+            <li><button id="menuTimeSlotBtn">🕒 編輯可預約時段與刪除</button></li>
             <li><button id="menuDiscountBtn">⚙️ 優惠活動折扣設定</button></li>
             <li><button id="menuStyleBtn">💅 編輯核心款式項目及價錢</button></li>
             <li><button id="menuAddonBtn">✨ 編輯附加服務項目及價錢</button></li>
@@ -253,6 +254,29 @@
             <div class="modal-actions">
                 <button class="btn-modal btn-cancel" id="closeDiscountBtn">取消返回</button>
                 <button class="btn-modal btn-confirm-success" id="saveDiscountBtn">確認修改折扣</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="timeSlotConfigModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 450px;">
+            <h3>🕒 編輯可預約時段</h3>
+            <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px;">設定顧客能在前台專頁選擇的預約時段。</p>
+            <div class="config-table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align: center;">開放預約時段</th>
+                            <th style="text-align: center;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timeSlotListTbody"></tbody>
+                </table>
+            </div>
+            <button class="btn-refresh" id="addTimeSlotRowBtn" style="width: 100%; margin-bottom: 20px;">➕ 新增時段</button>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeTimeSlotModalBtn">取消返回</button>
+                <button class="btn-modal btn-confirm-success" id="saveTimeSlotBtn">💾 儲存所有變更</button>
             </div>
         </div>
     </div>
@@ -364,7 +388,7 @@
         let globalBookingsData = []; 
         let globalExpensesData = {}; 
         let currentMonthConsumables = []; 
-        let globalConfig = { firstTimeDiscount: 95, pageTitle: "", pageSubtitle: "", styles: [], addons: [] };
+        let globalConfig = { firstTimeDiscount: 95, pageTitle: "", pageSubtitle: "", styles: [], addons: [], timeSlots: [] }; // 新增 timeSlots 初始設定
         let globalDiscount = 95; 
 
         // --- DOM 元素抓取 ---
@@ -772,8 +796,61 @@
             if (success) discountModal.style.display = 'none';
         });
 
+        // ===================================================
+        // 編輯可預約時段功能 (新增區域)
+        // ===================================================
+        const timeSlotConfigModal = document.getElementById('timeSlotConfigModal');
+        
+        function addTimeSlotRow(tbody, time = "10:00") {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="time" class="input-discount row-time-input" style="width: 100%; text-align:center;" value="${time}"></td>
+                <td style="text-align:center;"><button class="btn-delete-row" style="padding: 6px 12px;">刪除</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        document.getElementById('menuTimeSlotBtn').addEventListener('click', () => {
+            closeSidebar();
+            const tbody = document.getElementById('timeSlotListTbody');
+            tbody.innerHTML = '';
+            
+            // 如果無舊資料，帶入預設時段供老闆參考
+            const defaultSlots = ['10:00', '13:00', '16:00', '19:00'];
+            const currentSlots = (globalConfig.timeSlots && globalConfig.timeSlots.length > 0) ? globalConfig.timeSlots : defaultSlots;
+            
+            currentSlots.forEach(time => { addTimeSlotRow(tbody, time); });
+            timeSlotConfigModal.style.display = 'flex';
+        });
+
+        document.getElementById('closeTimeSlotModalBtn').addEventListener('click', () => timeSlotConfigModal.style.display = 'none');
+        document.getElementById('addTimeSlotRowBtn').addEventListener('click', () => addTimeSlotRow(document.getElementById('timeSlotListTbody'), "12:00"));
+        
+        document.getElementById('saveTimeSlotBtn').addEventListener('click', async () => {
+            const rows = document.getElementById('timeSlotListTbody').querySelectorAll('tr');
+            let data = [];
+            rows.forEach(row => {
+                const timeValue = row.querySelector('.row-time-input').value;
+                if (timeValue) { data.push(timeValue); }
+            });
+            
+            // 自動為時段做先後排序，避免前台顯示錯亂
+            data.sort();
+            
+            // 排除完全重複的時段
+            const uniqueData = [...new Set(data)];
+
+            const success = await updateSystemConfig({ timeSlots: uniqueData }, document.getElementById('saveTimeSlotBtn'), "💾 儲存所有變更");
+            if (success) timeSlotConfigModal.style.display = 'none';
+        });
+
         function handleTableDeleteDelegation(tbodyId) { document.getElementById(tbodyId).addEventListener('click', (e) => { if (e.target.classList.contains('btn-delete-row')) { e.target.closest('tr').remove(); }}); }
-        handleTableDeleteDelegation('styleListTbody'); handleTableDeleteDelegation('addonListTbody');
+        
+        handleTableDeleteDelegation('timeSlotListTbody'); // 綁定時段表格刪除
+        handleTableDeleteDelegation('styleListTbody'); 
+        handleTableDeleteDelegation('addonListTbody');
+
+        // ===================================================
 
         const styleConfigModal = document.getElementById('styleConfigModal');
         document.getElementById('menuStyleBtn').addEventListener('click', () => {
