@@ -86,7 +86,7 @@
         .modal-container { background: #FFF; width: 100vw; height: 100vh; max-width: 100%; max-height: 100%; display: flex; flex-direction: column; overflow: hidden; animation: zoomInRec 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
         @keyframes zoomInRec { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        .modal-header { background: #F7ECEE; padding: 20px 25px; font-size: 1.3rem; font-weight: 700; color: #3A2E2B; border-bottom: 1px solid #EFE4DF; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .modal-header { background: #F7ECEE; padding: 20px 25px; font-size: 1.3rem; font-weight: 700; color: #3A2E2B; border-bottom: 1px solid #EFE4DF; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); ]
         .modal-close { background: none; border: none; font-size: 2rem; cursor: pointer; color: #8C7572; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; transition: var(--transition); }
         .modal-close:hover { color: #3A2E2B; transform: rotate(90deg); }
         .modal-body { padding: 35px; overflow-y: auto; flex: 1; max-width: 900px; margin: 0 auto; width: 100%; }
@@ -748,6 +748,25 @@
         initSystem();
     </script>
     
+    <script>
+        (function() {
+            try {
+                // 每次網頁初始化時，強制遍歷並清除所有與 fastbots 及聊天快取相關的舊紀錄
+                Object.keys(localStorage).forEach(function(key) {
+                    if (key.toLowerCase().includes('fastbots') || key.toLowerCase().includes('chat')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                Object.keys(sessionStorage).forEach(function(key) {
+                    if (key.toLowerCase().includes('fastbots') || key.toLowerCase().includes('chat')) {
+                        sessionStorage.removeItem(key);
+                    }
+                });
+            } catch (e) {
+                console.warn("Fastbots 快取記憶重置失敗: ", e);
+            }
+        })();
+    </script>
     <script defer src="https://app.fastbots.ai/embed.js" data-bot-id="cmqqzn69f04atqg1p1ixjidfb"></script>
 </body>
 </html>
