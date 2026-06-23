@@ -113,25 +113,26 @@
         .input-discount { width: 100%; padding: 10px 14px; border: 2px solid #EADCDD; border-radius: 8px; font-weight: 700; font-size: 1rem; outline: none; transition: var(--transition); }
         .input-discount:focus { border-color: var(--accent-purple); background-color: white; }
 
-        /* 全螢幕美甲師簽名覆蓋層 */
+        /* 全螢幕美甲師簽名覆蓋層 (修復不見的按鈕) */
         .fullscreen-sign-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #FFFFFF; z-index: 4000; flex-direction: column;
+            background: #FFFFFF; z-index: 4000; flex-direction: column; overflow: hidden;
         }
         .sign-header {
             padding: 20px; background: var(--main-gradient); color: white;
             display: flex; justify-content: space-between; align-items: center; font-weight: 700;
         }
-        .sign-body-text { padding: 20px; background: #FFF5F6; font-size: 0.9rem; color: #555; line-height: 1.5; border-bottom: 1px solid #EADCDD; }
-        .sign-canvas-container { flex: 1; position: relative; background: #FAF6F6; cursor: crosshair; }
-        #fullCanvas { width: 100%; height: 100%; display: block; }
-        .sign-footer-controls { padding: 20px; background: white; border-top: 1px solid #EADCDD; display: flex; justify-content: space-between; gap: 15px; align-items: center; }
+        .sign-body-text { padding: 15px 20px; background: #FFF5F6; font-size: 0.9rem; color: #555; line-height: 1.5; border-bottom: 1px solid #EADCDD; max-height: 20vh; overflow-y: auto; }
+        .sign-canvas-container { flex: 1; position: relative; background: #FAF6F6; cursor: crosshair; overflow: hidden; width: 100%; min-height: 150px; }
+        #fullCanvas { width: 100%; height: 100%; display: block; touch-action: none; }
+        .sign-footer-controls { padding: 15px 20px; background: white; border-top: 1px solid #EADCDD; display: flex; justify-content: space-between; gap: 15px; align-items: center; position: sticky; bottom: 0; }
 
         /* 作品集排版格網 */
         .gallery-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 15px; }
         .gallery-admin-item { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 1; border: 1px solid #EADCDD; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .gallery-admin-item img { width: 100%; height: 100%; object-fit: cover; }
-        .gallery-admin-item .del-tag { position: absolute; top: 5px; right: 5px; background: rgba(231, 76, 60, 0.9); color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: 700; }
+        .gallery-admin-item .del-tag { position: absolute; top: 5px; right: 5px; background: rgba(231, 76, 60, 0.9); color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: 700; transition: var(--transition); }
+        .gallery-admin-item .del-tag:hover { background: #C0392B; }
 
         /* 即時系統橫幅通知 */
         .toast-notification { position: fixed; top: 25px; right: 25px; background: #FFFFFF; border-left: 6px solid var(--accent-pink); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15); border-radius: 12px; padding: 20px; z-index: 5000; display: none; flex-direction: column; gap: 12px; max-width: 380px; width: 90%; animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -260,7 +261,7 @@
     <div id="bgUploadModal" class="modal-overlay">
         <div class="modal-content">
             <h3>🖼️ 更換前台大圖背景</h3>
-            <p style="font-size:0.85rem; color:#888; text-align:center; margin-bottom:15px;">上傳的新圖片將會上傳至 Supabase `website-assets` 並直接覆蓋前台的背景圖效果。</p>
+            <p style="font-size:0.85rem; color:#888; text-align:center; margin-bottom:15px;">上傳的新圖片將會覆蓋 Supabase 的 `website-assets/main_bg.jpg` 並直接更換前台大圖效果。</p>
             <div style="border:2px dashed #EADCDD; border-radius:12px; padding:30px; text-align:center; background:#FCFAFA;">
                 <input type="file" id="bgFileInput" accept="image/jpeg,image/png" style="display:none;">
                 <button class="btn-refresh" onclick="document.getElementById('bgFileInput').click()">選擇新背景圖片</button>
@@ -457,18 +458,18 @@
             今日施作完畢後，顧客確認款式顏色、加厚弧度與甲面修剪皆符合當初預約期待。本服務隨附 7 日基礎款式保固，非人為故意蓄意撞擊剝落，可享有免費原款修補一次。以下為雙方數位簽署確認憑證。
         </div>
         
-        <div style="padding:15px 20px; background:#FFF; border-bottom:1px solid #EADCDD; display:flex; gap:20px; align-items:center;">
+        <div style="padding:10px 20px; background:#FFF; border-bottom:1px solid #EADCDD; display:flex; gap:20px; align-items:center;">
             <div>
-                <span style="font-weight:700; color:var(--accent-purple);">👧 顧客前台原始簽章存檔：</span>
-                <div id="customerSigPlaceholder" style="display:inline-block; vertical-align:middle; margin-left:10px; max-height:50px;"></div>
+                <span style="font-weight:700; color:var(--accent-purple);">👧 顧客簽章：</span>
+                <div id="customerSigPlaceholder" style="display:inline-block; vertical-align:middle; margin-left:10px; max-height:40px;"></div>
             </div>
             <div style="flex:1; max-width:400px;">
-                <input type="text" id="signatureInputTech" class="input-discount" style="padding:8px;" placeholder="⌨️ 亦可以鍵盤在此處直接打字輸入美甲師姓名確認...">
+                <input type="text" id="signatureInputTech" class="input-discount" style="padding:6px; font-size: 0.9rem;" placeholder="⌨️ 亦可在此打字輸入姓名...">
             </div>
         </div>
 
         <div class="sign-canvas-container">
-            <div style="position:absolute; top:15px; left:20px; font-weight:700; color:#998A8A; font-size:0.9rem; pointer-events:none;">✍️ 請使用手指或觸控筆在下方全螢幕空白區域內進行您的「美甲師簽名」：</div>
+            <div style="position:absolute; top:15px; left:20px; font-weight:700; color:#998A8A; font-size:0.9rem; pointer-events:none;">✍️ 請在下方全螢幕空白區域進行「美甲師簽名」：</div>
             <canvas id="fullCanvas"></canvas>
         </div>
 
@@ -531,12 +532,15 @@
         }
 
         // ===================================================
-        // 全螢幕電子畫布邏輯控制
+        // 全螢幕電子畫布邏輯控制 (修復按鈕消失與自適應)
         // ===================================================
         function resizeFullCanvas() {
-            fullCanvas.width = window.innerWidth;
-            fullCanvas.height = window.innerHeight - 250; 
-            ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = '#333333';
+            const container = document.querySelector('.sign-canvas-container');
+            if (container) {
+                fullCanvas.width = container.clientWidth || window.innerWidth;
+                fullCanvas.height = container.clientHeight || (window.innerHeight - 300); 
+                ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = '#333333';
+            }
         }
 
         function initCanvasEvents() {
@@ -565,31 +569,27 @@
         });
 
         // ===================================================
-        // 核心資料同步與表格動態渲染 (包含新增的 AI 客服對話欄位)
+        // 核心資料同步與表格動態渲染
         // ===================================================
         function initRealtimeSync() {
             const tbody = document.getElementById('bookingListTbody');
             const loading = document.getElementById('loading');
             const table = document.getElementById('bookingTable');
 
-            // 監聽系統基本參數
             onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => {
                 if (docSnap.exists()) { globalConfig = { ...globalConfig, ...docSnap.data() }; }
             });
 
-            // 監聽顧客預約核心名單變動
             onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
                 let list = [];
                 snapshot.forEach(d => list.push({ id: d.id, ...d.data() }));
                 
-                // 依照日期與時間精準由近到遠排序
                 list.sort((a,b) => {
                     if(a.bookingDate !== b.bookingDate) return a.bookingDate.localeCompare(b.bookingDate);
                     return a.bookingTime.localeCompare(b.bookingTime);
                 });
                 globalBookingsData = list;
 
-                // 檢查重複預約時段之衝突
                 const counts = {};
                 list.forEach(item => {
                     const k = `${item.bookingDate}_${item.bookingTime}`;
@@ -608,18 +608,15 @@
                     const key = `${item.bookingDate}_${item.bookingTime}`;
                     if(counts[key] > 1) tr.className = 'overlap-row';
 
-                    // 顧客名稱與新客標籤判定
                     const isNew = item.isFirstTime === true || (item.clientName && item.clientName.includes('〔初〕'));
                     let nameHtml = isNew ? `<span class="client-name new-guest">〔初〕${item.clientName.replace('〔初〕','')}</span>` : `<span class="client-name">${item.clientName || '未填'}</span>`;
                     if(item.status === 'completed') nameHtml += `<br><span class="status-completed">✅ 雙簽已結案</span>`;
 
-                    // 附加項目標籤組
                     let addonHtml = '';
                     if(item.selectedAddons && item.selectedAddons.length > 0) {
                         item.selectedAddons.forEach((a, i) => { addonHtml += `<span class="addon-tag">${i+1}. ${a}</span>`; });
                     } else { addonHtml = '<span style="color:#bbb;">無附加</span>'; }
 
-                    // 金額運算
                     let priceHtml = '$0';
                     if(item.priceCalculations) {
                         const t = item.priceCalculations.totalPrice.toLocaleString();
@@ -628,7 +625,6 @@
                         } else { priceHtml = `<span class="total-price">$${t}</span>`; }
                     }
 
-                    // 同意書雙簽狀態
                     let signHtml = '<span style="color:#aaa; font-size:0.85rem;">未啟動簽署</span>';
                     if(item.warrantyScreenshot) {
                         signHtml = `<button class="btn-action-ui btn-view-img" data-id="${item.id}">👁️ 查閱完整合約</button>`;
@@ -636,7 +632,6 @@
                         signHtml = `<span style="color:var(--accent-pink); font-size:0.85rem; font-weight:700;">✍️ 顧客已簽<br>待美甲師結案</span>`;
                     }
 
-                    // 結案按鈕組
                     let completeBtn = (item.status === 'completed') ? '' : `<button class="btn-action-ui btn-complete-row" data-id="${item.id}">✅ 結案簽名</button>`;
 
                     tr.innerHTML = `
@@ -671,13 +666,13 @@
         }
 
         // ===================================================
-        // 事件委派代理控制 (表格內各功能點擊)
+        // 事件委派代理控制
         // ===================================================
         document.getElementById('bookingListTbody').addEventListener('click', (e) => {
             const id = e.target.getAttribute('data-id');
             if(!id) return;
 
-            // 1. 點擊啟動結案補簽名 (全螢幕邏輯)
+            // 1. 點擊啟動結案補簽名
             if(e.target.classList.contains('btn-complete-row')) {
                 targetCompleteId = id;
                 const b = globalBookingsData.find(x => x.id === id);
@@ -687,30 +682,30 @@
                     if(b.customerSignature.startsWith('[打字簽章]')) {
                         placeholder.innerHTML = `<span style="font-weight:700; background:#DDD; padding:4px 8px; border-radius:4px;">${b.customerSignature}</span>`;
                     } else {
-                        placeholder.innerHTML = `<img src="${b.customerSignature}" style="max-height:45px;">`;
+                        placeholder.innerHTML = `<img src="${b.customerSignature}" style="max-height:40px;">`;
                     }
                 } else {
                     placeholder.innerHTML = '<span style="color:#aaa;">無顧客簽名存檔</span>';
                 }
                 
                 document.getElementById('fullscreenSignOverlay').style.display = 'flex';
-                resizeFullCanvas();
+                // 等待 Flex 顯示後抓取正確尺寸並重製畫布
+                setTimeout(() => { resizeFullCanvas(); }, 50);
+                
                 ctx.clearRect(0,0,fullCanvas.width,fullCanvas.height);
                 document.getElementById('signatureInputTech').value = '';
                 hasDrawnTech = false;
             }
 
-            // 2. 查看 AI 互動交談對話
+            // 2. 查看 AI 對話
             if(e.target.classList.contains('btn-ai-log')) {
                 const b = globalBookingsData.find(x => x.id === id);
                 const container = document.getElementById('chatLogContainer');
                 container.innerHTML = '';
-                
                 const chatHistory = b?.aiChatHistory || [
                     { role: 'user', text: '請問可以做奢華法式碎鑽風嗎？', time: '系統模擬對話' },
                     { role: 'ai', text: '可以的！現場有提供施華洛世奇多款碎鑽提供您複選。', time: '系統模擬對話' }
                 ];
-
                 chatHistory.forEach(m => {
                     const row = document.createElement('div');
                     row.className = `chat-msg-row ${m.role === 'user' ? 'user' : 'ai'}`;
@@ -720,7 +715,7 @@
                 document.getElementById('aiLogModal').style.display = 'flex';
             }
 
-            // 3. 查閱完整合約憑證圖片
+            // 3. 查閱合約憑證
             if(e.target.classList.contains('btn-view-img')) {
                 const url = screenshotsMap.get(id);
                 if(url) {
@@ -729,18 +724,17 @@
                 }
             }
 
-            // 4. 觸發完全刪除
+            // 4. 觸發刪除
             if(e.target.classList.contains('btn-delete-row')) {
                 targetDeleteId = id;
                 document.getElementById('deleteModal').style.display = 'flex';
             }
         });
 
-        // 關閉 AI 對話視窗
         document.getElementById('closeAiLogBtn').addEventListener('click', () => { document.getElementById('aiLogModal').style.display = 'none'; });
 
         // ===================================================
-        // 全螢幕截圖合約並封裝上傳至 Supabase `website-assets`
+        // 全螢幕截圖合約並上傳 Supabase `website-assets`
         // ===================================================
         document.getElementById('abandonSignBtn').addEventListener('click', () => { document.getElementById('fullscreenSignOverlay').style.display = 'none'; });
         
@@ -750,10 +744,9 @@
             if(!hasDrawnTech && !typed) { alert('請填寫美甲師電子簽名或於上方欄位打字輸入姓名以茲確認！'); return; }
 
             try {
-                document.getElementById('submitFullSignBtn').innerText = "雲端簽署截圖上傳備份中...";
+                document.getElementById('submitFullSignBtn').innerText = "雲端簽署備份中...";
                 document.getElementById('submitFullSignBtn').disabled = true;
 
-                // 利用隱蔽性渲染生成虛擬合約 DOM 物件進行 html2canvas 生態截圖
                 const dummy = document.createElement('div');
                 dummy.style.padding = '40px'; dummy.style.width = '750px'; dummy.style.background = '#FFF'; dummy.style.position = 'fixed'; dummy.style.top = '-9999px';
                 
@@ -791,7 +784,6 @@
                 const base64Str = capCanvas.toDataURL('image/jpeg', 0.9).split(',')[1];
                 document.body.removeChild(dummy);
 
-                // 上傳至指定 Supabase 的 website-assets 目錄下
                 const filename = `website-assets/receipt_${Date.now()}_${targetCompleteId}.jpg`;
                 const blobObj = b64toBlob(base64Str, 'image/jpeg');
 
@@ -800,7 +792,6 @@
 
                 const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(filename);
 
-                // 更新同步 Firebase
                 await updateDoc(doc(db, "nail_bookings", targetCompleteId), {
                     status: "completed",
                     techSignature: techSigSrc,
@@ -820,7 +811,9 @@
             }
         });
 
-        // 刪除確認執行
+        // ===================================================
+        // Firebase 刪除作業
+        // ===================================================
         document.getElementById('cancelDeleteBtn').addEventListener('click', () => { document.getElementById('deleteModal').style.display='none'; });
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
             if(!targetDeleteId) return;
@@ -833,35 +826,15 @@
         });
 
         // ===================================================
-        // 側邊選單：店家基本資料設定 (Firebase 控制)
+        // 店家基本資料設定
         // ===================================================
         const infoModal = document.getElementById('infoModal');
-        document.getElementById('menuInfoBtn').addEventListener('click', () => {
-            closeSidebar();
-            document.getElementById('infoAddress').value = globalConfig.shopAddress || '';
-            document.getElementById('infoPhone').value = globalConfig.shopPhone || '';
-            document.getElementById('infoIg').value = globalConfig.shopIg || '';
-            document.getElementById('infoLine').value = globalConfig.shopLine || '';
-            document.getElementById('infoFb').value = globalConfig.shopFb || '';
-            infoModal.style.display = 'flex';
-        });
+        document.getElementById('menuInfoBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('infoAddress').value = globalConfig.shopAddress || ''; document.getElementById('infoPhone').value = globalConfig.shopPhone || ''; document.getElementById('infoIg').value = globalConfig.shopIg || ''; document.getElementById('infoLine').value = globalConfig.shopLine || ''; document.getElementById('infoFb').value = globalConfig.shopFb || ''; infoModal.style.display = 'flex'; });
         document.getElementById('closeInfoBtn').addEventListener('click', () => { infoModal.style.display='none'; });
-        document.getElementById('saveInfoBtn').addEventListener('click', async () => {
-            try {
-                await setDoc(doc(db, "system_settings", "booking_config"), {
-                    shopAddress: document.getElementById('infoAddress').value.trim(),
-                    shopPhone: document.getElementById('infoPhone').value.trim(),
-                    shopIg: document.getElementById('infoIg').value.trim(),
-                    shopLine: document.getElementById('infoLine').value.trim(),
-                    shopFb: document.getElementById('infoFb').value.trim()
-                }, { merge: true });
-                infoModal.style.display = 'none';
-                alert('✅ 店家地址與各大社群網址已同步更新連動！');
-            } catch(e) { alert('儲存失敗'); }
-        });
+        document.getElementById('saveInfoBtn').addEventListener('click', async () => { try { await setDoc(doc(db, "system_settings", "booking_config"), { shopAddress: document.getElementById('infoAddress').value.trim(), shopPhone: document.getElementById('infoPhone').value.trim(), shopIg: document.getElementById('infoIg').value.trim(), shopLine: document.getElementById('infoLine').value.trim(), shopFb: document.getElementById('infoFb').value.trim() }, { merge: true }); infoModal.style.display = 'none'; alert('✅ 店家地址與各大社群網址已同步更新連動！'); } catch(e) { alert('儲存失敗'); } });
 
         // ===================================================
-        // 側邊選單：前台背景圖上傳管理 (Supabase website-assets)
+        // 更換前台大圖背景 (修復上傳失敗 / Upsert 衝突)
         // ===================================================
         const bgUploadModal = document.getElementById('bgUploadModal');
         let bgFileRaw = null;
@@ -873,18 +846,32 @@
         document.getElementById('confirmBgUploadBtn').addEventListener('click', async () => {
             if(!bgFileRaw) { alert('請先選取圖片檔案！'); return; }
             try {
-                document.getElementById('confirmBgUploadBtn').innerText = "上傳中...";
-                // 固定覆蓋特定命名，確保前台大圖固定讀取此相對路徑
-                const { data, error } = await supabaseClient.storage.from('receipts').upload('website-assets/main_bg.jpg', bgFileRaw, { contentType:'image/jpeg', upsert:true });
+                document.getElementById('confirmBgUploadBtn').innerText = "雲端上傳中...";
+                document.getElementById('confirmBgUploadBtn').disabled = true;
+
+                // 為了避免 RLS (Row Level Security) 阻擋原檔覆蓋，先強迫執行刪除 (即使回傳錯誤也無視)
+                await supabaseClient.storage.from('receipts').remove(['website-assets/main_bg.jpg']);
+                
+                // 執行乾淨的新增上傳
+                const { data, error } = await supabaseClient.storage.from('receipts').upload('website-assets/main_bg.jpg', bgFileRaw, { 
+                    contentType: bgFileRaw.type || 'image/jpeg', 
+                    cacheControl: '0',
+                    upsert: true 
+                });
                 if(error) throw error;
+                
                 bgUploadModal.style.display = 'none';
-                alert('✅ 大圖背景上傳成功！已寫入 `website-assets/main_bg.jpg`。');
-            } catch(e) { alert('背景更換失敗：' + e.message); }
-            finally { document.getElementById('confirmBgUploadBtn').innerText = "確認上傳覆蓋"; }
+                alert('✅ 大圖背景上傳成功！已成功更換 `website-assets/main_bg.jpg`。');
+            } catch(e) { 
+                alert('背景更換失敗：' + e.message); 
+            } finally { 
+                document.getElementById('confirmBgUploadBtn').innerText = "確認上傳覆蓋"; 
+                document.getElementById('confirmBgUploadBtn').disabled = false;
+            }
         });
 
         // ===================================================
-        // 側邊選單：作品集動態管理區 (Supabase website-assets 直接存取)
+        // 作品集動態管理區 (修復刪除失敗卻假裝成功的狀況)
         // ===================================================
         const galleryModal = document.getElementById('galleryModal');
         let galleryFileRaw = null;
@@ -896,7 +883,6 @@
                 const { data, error } = await supabaseClient.storage.from('receipts').list('website-assets', { limit: 100 });
                 if(error) throw error;
                 
-                // 過濾出屬於作品集的照片項目
                 const filtered = data.filter(x => x.name.startsWith('portfolio_'));
                 grid.innerHTML = '';
                 
@@ -923,28 +909,48 @@
             if(!galleryFileRaw) return;
             try {
                 const uniqName = `website-assets/portfolio_${Date.now()}_${Math.floor(Math.random()*1000)}.jpg`;
-                const { data, error } = await supabaseClient.storage.from('receipts').upload(uniqName, galleryFileRaw, { contentType:'image/jpeg' });
+                const { data, error } = await supabaseClient.storage.from('receipts').upload(uniqName, galleryFileRaw, { contentType: galleryFileRaw.type || 'image/jpeg' });
                 if(error) throw error;
                 document.getElementById('galleryFileNameDisplay').innerText = '';
                 galleryFileRaw = null;
-                alert('作品照片成功追加至 `website-assets`！');
+                alert('🎉 作品照片成功追加至 `website-assets`！');
                 renderAdminGallery();
-            } catch(e) { alert('上傳作品失敗'); }
+            } catch(e) { alert('上傳作品失敗：' + e.message); }
         }
 
-        // 直接讀取並確認刪除指定作品集照片項目
+        // 嚴格對應雲端路徑的實際刪除機制
         document.getElementById('galleryAdminGrid').addEventListener('click', async (e) => {
             if(e.target.classList.contains('del-tag')) {
                 const targetName = e.target.getAttribute('data-name');
                 if(confirm('確定要直接從 Supabase 儲存空間移除這張作品照片嗎？前台將同步消失。')) {
-                    const { error } = await supabaseClient.storage.from('receipts').remove([`website-assets/${targetName}`]);
-                    if(!error) { alert('照片已完全移除'); renderAdminGallery(); } else { alert('移除失敗'); }
+                    const btn = e.target;
+                    btn.innerText = "刪除中";
+                    btn.disabled = true;
+                    
+                    // 確保檔案名稱前綴正確並避免雙重斜線
+                    const cleanName = targetName.replace(/^\/+/, '');
+                    const fullPath = `website-assets/${cleanName}`;
+                    
+                    const { data, error } = await supabaseClient.storage.from('receipts').remove([fullPath]);
+                    
+                    if (error) {
+                        alert('移除失敗：' + error.message);
+                        btn.innerText = "刪除";
+                        btn.disabled = false;
+                    } else if (data && data.length === 0) {
+                        // 這是修復「圖示不見但雲端檔案還在」的關鍵：被權限擋下時會回傳空陣列
+                        alert('⚠️ 雲端刪除失敗：找不到該檔案，或您的 Supabase Storage 缺少 DELETE 權限。');
+                        renderAdminGallery(); // 重新整理把圖示抓回來
+                    } else {
+                        alert('✅ 照片已完全移除');
+                        renderAdminGallery();
+                    }
                 }
             }
         });
 
         // ===================================================
-        // 側邊選單：其餘規則規則設定綁定 (保留既定完全邏輯)
+        // 其他系統設定綁定
         // ===================================================
         async function updateFirebaseConfig(dataObj, btn, text) {
             try {
@@ -955,95 +961,45 @@
             finally { btn.innerText = text; btn.disabled = false; }
         }
 
-        // 優惠折扣
         document.getElementById('menuDiscountBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('discountModal').style.display='flex'; document.getElementById('discountConfigInput').value = globalConfig.firstTimeDiscount || 95; });
         document.getElementById('closeDiscountBtn').addEventListener('click', () => { document.getElementById('discountModal').style.display='none'; });
-        document.getElementById('saveDiscountBtn').addEventListener('click', async () => {
-            const v = parseInt(document.getElementById('discountConfigInput').value);
-            if(isNaN(v) || v<10 || v>99) { alert('請填寫有效折數'); return; }
-            if(await updateFirebaseConfig({ firstTimeDiscount: v }, document.getElementById('saveDiscountBtn'), "確認修改折扣")) document.getElementById('discountModal').style.display='none';
-        });
+        document.getElementById('saveDiscountBtn').addEventListener('click', async () => { const v = parseInt(document.getElementById('discountConfigInput').value); if(isNaN(v) || v<10 || v>99) { alert('請填寫有效折數'); return; } if(await updateFirebaseConfig({ firstTimeDiscount: v }, document.getElementById('saveDiscountBtn'), "確認修改折扣")) document.getElementById('discountModal').style.display='none'; });
 
-        // 時段管理
-        function addTimeSlotRow(tbody, t="10:00") {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td><input type="time" class="input-discount row-time-input" style="text-align:center;" value="${t}"></td><td style="text-align:center;"><button class="btn-action-ui btn-delete-row" style="padding:4px 8px;">刪除</button></td>`;
-            tbody.appendChild(tr);
-        }
-        document.getElementById('menuTimeSlotBtn').addEventListener('click', () => {
-            closeSidebar(); const tbody = document.getElementById('timeSlotListTbody'); tbody.innerHTML = '';
-            const slots = (globalConfig.timeSlots && globalConfig.timeSlots.length > 0) ? globalConfig.timeSlots : ['10:00','13:00','16:00','19:00'];
-            slots.forEach(s => addTimeSlotRow(tbody, s));
-            document.getElementById('timeSlotConfigModal').style.display='flex';
-        });
+        function addTimeSlotRow(tbody, t="10:00") { const tr = document.createElement('tr'); tr.innerHTML = `<td><input type="time" class="input-discount row-time-input" style="text-align:center;" value="${t}"></td><td style="text-align:center;"><button class="btn-action-ui btn-delete-row" style="padding:4px 8px;">刪除</button></td>`; tbody.appendChild(tr); }
+        document.getElementById('menuTimeSlotBtn').addEventListener('click', () => { closeSidebar(); const tbody = document.getElementById('timeSlotListTbody'); tbody.innerHTML = ''; const slots = (globalConfig.timeSlots && globalConfig.timeSlots.length > 0) ? globalConfig.timeSlots : ['10:00','13:00','16:00','19:00']; slots.forEach(s => addTimeSlotRow(tbody, s)); document.getElementById('timeSlotConfigModal').style.display='flex'; });
         document.getElementById('addTimeSlotRowBtn').addEventListener('click', () => addTimeSlotRow(document.getElementById('timeSlotListTbody'), "12:00"));
         document.getElementById('closeTimeSlotModalBtn').addEventListener('click', () => { document.getElementById('timeSlotConfigModal').style.display='none'; });
-        document.getElementById('saveTimeSlotBtn').addEventListener('click', async () => {
-            let arr = [];
-            document.getElementById('timeSlotListTbody').querySelectorAll('.row-time-input').forEach(i => { if(i.value) arr.push(i.value); });
-            arr.sort();
-            if(await updateFirebaseConfig({ timeSlots: [...new Set(arr)] }, document.getElementById('saveTimeSlotBtn'), "💾 儲存所有時段")) document.getElementById('timeSlotConfigModal').style.display='none';
-        });
+        document.getElementById('saveTimeSlotBtn').addEventListener('click', async () => { let arr = []; document.getElementById('timeSlotListTbody').querySelectorAll('.row-time-input').forEach(i => { if(i.value) arr.push(i.value); }); arr.sort(); if(await updateFirebaseConfig({ timeSlots: [...new Set(arr)] }, document.getElementById('saveTimeSlotBtn'), "💾 儲存所有時段")) document.getElementById('timeSlotConfigModal').style.display='none'; });
 
-        // 款式與附加服務通用處理
-        function addConfigRow(tbody, n="", p=0) {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td><input type="text" class="input-discount row-name-input" placeholder="項目名稱" value="${n}"></td><td><input type="number" class="input-discount row-price-input" style="width:100px;" value="${p}"></td><td style="text-align:center;"><button class="btn-action-ui btn-delete-row" style="padding:4px 8px;">刪除</button></td>`;
-            tbody.appendChild(tr);
-        }
-        function getTableData(tbodyId) {
-            let res = [];
-            document.getElementById(tbodyId).querySelectorAll('tr').forEach(tr => {
-                const n = tr.querySelector('.row-name-input').value.trim();
-                const p = parseInt(tr.querySelector('.row-price-input').value) || 0;
-                if(n) res.push({ name:n, price:p });
-            });
-            return res;
-        }
+        function addConfigRow(tbody, n="", p=0) { const tr = document.createElement('tr'); tr.innerHTML = `<td><input type="text" class="input-discount row-name-input" placeholder="項目名稱" value="${n}"></td><td><input type="number" class="input-discount row-price-input" style="width:100px;" value="${p}"></td><td style="text-align:center;"><button class="btn-action-ui btn-delete-row" style="padding:4px 8px;">刪除</button></td>`; tbody.appendChild(tr); }
+        function getTableData(tbodyId) { let res = []; document.getElementById(tbodyId).querySelectorAll('tr').forEach(tr => { const n = tr.querySelector('.row-name-input').value.trim(); const p = parseInt(tr.querySelector('.row-price-input').value) || 0; if(n) res.push({ name:n, price:p }); }); return res; }
 
-        // 款式控制
         document.getElementById('menuStyleBtn').addEventListener('click', () => { closeSidebar(); const tb=document.getElementById('styleListTbody'); tb.innerHTML=''; (globalConfig.styles || []).forEach(x => addConfigRow(tb, x.name, x.price)); document.getElementById('styleConfigModal').style.display='flex'; });
         document.getElementById('addStyleRowBtn').addEventListener('click', () => addConfigRow(document.getElementById('styleListTbody')));
         document.getElementById('closeStyleModalBtn').addEventListener('click', () => { document.getElementById('styleConfigModal').style.display='none'; });
-        document.getElementById('saveStyleBtn').addEventListener('click', async () => {
-            if(await updateFirebaseConfig({ styles: getTableData('styleListTbody') }, document.getElementById('saveStyleBtn'), "💾 儲存並同步連動")) document.getElementById('styleConfigModal').style.display='none';
-        });
+        document.getElementById('saveStyleBtn').addEventListener('click', async () => { if(await updateFirebaseConfig({ styles: getTableData('styleListTbody') }, document.getElementById('saveStyleBtn'), "💾 儲存並同步連動")) document.getElementById('styleConfigModal').style.display='none'; });
 
-        // 附加控制
         document.getElementById('menuAddonBtn').addEventListener('click', () => { closeSidebar(); const tb=document.getElementById('addonListTbody'); tb.innerHTML=''; (globalConfig.addons || []).forEach(x => addConfigRow(tb, x.name, x.price)); document.getElementById('addonConfigModal').style.display='flex'; });
         document.getElementById('addAddonRowBtn').addEventListener('click', () => addConfigRow(document.getElementById('addonListTbody')));
         document.getElementById('closeAddonModalBtn').addEventListener('click', () => { document.getElementById('addonConfigModal').style.display='none'; });
-        document.getElementById('saveAddonBtn').addEventListener('click', async () => {
-            if(await updateFirebaseConfig({ addons: getTableData('addonListTbody') }, document.getElementById('saveAddonBtn'), "💾 儲存服務項目")) document.getElementById('addonConfigModal').style.display='none';
-        });
+        document.getElementById('saveAddonBtn').addEventListener('click', async () => { if(await updateFirebaseConfig({ addons: getTableData('addonListTbody') }, document.getElementById('saveAddonBtn'), "💾 儲存服務項目")) document.getElementById('addonConfigModal').style.display='none'; });
 
-        // 主副標題控制
         document.getElementById('menuTitleBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('pageTitleInput').value = globalConfig.pageTitle || ''; document.getElementById('pageSubtitleInput').value = globalConfig.pageSubtitle || ''; document.getElementById('textConfigModal').style.display='flex'; });
         document.getElementById('closeTextModalBtn').addEventListener('click', () => { document.getElementById('textConfigModal').style.display='none'; });
-        document.getElementById('saveTextBtn').addEventListener('click', async () => {
-            if(await updateFirebaseConfig({ pageTitle: document.getElementById('pageTitleInput').value.trim(), pageSubtitle: document.getElementById('pageSubtitleInput').value.trim() }, document.getElementById('saveTextBtn'), "💾 儲存並修改前台")) document.getElementById('textConfigModal').style.display='none';
-        });
+        document.getElementById('saveTextBtn').addEventListener('click', async () => { if(await updateFirebaseConfig({ pageTitle: document.getElementById('pageTitleInput').value.trim(), pageSubtitle: document.getElementById('pageSubtitleInput').value.trim() }, document.getElementById('saveTextBtn'), "💾 儲存並修改前台")) document.getElementById('textConfigModal').style.display='none'; });
 
-        // 通用刪除列事件代理 (針對彈出配置視窗內表格)
-        ['timeSlotListTbody','styleListTbody','addonListTbody'].forEach(id => {
-            document.getElementById(id).addEventListener('click', (e) => { if(e.target.classList.contains('btn-delete-row')) e.target.closest('tr').remove(); });
-        });
+        ['timeSlotListTbody','styleListTbody','addonListTbody'].forEach(id => { document.getElementById(id).addEventListener('click', (e) => { if(e.target.classList.contains('btn-delete-row')) e.target.closest('tr').remove(); }); });
 
-        // 合約圖片關閉與下載
         document.getElementById('closeImgModalBtn').addEventListener('click', () => { document.getElementById('imageModal').style.display='none'; });
         document.getElementById('downloadImgBtn').addEventListener('click', () => { const src = document.getElementById('previewImage').src; if(src) window.open(src, '_blank'); });
 
-        // ===================================================
-        // 側邊欄基礎開關動畫設定
-        // ===================================================
+        // 側邊欄基礎開關
         const sidebar = document.getElementById('sidebar'); const overlay = document.getElementById('sidebarOverlay');
         document.getElementById('openSidebarBtn').addEventListener('click', () => { overlay.style.display='block'; setTimeout(()=>{ overlay.style.opacity='1'; sidebar.style.left='0'; },10); });
         function closeSidebar() { sidebar.style.left='-320px'; overlay.style.opacity='0'; setTimeout(()=>{ overlay.style.display='none'; },300); }
         document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar); overlay.addEventListener('click', closeSidebar);
 
-        // ===================================================
         // 顧客歷史模糊快速搜尋
-        // ===================================================
         const searchModal = document.getElementById('searchModal');
         document.getElementById('fabSearchBtn').addEventListener('click', () => { searchModal.style.display='flex'; document.getElementById('searchInput').value=''; document.getElementById('searchResultList').innerHTML='<p style="color:#aaa; text-align:center;">請在上方輸入關鍵字...</p>'; });
         document.getElementById('closeSearchBtn').addEventListener('click', () => { searchModal.style.display='none'; });
@@ -1062,7 +1018,6 @@
             });
         });
 
-        // 啟動與視窗大小調適重整
         window.addEventListener('resize', () => { if(document.getElementById('fullscreenSignOverlay').style.display === 'flex') resizeFullCanvas(); });
         initCanvasEvents();
         initRealtimeSync();
