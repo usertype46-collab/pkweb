@@ -11,11 +11,6 @@
 
     <style>
         /* --- 全局樣式與優雅變數 --- */
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-
         :root {
             --primary-color: #D4B2D4; 
             --accent-color: #C5A059;  
@@ -168,6 +163,7 @@
         .social-icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
         .copyright { font-size: 0.8rem; color: #8C7572; margin-top: 25px; letter-spacing: 0.5px; }
     </style>
+     <link rel="stylesheet" href="./main.css" />
 </head>
 <body>
 
@@ -751,50 +747,7 @@
 
         initSystem();
     </script>
-
-    <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/1.2.0-beta.10/libs/oversea/index.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.CozeWebSDK && window.CozeWebSDK.WebChatClient) {
-                new CozeWebSDK.WebChatClient({
-                    config: {
-                        bot_id: '7654491249436999733',
-                    },
-                    auth: {
-                        type: 'token',
-                        token: 'cztei_0ppOyG4tmhZOnRKtuW8d573Cr0MXTTnxypyTyPirMzixAan3BiBs8jRzXSe9tPtIR',
-                        onRefreshToken: async () => 'token'
-                    },
-                    userInfo: {
-                        id: 'user',
-                        url: 'https://sf-coze-web-cdn.coze.com/obj/eden-sg/lm-lgvj/ljhwZthlaukjlkulzlp/coze/coze-logo.png',
-                        nickname: 'User',
-                    },
-                    ui: {
-                        base: {
-                            icon: 'https://sf-coze-web-cdn.coze.com/obj/eden-sg/lm-lgvj/ljhwZthlaukjlkulzlp/coze/chatsdk-logo.png',
-                            layout: 'pc',
-                            lang: 'zh-TW',
-                            zIndex: 1000
-                        },
-                        asstBtn: {
-                            isNeed: true
-                        },
-                        footer: {
-                            isShow: true,
-                            expressionText: 'Powered by ...',
-                        },
-                        chatBot: {
-                            title: '神の指藝 智能助理',
-                            uploadable: true,
-                            width: 390,
-                        },
-                    },
-                });
-            } else {
-                console.error("CozeWebSDK 載入失敗或未定義");
-            }
-        });
-    </script>
+    
+    <script defer src="https://app.fastbots.ai/embed.js" data-bot-id="cmqqzn69f04atqg1p1ixjidfb"></script>
 </body>
 </html>
