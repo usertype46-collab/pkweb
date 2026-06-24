@@ -101,6 +101,10 @@
         .config-table-wrapper td { padding: 12px 10px; border-bottom: 1px solid #F3EBEB; }
         .input-discount { width: 100%; padding: 10px 14px; border: 2px solid #EADCDD; border-radius: 8px; font-weight: 700; font-size: 1rem; outline: none; transition: var(--transition); }
         .input-discount:focus { border-color: var(--accent-purple); background-color: white; }
+        
+        /* 面板與新功能專用樣式 */
+        .settings-panel { background: #F9F9F9; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #EADCDD; }
+        input[type="range"] { accent-color: var(--accent-purple); height: 6px; background: #EADCDD; border-radius: 5px; outline: none; }
 
         .fullscreen-sign-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #FFFFFF; z-index: 4000; flex-direction: column; }
         .sign-header { padding: 20px; background: var(--main-gradient); color: white; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
@@ -110,15 +114,27 @@
         .sign-footer-controls { padding: 20px; background: white; border-top: 1px solid #EADCDD; display: flex; justify-content: space-between; gap: 15px; align-items: center; }
 
         /* 圖庫管理專用網格 */
-        .gallery-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 15px; }
-        .gallery-admin-item { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 1; border: 2px solid #EADCDD; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: var(--transition); }
-        .gallery-admin-item img { width: 100%; height: 100%; object-fit: cover; }
-        .gallery-admin-item .del-tag { position: absolute; top: 5px; right: 5px; background: rgba(231, 76, 60, 0.9); color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: 700; }
+        .gallery-admin-grid { display: grid; gap: 15px; margin-top: 15px; }
+        /* 預設為兩張並排 */
+        .gallery-admin-grid.layout-2col { grid-template-columns: repeat(2, 1fr); }
+        /* 單張直式 */
+        .gallery-admin-grid.layout-1col { grid-template-columns: 1fr; }
+        
+        .gallery-admin-item { position: relative; border-radius: 10px; overflow: hidden; border: 2px solid #EADCDD; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: var(--transition); background: white; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+        /* 設定直式比例 */
+        .img-wrapper { width: 100%; aspect-ratio: 3/4; overflow: hidden; border-radius: 8px; background: #f0f0f0; display: flex; justify-content: center; align-items: center; }
+        .gallery-admin-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        
+        .gallery-admin-item .del-tag { background: #FFF5F5; color: var(--danger-red); border: 1px solid #F5B7B1; padding: 6px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 700; text-align: center; width: 100%; transition: var(--transition); }
+        .gallery-admin-item .del-tag:hover { background: var(--danger-red); color: white; }
         
         /* 升級版背景卡片專屬樣式 */
-        .gallery-admin-item.active-bg-card { border-color: var(--success-green); box-shadow: 0 0 15px rgba(46,204,113,0.5); }
-        .btn-use-bg { position: absolute; bottom: 5px; left: 5px; background: var(--main-gradient); color: white; border: none; padding: 4px 10px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: 700; }
-        .badge-in-use { position: absolute; bottom: 5px; left: 5px; background: var(--success-green); color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 700; pointer-events: none; }
+        .bg-grid-item { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 16/9; border: 2px solid #EADCDD; }
+        .bg-grid-item img { width: 100%; height: 100%; object-fit: cover; }
+        .bg-grid-item.active-bg-card { border-color: var(--success-green); box-shadow: 0 0 15px rgba(46,204,113,0.5); }
+        .btn-use-bg { position: absolute; bottom: 5px; left: 5px; background: var(--main-gradient); color: white; border: none; padding: 4px 10px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: 700; z-index: 10; }
+        .badge-in-use { position: absolute; bottom: 5px; left: 5px; background: var(--success-green); color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 700; z-index: 10; pointer-events: none; }
+        .bg-del-tag { position: absolute; top: 5px; right: 5px; background: rgba(231, 76, 60, 0.9); color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: 700; z-index: 10; }
 
         .fab-btn { position: fixed; bottom: 30px; right: 30px; z-index: 2000; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-pink); color: white; font-size: 28px; border: none; box-shadow: 0 4px 15px rgba(255, 71, 126, 0.4); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
         .fab-btn:hover { transform: scale(1.1) rotate(10deg); }
@@ -147,7 +163,6 @@
             <li><button id="menuDiscountBtn">⚙️ 優惠活動折扣設定</button></li>
             <li><button id="menuStyleBtn">💅 編輯核心款式與價錢</button></li>
             <li><button id="menuAddonBtn">✨ 編輯附加服務與價錢</button></li>
-            <li><button id="menuTitleBtn">📝 編輯專頁主副標題文字</button></li>
         </ul>
     </div>
 
@@ -204,8 +219,30 @@
     <div id="bgUploadModal" class="modal-overlay">
         <div class="modal-content" style="max-width: 650px;">
             <h3>🖼️ 前台大圖背景庫動態管理</h3>
-            <p style="font-size:0.85rem; color:#888; text-align:center; margin-bottom:15px;">上傳多張背景隨時替換，點選「✨ 套用」即可一鍵無縫渲染變更前台客人的網頁背景！</p>
             
+            <div class="settings-panel">
+                <h4 style="margin-bottom:12px; color:var(--accent-purple); font-size:1rem;">🎛️ 背景特效與文字設定</h4>
+                
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:0.85rem; font-weight:700;">圖片放大縮小比例 (<span id="bgScaleDisplay">100</span>%)</label>
+                    <input type="range" id="bgScaleInput" min="50" max="200" value="100" style="width:100%; margin-top:5px;">
+                </div>
+                
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="text" id="bgTitleInput" class="input-discount" placeholder="輸入網頁主標題文字...">
+                        <button id="addBgTitleBtn" class="btn-action-ui btn-complete-row" style="white-space:nowrap;">新增</button>
+                        <button id="delBgTitleBtn" class="btn-action-ui btn-delete-row" style="white-space:nowrap;">刪除</button>
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input type="text" id="bgSubtitleInput" class="input-discount" placeholder="輸入網頁副標題文字...">
+                        <button id="addBgSubtitleBtn" class="btn-action-ui btn-complete-row" style="white-space:nowrap;">新增</button>
+                        <button id="delBgSubtitleBtn" class="btn-action-ui btn-delete-row" style="white-space:nowrap;">刪除</button>
+                    </div>
+                </div>
+                <button id="saveBgSettingsBtn" class="btn-refresh" style="width:100%; margin-top:15px;">💾 同步儲存比例與文字</button>
+            </div>
+
             <div style="border:2px dashed #EADCDD; border-radius:12px; padding:20px; text-align:center; background:#FCFAFA; margin-bottom:20px;">
                 <input type="file" id="bgFileInput" accept="image/jpeg,image/png" style="display:none;">
                 <button class="btn-refresh" onclick="document.getElementById('bgFileInput').click()">➕ 上傳新背景圖片</button>
@@ -213,7 +250,7 @@
             </div>
 
             <label style="font-weight:700; font-size:0.9rem; color:#4A3B43;">雲端大圖背景庫清單：</label>
-            <div class="gallery-admin-grid" id="bgAdminGrid"></div>
+            <div class="gallery-admin-grid layout-2col" id="bgAdminGrid"></div>
 
             <div class="modal-actions" style="margin-top:20px;">
                 <button class="btn-modal btn-cancel" id="closeBgBtn" style="width:100%;">關閉背景庫</button>
@@ -222,16 +259,36 @@
     </div>
 
     <div id="galleryModal" class="modal-overlay">
-        <div class="modal-content" style="max-width:600px;">
+        <div class="modal-content" style="max-width:700px;">
             <h3>📸 上傳作品集與排版管理</h3>
-            <p style="font-size:0.85rem; color:#888; text-align:center; margin-bottom:15px;">上傳的照片將即時同步顯示於前台客人的「作品集」燈箱中。</p>
+            
+            <div class="settings-panel">
+                <h4 style="margin-bottom:12px; color:var(--accent-purple); font-size:1rem;">🎛️ 排版與顯示設定</h4>
+                <div style="display:flex; gap:15px; margin-bottom:10px; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:200px;">
+                        <label style="font-size:0.85rem; font-weight:700; display:block; margin-bottom:5px;">前台與預覽排版方式</label>
+                        <select id="portfolioLayoutSelect" class="input-discount" style="padding:8px;">
+                            <option value="1col">單張直式 (大圖呈現)</option>
+                            <option value="2col">2張並排直式 (並列呈現)</option>
+                        </select>
+                    </div>
+                    <div style="flex:1; min-width:200px;">
+                        <label style="font-size:0.85rem; font-weight:700; display:block; margin-bottom:5px;">圖片縮放比例 (<span id="portScaleDisplay">100</span>%)</label>
+                        <input type="range" id="portScaleInput" min="50" max="150" value="100" style="width:100%; margin-top:8px;">
+                    </div>
+                </div>
+                <button id="savePortSettingsBtn" class="btn-refresh" style="width:100%; margin-top:10px;">💾 儲存全域排版與縮放設定</button>
+            </div>
+
             <div style="border:2px dashed #EADCDD; border-radius:12px; padding:20px; text-align:center; background:#FCFAFA; margin-bottom:20px;">
                 <input type="file" id="galleryFileInput" accept="image/jpeg,image/png" style="display:none;">
                 <button class="btn-refresh" onclick="document.getElementById('galleryFileInput').click()">➕ 新增作品照片</button>
                 <div id="galleryFileNameDisplay" style="margin-top:8px; font-size:0.85rem; color:#555;"></div>
             </div>
-            <label style="font-weight:700; font-size:0.9rem;">目前作品照片清單 (點擊刪除將同步移除)：</label>
-            <div class="gallery-admin-grid" id="galleryAdminGrid"></div>
+            
+            <label style="font-weight:700; font-size:0.9rem;">目前作品照片清單 (可個別新增文字標示)：</label>
+            <div class="gallery-admin-grid layout-2col" id="galleryAdminGrid"></div>
+            
             <div class="modal-actions" style="margin-top:20px;"><button class="btn-modal btn-cancel" id="closeGalleryBtn" style="width:100%;">關閉視窗</button></div>
         </div>
     </div>
@@ -271,17 +328,6 @@
             <div class="config-table-wrapper"><table><thead><tr><th>服務名稱</th><th>價格 (元)</th><th style="text-align:center;">操作</th></tr></thead><tbody id="addonListTbody"></tbody></table></div>
             <button class="btn-refresh" id="addAddonRowBtn" style="width: 100%; margin-bottom: 15px;">➕ 新增服務</button>
             <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeAddonModalBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveAddonBtn">💾 儲存服務</button></div>
-        </div>
-    </div>
-
-    <div id="textConfigModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>📝 編輯專頁標題與副標題</h3>
-            <div style="margin: 20px 0; display:flex; flex-direction:column; gap:15px;">
-                <div><label style="font-weight: 700; display:block; font-size:0.9rem;">主標題</label><input type="text" id="pageTitleInput" class="input-discount"></div>
-                <div><label style="font-weight: 700; display:block; font-size:0.9rem;">副標題說明文</label><input type="text" id="pageSubtitleInput" class="input-discount"></div>
-            </div>
-            <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeTextModalBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveTextBtn">💾 儲存修改</button></div>
         </div>
     </div>
 
@@ -343,7 +389,11 @@
         const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
         let targetDeleteId = null; let targetCompleteId = null; let globalBookingsData = []; 
-        let globalConfig = { firstTimeDiscount: 95, pageTitle: "", pageSubtitle: "", styles: [], addons: [], timeSlots: [], shopAddress: "", shopPhone: "", shopIg: "", shopLine: "", shopFb: "", activeBgUrl: "" }; 
+        let globalConfig = { 
+            firstTimeDiscount: 95, pageTitle: "", pageSubtitle: "", styles: [], addons: [], timeSlots: [], 
+            shopAddress: "", shopPhone: "", shopIg: "", shopLine: "", shopFb: "", activeBgUrl: "",
+            bgScale: 100, portfolioLayout: '2col', portfolioScale: 100, portfolioCaptions: {}
+        }; 
         const screenshotsMap = new Map();
 
         const fullCanvas = document.getElementById('fullCanvas'); const ctx = fullCanvas.getContext('2d');
@@ -377,8 +427,45 @@
         document.getElementById('signatureInputTech').addEventListener('input', () => { if(hasDrawnTech) { ctx.clearRect(0,0,fullCanvas.width,fullCanvas.height); hasDrawnTech = false; } });
 
         // ===================================================
-        // 核心改造：動態背景圖庫管理（Supabase `website-assets/bg_*`）
+        // 通用設定存取函式
         // ===================================================
+        async function saveCfg(dataObj, btn, text) { 
+            try { 
+                if(btn) { btn.innerText="儲存中..."; btn.disabled=true; }
+                await setDoc(doc(db, "system_settings", "booking_config"), dataObj, { merge: true }); 
+                alert("🎉 設定已即時同步連動至前台！"); 
+                return true; 
+            } catch(e) { 
+                alert("儲存失敗: " + e.message); 
+                return false; 
+            } finally { 
+                if(btn) { btn.innerText=text; btn.disabled=false; }
+            } 
+        }
+
+        // ===================================================
+        // 增強版：大圖背景管理 (含縮放與標題設定)
+        // ===================================================
+        // 綁定 Slider 事件
+        document.getElementById('bgScaleInput').addEventListener('input', (e) => document.getElementById('bgScaleDisplay').innerText = e.target.value);
+        
+        // 標題新增按鈕
+        document.getElementById('addBgTitleBtn').addEventListener('click', () => saveCfg({ pageTitle: document.getElementById('bgTitleInput').value.trim() }, document.getElementById('addBgTitleBtn'), "新增"));
+        document.getElementById('addBgSubtitleBtn').addEventListener('click', () => saveCfg({ pageSubtitle: document.getElementById('bgSubtitleInput').value.trim() }, document.getElementById('addBgSubtitleBtn'), "新增"));
+        
+        // 標題刪除/清除按鈕
+        document.getElementById('delBgTitleBtn').addEventListener('click', () => { document.getElementById('bgTitleInput').value=''; saveCfg({ pageTitle: "" }, document.getElementById('delBgTitleBtn'), "刪除"); });
+        document.getElementById('delBgSubtitleBtn').addEventListener('click', () => { document.getElementById('bgSubtitleInput').value=''; saveCfg({ pageSubtitle: "" }, document.getElementById('delBgSubtitleBtn'), "刪除"); });
+
+        // 儲存背景面板設定
+        document.getElementById('saveBgSettingsBtn').addEventListener('click', () => {
+            saveCfg({ 
+                bgScale: parseInt(document.getElementById('bgScaleInput').value) || 100,
+                pageTitle: document.getElementById('bgTitleInput').value.trim(),
+                pageSubtitle: document.getElementById('bgSubtitleInput').value.trim()
+            }, document.getElementById('saveBgSettingsBtn'), "💾 同步儲存比例與文字");
+        });
+
         async function renderAdminBgGallery() {
             const grid = document.getElementById('bgAdminGrid');
             grid.innerHTML = '<p style="color:#aaa; font-size:0.85rem; grid-column:1/-1;">正在讀取 Supabase 雲端背景圖庫...</p>';
@@ -395,21 +482,28 @@
                     const isUsing = (pUrl.publicUrl === globalConfig.activeBgUrl);
                     
                     const div = document.createElement('div');
-                    div.className = `gallery-admin-item ${isUsing ? 'active-bg-card' : ''}`;
+                    div.className = `bg-grid-item ${isUsing ? 'active-bg-card' : ''}`;
                     div.innerHTML = `
                         <img src="${pUrl.publicUrl}">
                         ${isUsing ? '<span class="badge-in-use">使用中</span>' : `<button class="btn-use-bg" data-url="${pUrl.publicUrl}">✨ 套用</button>`}
-                        <button class="del-tag" data-name="${item.name}">刪除</button>
+                        <button class="bg-del-tag" data-name="${item.name}">刪除</button>
                     `;
                     grid.appendChild(div);
                 });
             } catch(e) { grid.innerHTML = '讀取背景圖庫失敗。'; }
         }
 
-        document.getElementById('menuBgUploadBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('bgUploadModal').style.display='flex'; renderAdminBgGallery(); });
+        document.getElementById('menuBgUploadBtn').addEventListener('click', () => { 
+            closeSidebar(); 
+            document.getElementById('bgScaleInput').value = globalConfig.bgScale || 100;
+            document.getElementById('bgScaleDisplay').innerText = globalConfig.bgScale || 100;
+            document.getElementById('bgTitleInput').value = globalConfig.pageTitle || '';
+            document.getElementById('bgSubtitleInput').value = globalConfig.pageSubtitle || '';
+            document.getElementById('bgUploadModal').style.display='flex'; 
+            renderAdminBgGallery(); 
+        });
         document.getElementById('closeBgBtn').addEventListener('click', () => { document.getElementById('bgUploadModal').style.display='none'; });
         
-        // 上傳新背景
         document.getElementById('bgFileInput').addEventListener('change', async (e) => {
             if(e.target.files.length > 0) {
                 const file = e.target.files[0];
@@ -420,7 +514,6 @@
                     if(error) throw error;
                     
                     const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(uniqName);
-                    // 自動同步設定為當前使用中背景
                     await setDoc(doc(db, "system_settings", "booking_config"), { activeBgUrl: pUrl.publicUrl }, { merge: true });
                     
                     document.getElementById('bgFileNameDisplay').innerText = '';
@@ -430,7 +523,6 @@
             }
         });
 
-        // 背景圖庫操作代理（套用 / 刪除）
         document.getElementById('bgAdminGrid').addEventListener('click', async (e) => {
             if(e.target.classList.contains('btn-use-bg')) {
                 const targetUrl = e.target.getAttribute('data-url');
@@ -438,7 +530,7 @@
                 alert('✅ 已成功變更前台網頁大背景！');
                 renderAdminBgGallery();
             }
-            if(e.target.classList.contains('del-tag')) {
+            if(e.target.classList.contains('bg-del-tag')) {
                 const targetName = e.target.getAttribute('data-name');
                 if(confirm('確定要直接從 Supabase 儲存桶徹底移除這張背景圖嗎？')) {
                     const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(`website-assets/${targetName}`);
@@ -450,28 +542,69 @@
         });
 
         // ===================================================
-        // 原有作品集動態圖庫管理
+        // 增強版：作品集排版與標示管理
         // ===================================================
+        // 排版與縮放設定面板事件
+        document.getElementById('portScaleInput').addEventListener('input', (e) => document.getElementById('portScaleDisplay').innerText = e.target.value);
+        document.getElementById('portfolioLayoutSelect').addEventListener('change', (e) => {
+            const grid = document.getElementById('galleryAdminGrid');
+            grid.className = `gallery-admin-grid layout-${e.target.value}`;
+        });
+        
+        document.getElementById('savePortSettingsBtn').addEventListener('click', () => {
+            saveCfg({ 
+                portfolioLayout: document.getElementById('portfolioLayoutSelect').value,
+                portfolioScale: parseInt(document.getElementById('portScaleInput').value) || 100
+            }, document.getElementById('savePortSettingsBtn'), "💾 儲存全域排版與縮放設定");
+        });
+
         async function renderAdminGallery() {
             const grid = document.getElementById('galleryAdminGrid');
+            const layout = globalConfig.portfolioLayout || '2col';
+            const scale = (globalConfig.portfolioScale || 100) / 100;
+            const captions = globalConfig.portfolioCaptions || {};
+            
+            grid.className = `gallery-admin-grid layout-${layout}`;
             grid.innerHTML = '<p style="color:#aaa; font-size:0.85rem; grid-column:1/-1;">正在讀取作品集照片...</p>';
+            
             try {
                 const { data, error } = await supabaseClient.storage.from('receipts').list('website-assets', { limit: 100 });
                 if(error) throw error;
                 const filtered = data.filter(x => x.name.startsWith('portfolio_'));
                 grid.innerHTML = '';
+                
                 if(filtered.length === 0) { grid.innerHTML = '<p style="color:#ccc; font-size:0.85rem; grid-column:1/-1; text-align:center;">目前無作品照片</p>'; return; }
+                
                 filtered.forEach(item => {
                     const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(`website-assets/${item.name}`);
-                    const div = document.createElement('div'); div.className = 'gallery-admin-item';
-                    div.innerHTML = `<img src="${pUrl.publicUrl}"><button class="del-tag" data-name="${item.name}">刪除</button>`;
+                    const div = document.createElement('div'); 
+                    div.className = 'gallery-admin-item';
+                    
+                    div.innerHTML = `
+                        <div class="img-wrapper">
+                            <img src="${pUrl.publicUrl}" style="transform: scale(${scale});">
+                        </div>
+                        <input type="text" class="input-discount cap-input" data-name="${item.name}" placeholder="輸入款式名稱或介紹..." value="${captions[item.name] || ''}" style="padding: 6px 10px; font-size: 0.85rem;">
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-save-cap" data-name="${item.name}" style="flex:1; background:var(--accent-purple); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:700;">💾 存標示</button>
+                            <button class="del-tag" data-name="${item.name}" style="flex:1;">刪除圖</button>
+                        </div>
+                    `;
                     grid.appendChild(div);
                 });
             } catch(e) { grid.innerHTML = '讀取作品集目錄清單失敗。'; }
         }
 
-        document.getElementById('menuGalleryBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('galleryModal').style.display='flex'; renderAdminGallery(); });
+        document.getElementById('menuGalleryBtn').addEventListener('click', () => { 
+            closeSidebar(); 
+            document.getElementById('portfolioLayoutSelect').value = globalConfig.portfolioLayout || '2col';
+            document.getElementById('portScaleInput').value = globalConfig.portfolioScale || 100;
+            document.getElementById('portScaleDisplay').innerText = globalConfig.portfolioScale || 100;
+            document.getElementById('galleryModal').style.display='flex'; 
+            renderAdminGallery(); 
+        });
         document.getElementById('closeGalleryBtn').addEventListener('click', () => { document.getElementById('galleryModal').style.display='none'; });
+        
         document.getElementById('galleryFileInput').addEventListener('change', async (e) => {
             if(e.target.files.length > 0) {
                 const file = e.target.files[0]; document.getElementById('galleryFileNameDisplay').innerText = `上傳中...`;
@@ -482,18 +615,37 @@
                 } catch(err) { alert('上傳作品失敗'); }
             }
         });
+        
+        // 綁定圖庫的文字標示與刪除按鈕
         document.getElementById('galleryAdminGrid').addEventListener('click', async (e) => {
             if(e.target.classList.contains('del-tag')) {
                 if(confirm('確定移除這張作品照？')) {
-                    await supabaseClient.storage.from('receipts').remove([`website-assets/${e.target.getAttribute('data-name')}`]);
+                    const name = e.target.getAttribute('data-name');
+                    await supabaseClient.storage.from('receipts').remove([`website-assets/${name}`]);
+                    // 同步清理標示文字
+                    let newCaps = { ...(globalConfig.portfolioCaptions || {}) };
+                    if(newCaps[name]) { delete newCaps[name]; await saveCfg({ portfolioCaptions: newCaps }); }
                     renderAdminGallery();
                 }
+            }
+            if(e.target.classList.contains('btn-save-cap')) {
+                const name = e.target.getAttribute('data-name');
+                const inputVal = e.target.parentElement.parentElement.querySelector('.cap-input').value.trim();
+                let newCaps = { ...(globalConfig.portfolioCaptions || {}) };
+                newCaps[name] = inputVal;
+                
+                const btn = e.target; btn.innerText = "儲存中..."; btn.disabled = true;
+                await setDoc(doc(db, "system_settings", "booking_config"), { portfolioCaptions: newCaps }, { merge: true });
+                btn.innerText = "✅ 已存"; btn.style.background = "var(--success-green)";
+                setTimeout(() => { btn.innerText = "💾 存標示"; btn.style.background = "var(--accent-purple)"; btn.disabled = false; }, 1500);
             }
         });
 
         // --- 即時清單同步渲染 ---
         function initRealtimeSync() {
-            onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => { if (docSnap.exists()) globalConfig = { ...globalConfig, ...docSnap.data() }; });
+            onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => { 
+                if (docSnap.exists()) globalConfig = { ...globalConfig, ...docSnap.data() }; 
+            });
 
             onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
                 let list = []; snapshot.forEach(d => list.push({ id: d.id, ...d.data() }));
@@ -576,9 +728,7 @@
         document.getElementById('cancelDeleteBtn').addEventListener('click', () => document.getElementById('deleteModal').style.display='none');
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => { if(targetDeleteId) { await deleteDoc(doc(db, "nail_bookings", targetDeleteId)); document.getElementById('deleteModal').style.display='none'; targetDeleteId=null; } });
 
-        // 其餘配置通用綁定
-        async function saveCfg(dataObj, btn, text) { try { btn.innerText="儲存中..."; btn.disabled=true; await setDoc(doc(db, "system_settings", "booking_config"), dataObj, { merge: true }); alert("🎉 前台已即時同步連動！"); return true; } catch(e) { alert("儲存失敗"); return false; } finally { btn.innerText=text; btn.disabled=false; } }
-
+        // 其他基礎配置通用綁定
         document.getElementById('menuInfoBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('infoAddress').value=globalConfig.shopAddress||''; document.getElementById('infoPhone').value=globalConfig.shopPhone||''; document.getElementById('infoIg').value=globalConfig.shopIg||''; document.getElementById('infoLine').value=globalConfig.shopLine||''; document.getElementById('infoFb').value=globalConfig.shopFb||''; document.getElementById('infoModal').style.display='flex'; });
         document.getElementById('closeInfoBtn').addEventListener('click', () => document.getElementById('infoModal').style.display='none');
         document.getElementById('saveInfoBtn').addEventListener('click', async () => { if(await saveCfg({ shopAddress:document.getElementById('infoAddress').value.trim(), shopPhone:document.getElementById('infoPhone').value.trim(), shopIg:document.getElementById('infoIg').value.trim(), shopLine:document.getElementById('infoLine').value.trim(), shopFb:document.getElementById('infoFb').value.trim() }, document.getElementById('saveInfoBtn'), "儲存設定")) document.getElementById('infoModal').style.display='none'; });
@@ -605,10 +755,6 @@
         document.getElementById('addAddonRowBtn').addEventListener('click', () => addTr2(document.getElementById('addonListTbody')));
         document.getElementById('closeAddonModalBtn').addEventListener('click', () => document.getElementById('addonConfigModal').style.display='none');
         document.getElementById('saveAddonBtn').addEventListener('click', async () => { if(await saveCfg({addons:getTb2('addonListTbody')}, document.getElementById('saveAddonBtn'), "💾 儲存服務")) document.getElementById('addonConfigModal').style.display='none'; });
-
-        document.getElementById('menuTitleBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('pageTitleInput').value=globalConfig.pageTitle||''; document.getElementById('pageSubtitleInput').value=globalConfig.pageSubtitle||''; document.getElementById('textConfigModal').style.display='flex'; });
-        document.getElementById('closeTextModalBtn').addEventListener('click', () => document.getElementById('textConfigModal').style.display='none');
-        document.getElementById('saveTextBtn').addEventListener('click', async () => { if(await saveCfg({pageTitle:document.getElementById('pageTitleInput').value.trim(), pageSubtitle:document.getElementById('pageSubtitleInput').value.trim()}, document.getElementById('saveTextBtn'), "💾 儲存修改")) document.getElementById('textConfigModal').style.display='none'; });
 
         ['timeSlotListTbody','styleListTbody','addonListTbody'].forEach(id => document.getElementById(id).addEventListener('click', e => { if(e.target.classList.contains('btn-delete-row')) e.target.closest('tr').remove(); }));
 
