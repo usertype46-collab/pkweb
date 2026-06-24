@@ -37,14 +37,12 @@
             color: var(--text-color); 
             line-height: 1.65; 
             overflow-x: hidden; 
-            /* 動態背景圖轉場設定 */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             transition: background-image 0.6s ease-in-out;
         }
 
-        /* 改造1：Header完全透明化，讓大背景圖完美透出，並加上文字發光陰影確保任何圖底都清晰 */
         header { 
             text-align: center; 
             padding: 50px 20px; 
@@ -77,7 +75,6 @@
         h2 span { color: var(--accent-color); font-size: 1.2rem; }
         .section-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border-radius: var(--border-radius); padding: 35px; box-shadow: var(--shadow-md); border: 1px solid rgba(239, 228, 223, 0.8); transition: var(--transition); }
 
-        /* --- 款式美化網格 --- */
         .style-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; margin-bottom: 35px; }
         .style-card { border: 1px solid #EFE4DF; border-radius: 12px; padding: 25px 20px; text-align: center; cursor: pointer; transition: var(--transition); background: #FFF; position: relative; overflow: hidden; box-shadow: var(--shadow-sm); }
         .style-card:hover { transform: translateY(-4px); border-color: var(--primary-color); box-shadow: 0 8px 20px rgba(212, 178, 212, 0.25); }
@@ -89,7 +86,6 @@
         .style-name { font-weight: 700; font-size: 1.15rem; margin-bottom: 10px; color: #3A2E2B; letter-spacing: 0.5px; }
         .style-price { color: var(--accent-dark); font-weight: 700; font-size: 1.3rem; font-family: 'Cinzel', sans-serif; }
 
-        /* --- 附加服務美化 --- */
         .addons-list { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         @media (max-width: 600px) { .addons-list { grid-template-columns: 1fr; } }
         .addon-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #FFF; border: 1px solid #EFE4DF; border-radius: 10px; cursor: pointer; transition: var(--transition); box-shadow: var(--shadow-sm); }
@@ -100,7 +96,6 @@
         .addon-label-text { font-weight: 500; font-size: 1rem; color: var(--text-color); }
         .addon-price-text { color: var(--accent-dark); font-weight: 600; font-size: 1.05rem; }
 
-        /* --- 表單控制元件 --- */
         .form-group { margin-bottom: 22px; }
         .form-group label { display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: #3A2E2B; }
         .form-control { width: 100%; padding: 14px 16px; border: 1px solid #DCD1CC; border-radius: 10px; font-size: 1rem; color: var(--text-color); background-color: #FAFAFA; transition: var(--transition); font-family: inherit; }
@@ -108,18 +103,15 @@
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 
-        /* --- 計價總結區塊 --- */
         .price-summary { background: linear-gradient(135deg, #423633 0%, #2A201E 100%); color: #FFF; padding: 28px; border-radius: 12px; margin-bottom: 28px; box-shadow: 0 8px 20px rgba(42,32,30,0.15); }
         .price-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; color: #D3C4BF; }
         .discount-row { color: #FFAAA6; font-weight: 600; }
         .price-total { display: flex; justify-content: space-between; margin-top: 18px; padding-top: 18px; border-top: 1px solid #5A4C49; font-size: 1.5rem; font-weight: 700; color: #F3D9B1; font-family: 'Cinzel', 'Noto Sans TC', serif; }
 
-        /* --- 按鈕樣式 --- */
         .btn-submit, .btn-trigger { width: 100%; background: linear-gradient(90deg, #E5C07B 0%, #C5A059 100%); color: white; border: none; padding: 16px; font-size: 1.1rem; font-weight: 700; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 20px rgba(197, 160, 89, 0.25); transition: var(--transition); text-align: center; letter-spacing: 1px; }
         .btn-submit:hover, .btn-trigger:hover { opacity: 0.95; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(197, 160, 89, 0.35); }
         .btn-submit:disabled { background: #D2C9C5; cursor: not-allowed; box-shadow: none; transform: none; }
 
-        /* --- 全螢幕合約與簽名燈箱 --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; padding: 0; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-container { background: #FFF; width: 100vw; height: 100vh; max-width: 100%; max-height: 100%; display: flex; flex-direction: column; overflow: hidden; animation: zoomInRec 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
@@ -180,6 +172,34 @@
         .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
         .gallery-item:hover img { transform: scale(1.05); }
 
+        /* --- 智能客服 UI 樣式 --- */
+        .ai-fab { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #C5A059 0%, #A67C37 100%); color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 25px rgba(197, 160, 89, 0.4); z-index: 1500; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border: 2px solid #FFF; }
+        .ai-fab:hover { transform: scale(1.1) rotate(5deg); }
+        .ai-fab svg { width: 32px; height: 32px; fill: currentColor; }
+        
+        .ai-chat-window { position: fixed; bottom: 110px; right: 30px; width: 360px; height: 520px; background: #FFF; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 1500; opacity: 0; pointer-events: none; transition: all 0.3s ease; transform: translateY(20px); border: 1px solid #EFE4DF; overflow: hidden; }
+        .ai-chat-window.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        @media (max-width: 480px) {
+            .ai-chat-window { width: calc(100% - 40px); right: 20px; bottom: 100px; height: 60vh; }
+        }
+        
+        .ai-chat-header { background: linear-gradient(135deg, #423633 0%, #2A201E 100%); color: #F3D9B1; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; letter-spacing: 1px; }
+        .ai-chat-header span { display: flex; align-items: center; gap: 8px; }
+        .ai-chat-close { background: none; border: none; color: #D3C4BF; font-size: 1.5rem; cursor: pointer; transition: var(--transition); }
+        .ai-chat-close:hover { color: #FFF; }
+        
+        .ai-chat-body { flex: 1; padding: 20px; overflow-y: auto; background: #FAF6F0; display: flex; flex-direction: column; gap: 15px; }
+        .chat-msg { max-width: 80%; padding: 12px 16px; border-radius: 14px; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; }
+        .chat-msg.model { background: #FFF; border: 1px solid #EFE4DF; color: #4A3E3D; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .chat-msg.user { background: var(--primary-color); color: #FFF; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 2px 5px rgba(212, 178, 212, 0.2); }
+        
+        .ai-chat-footer { padding: 15px; background: #FFF; border-top: 1px solid #EFE4DF; display: flex; gap: 10px; }
+        .ai-chat-input { flex: 1; padding: 12px 15px; border: 1px solid #DCD1CC; border-radius: 20px; font-size: 0.95rem; font-family: inherit; transition: var(--transition); outline: none; }
+        .ai-chat-input:focus { border-color: var(--accent-color); }
+        .ai-chat-send { background: var(--accent-color); color: #FFF; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: var(--transition); }
+        .ai-chat-send:hover { background: var(--accent-dark); transform: scale(1.05); }
+        .ai-chat-send svg { width: 18px; height: 18px; fill: currentColor; }
+
         footer { background: #3A2E2B; color: #E5DDD8; padding: 50px 20px; border-top: 4px solid var(--accent-color); font-size: 0.95rem; text-align: center; position: relative; z-index: 10; }
         .footer-container { max-width: 800px; margin: 0 auto; }
         .store-info { margin-bottom: 30px; line-height: 1.8; }
@@ -200,6 +220,26 @@
         <div class="floating-item" id="openPortfolioBtn">
             <svg style="width:20px; height:20px; fill:currentColor;" viewBox="0 0 24 24"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/></svg>
             <span>作品集</span>
+        </div>
+    </div>
+
+    <div class="ai-fab" id="aiFabBtn">
+        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
+    </div>
+    
+    <div class="ai-chat-window" id="aiChatWindow">
+        <div class="ai-chat-header">
+            <span>✨ 預約顧問 Gemini</span>
+            <button class="ai-chat-close" id="aiChatCloseBtn">&times;</button>
+        </div>
+        <div class="ai-chat-body" id="aiChatBody">
+            <div class="chat-msg model">✦ 親愛的客戶您好，我是神の指藝智能顧問。有任何關於美甲款式、保固範圍或預約的問題，歡迎隨時詢問我喔！</div>
+        </div>
+        <div class="ai-chat-footer">
+            <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="輸入訊息詢問顧問...">
+            <button class="ai-chat-send" id="aiChatSendBtn">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
         </div>
     </div>
 
@@ -406,8 +446,8 @@
         <div class="footer-container">
             <div class="store-info">
                 <div class="store-title">神の指藝 Beautiful moment.</div>
-                <div class="store-detail-item" id="ftAddr">🏠 <strong>實體店面地址：</strong> 屏東縣潮州鎮三德路國際鄉園D棟8樓</div>
-                <div class="store-detail-item" id="ftPhone">📞 <strong>客戶預約及聯絡電話：</strong> 0900-123-456</div>
+                <div class="store-detail-item" id="ftAddr">🏠 <strong>地址：</strong> 屏東縣潮州鎮三德路國際鄉園D棟8樓</div>
+                <div class="store-detail-item" id="ftPhone">📞 <strong>電話：</strong> 0900-123-456</div>
                 <div class="store-detail-item">⏰ <strong>營業時間：</strong> 週一至週日 08:00 - 22:00 (全預約制)</div>
             </div>
 
@@ -427,9 +467,9 @@
     </footer>
 
     <script type="module">
+        // 匯入必要的 Firestore 工具包含 query 和 orderBy 以便監聽 AI 聊天記錄
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        // 導入 Supabase SDK（與後台完全對齊）
+        import { getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
         
         const firebaseConfig = {
@@ -448,7 +488,6 @@
         const supabaseAnonKey = 'sb_publishable_TR5C2Zc7eOj9uUosUUsX4g_KbBOwey2';
         const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-        // Base64轉Blob輔助（上傳圖床用）
         function b64toBlob(b64Data, contentType='') {
             const byteCharacters = atob(b64Data);
             const byteArrays = [];
@@ -471,14 +510,13 @@
         let nailStyles = []; let addonServices = []; let systemDiscount = 0.95; 
         let currentSelection = { selectedStyle: null, selectedAddons: new Set() };
 
-        // 同步載入雲端作品集照片
         async function fetchPortfolioGallery() {
             const grid = document.getElementById('dynamicGalleryGrid');
             try {
                 const { data, error } = await supabase.storage.from('receipts').list('website-assets', { limit: 100 });
                 if(error) throw error;
                 const pFiles = data.filter(x => x.name.startsWith('portfolio_'));
-                if(pFiles.length === 0) { grid.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1;">闆闆尚未上傳作品集照片</p>'; return; }
+                if(pFiles.length === 0) { grid.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1;">尚未上傳作品集照片</p>'; return; }
                 
                 grid.innerHTML = '';
                 pFiles.forEach(f => {
@@ -497,7 +535,6 @@
                     if (data.pageTitle) document.getElementById('salonTitle').innerText = data.pageTitle;
                     if (data.pageSubtitle) document.getElementById('salonSubtitle').innerText = data.pageSubtitle;
                     
-                    // 動態切換大圖背景
                     if (data.activeBgUrl) {
                         document.body.style.backgroundImage = `url('${data.activeBgUrl}')`;
                     } else {
@@ -509,16 +546,14 @@
                         document.getElementById('discountLabelTitle').innerText = `新客優惠活動 (${data.firstTimeDiscount}折)`;
                     }
 
-                    // 綁定動態預約時段
                     const timeSelect = document.getElementById('bookingTime');
                     timeSelect.innerHTML = '<option value="">請選擇時段</option>';
                     (data.timeSlots || ['10:00','13:00','16:00','19:00']).forEach(t => {
                         timeSelect.innerHTML += `<option value="${t}">${t}</option>`;
                     });
 
-                    // 同步門市資訊
-                    if(data.shopAddress) document.getElementById('ftAddr').innerHTML = `🏠 <strong>實體店面地址：</strong> ${data.shopAddress}`;
-                    if(data.shopPhone) document.getElementById('ftPhone').innerHTML = `📞 <strong>聯絡電話：</strong> ${data.shopPhone}`;
+                    if(data.shopAddress) document.getElementById('ftAddr').innerHTML = `🏠 <strong>地址：</strong> ${data.shopAddress}`;
+                    if(data.shopPhone) document.getElementById('ftPhone').innerHTML = `📞 <strong>電話：</strong> ${data.shopPhone}`;
                     if(data.shopIg) document.getElementById('ftIg').href = data.shopIg;
                     if(data.shopLine) document.getElementById('ftLine').href = data.shopLine;
                     if(data.shopFb) document.getElementById('ftFb').href = data.shopFb;
@@ -575,7 +610,6 @@
             return { stylePrice, addonPrice, discount, total };
         }
 
-        // --- 全螢幕電子簽章邏輯 ---
         const modalOverlay = document.getElementById('modalOverlay'); const canvas = document.getElementById('sigCanvas');
         const ctx = canvas.getContext('2d'); const sigTextInput = document.getElementById('sigTextInput');
         let isDrawing = false; let sigMode = 'canvas'; 
@@ -613,12 +647,10 @@
 
         function isCanvasBlank(c) { const b = document.createElement('canvas'); b.width = c.width; b.height = c.height; return c.toDataURL() === b.toDataURL(); }
 
-        // 作品集彈出
         const pOverlay = document.getElementById('portfolioOverlay');
         document.getElementById('openPortfolioBtn').addEventListener('click', () => pOverlay.classList.add('active'));
         document.getElementById('closePortfolioBtn').addEventListener('click', () => pOverlay.classList.remove('active'));
 
-        // --- 送出資料至 Firebase & Supabase ---
         const submitFormBtn = document.getElementById('submitFormBtn');
 
         submitFormBtn.addEventListener('click', async () => {
@@ -635,7 +667,6 @@
 
             let finalSigPayload = "";
             try {
-                // 改造3：手寫簽章不再轉成龐大Base64存入資料庫，直接上傳至 Supabase `signatures/` 目錄
                 if (sigMode === 'canvas') {
                     if (isCanvasBlank(canvas)) { alert("請完成顧客手寫簽名！"); submitFormBtn.disabled = false; submitFormBtn.innerText = "確認無誤並送出預約申請"; return; }
                     const b64 = canvas.toDataURL('image/png').split(',')[1];
@@ -659,14 +690,13 @@
                     selectedAddons: Array.from(currentSelection.selectedAddons).map(item => item.name),
                     priceCalculations: { basePrice: prices.stylePrice, addonPrice: prices.addonPrice, discountPrice: prices.discount, totalPrice: prices.total },
                     agreedToTerms: true,
-                    customerSignature: finalSigPayload, // 乾淨的 Supabase URL 或 打字字串
+                    customerSignature: finalSigPayload,
                     techSignature: null, status: "待確認", warrantyScreenshot: null, 
                     createdAt: serverTimestamp()
                 };
 
                 const docRef = await addDoc(collection(db, "nail_bookings"), bookingRecord);
                 
-                // 填充成功畫面
                 document.getElementById('recId').innerText = docRef.id; document.getElementById('recName').innerText = clientName;
                 document.getElementById('recPhone').innerText = clientPhone; document.getElementById('recDate').innerText = bookingDate;
                 document.getElementById('recTime').innerText = bookingTime; document.getElementById('recStyle').innerText = currentSelection.selectedStyle.name;
@@ -688,7 +718,6 @@
                 modalOverlay.classList.remove('active'); document.getElementById('successAlert').style.display = 'block';
                 setTimeout(() => document.getElementById('successReceiptSection').scrollIntoView({ behavior: 'smooth' }), 400);
 
-                // 重置表單
                 document.getElementById('bookingStepForm').reset();
                 ctx.clearRect(0, 0, canvas.width, canvas.height); sigTextInput.value = "";
                 document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
@@ -698,7 +727,6 @@
             finally { submitFormBtn.disabled = false; submitFormBtn.innerText = "確認無誤並送出預約申請"; }
         });
 
-        // PDF 下載
         document.getElementById('downloadPdfBtn').addEventListener('click', async (e) => {
             e.target.disabled = true; e.target.innerText = "正在打包 PDF 憑證...";
             try {
@@ -711,39 +739,90 @@
         });
 
         initSystem();
-    </script>
 
-    <script>
-        (function() {
-            // 1. 清除 Fastbots 在當前網域的 LocalStorage 與 SessionStorage 快取
-            ['localStorage', 'sessionStorage'].forEach(function(storageType) {
-                try {
-                    const storage = window[storageType];
-                    const keysToRemove = [];
-                    for (let i = 0; i < storage.length; i++) {
-                        const key = storage.key(i);
-                        // 若屬性包含 fastbot 則加入清除清單
-                        if (key && key.toLowerCase().includes('fastbot')) {
-                            keysToRemove.push(key);
-                        }
-                    }
-                    keysToRemove.forEach(function(key) { storage.removeItem(key); });
-                } catch (e) {
-                    console.warn("無法清除 " + storageType, e);
+        /* =========================================
+           ✨ 新增：Gemini 智能客服前端邏輯
+        ========================================= */
+        const aiFabBtn = document.getElementById('aiFabBtn');
+        const aiChatWindow = document.getElementById('aiChatWindow');
+        const aiChatCloseBtn = document.getElementById('aiChatCloseBtn');
+        const aiChatBody = document.getElementById('aiChatBody');
+        const aiChatInput = document.getElementById('aiChatInput');
+        const aiChatSendBtn = document.getElementById('aiChatSendBtn');
+
+        // 建立或取得客戶 Session ID (確保重整不會馬上失去對話)
+        let chatSessionId = sessionStorage.getItem('gemini_chat_session');
+        if (!chatSessionId) {
+            chatSessionId = 'sess_' + Math.random().toString(36).substring(2, 15);
+            sessionStorage.setItem('gemini_chat_session', chatSessionId);
+        }
+
+        // 開關視窗
+        aiFabBtn.addEventListener('click', () => {
+            aiChatWindow.classList.add('active');
+            aiChatInput.focus();
+        });
+        aiChatCloseBtn.addEventListener('click', () => {
+            aiChatWindow.classList.remove('active');
+        });
+
+        // 綁定訊息監聽器 (前端接收 Tmux 後端的 AI 回覆)
+        const messagesRef = collection(db, "chat_sessions", chatSessionId, "messages");
+        const qMessages = query(messagesRef, orderBy("timestamp", "asc"));
+        
+        let isFirstLoad = true;
+        onSnapshot(qMessages, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const data = change.doc.data();
+                    
+                    // 為了避免初次載入重複渲染，或是本地剛剛送出已經畫好的訊息
+                    // 此處做簡易防呆：如果是我發出的訊息而且尚未有 timestamp，表示是我剛按的
+                    if(data.role === 'user' && !data.timestamp && !isFirstLoad) return; 
+
+                    appendMessageToUI(data.role, data.text);
                 }
             });
+            isFirstLoad = false;
+        });
 
-            // 2. 動態載入 Fastbots 腳本
-            const fastbotScript = document.createElement('script');
-            fastbotScript.defer = true;
-            // 加上時間戳確保抓取最新的 Embed 邏輯，避免因瀏覽器快取導致圖示消失
-            fastbotScript.src = "https://app.fastbots.ai/embed.js?v=" + new Date().getTime();
-            fastbotScript.setAttribute('data-bot-id', 'cmqqzn69f04atqg1p1ixjidfb');
-            // 若官方支援強制覆寫 Session，加上這行能進一步確保對話獨立
-            fastbotScript.setAttribute('data-session-id', Date.now().toString()); 
-            
-            document.body.appendChild(fastbotScript);
-        })();
+        function appendMessageToUI(role, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg ${role}`;
+            msgDiv.innerText = text;
+            aiChatBody.appendChild(msgDiv);
+            aiChatBody.scrollTop = aiChatBody.scrollHeight; // 自動滾動到底部
+        }
+
+        // 傳送訊息到 Firestore
+        async function sendChatMessage() {
+            const text = aiChatInput.value.trim();
+            if (!text) return;
+
+            aiChatInput.value = "";
+            aiChatInput.focus();
+
+            // 1. 先在畫面畫出客戶輸入的內容 (讓體感更即時)
+            appendMessageToUI('user', text);
+
+            try {
+                // 2. 寫入資料庫，Tmux 後端的 collectionGroup('messages') 會偵測到並觸發 Gemini
+                await addDoc(messagesRef, {
+                    role: 'user',
+                    text: text,
+                    timestamp: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("發送訊息失敗: ", error);
+                appendMessageToUI('model', '⚠️ 系統連線異常，請稍後再試！');
+            }
+        }
+
+        aiChatSendBtn.addEventListener('click', sendChatMessage);
+        aiChatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
     </script>
 </body>
 </html>
