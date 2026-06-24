@@ -712,5 +712,38 @@
 
         initSystem();
     </script>
+
+    <script>
+        (function() {
+            // 1. 清除 Fastbots 在當前網域的 LocalStorage 與 SessionStorage 快取
+            ['localStorage', 'sessionStorage'].forEach(function(storageType) {
+                try {
+                    const storage = window[storageType];
+                    const keysToRemove = [];
+                    for (let i = 0; i < storage.length; i++) {
+                        const key = storage.key(i);
+                        // 若屬性包含 fastbot 則加入清除清單
+                        if (key && key.toLowerCase().includes('fastbot')) {
+                            keysToRemove.push(key);
+                        }
+                    }
+                    keysToRemove.forEach(function(key) { storage.removeItem(key); });
+                } catch (e) {
+                    console.warn("無法清除 " + storageType, e);
+                }
+            });
+
+            // 2. 動態載入 Fastbots 腳本
+            const fastbotScript = document.createElement('script');
+            fastbotScript.defer = true;
+            // 加上時間戳確保抓取最新的 Embed 邏輯，避免因瀏覽器快取導致圖示消失
+            fastbotScript.src = "https://app.fastbots.ai/embed.js?v=" + new Date().getTime();
+            fastbotScript.setAttribute('data-bot-id', 'cmqqzn69f04atqg1p1ixjidfb');
+            // 若官方支援強制覆寫 Session，加上這行能進一步確保對話獨立
+            fastbotScript.setAttribute('data-session-id', Date.now().toString()); 
+            
+            document.body.appendChild(fastbotScript);
+        })();
+    </script>
 </body>
 </html>
