@@ -61,6 +61,21 @@
         .marquee-content { display: inline-block; animation: scrollText 5s linear infinite; }
         @keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
+        /* 歷史紀錄底水位閃爍警示動畫 */
+        @keyframes rowAlertFlash {
+            0% { background-color: rgba(255, 183, 0, 0.05); }
+            100% { background-color: rgba(255, 183, 0, 0.35); }
+        }
+        .row-low-stock td {
+            animation: rowAlertFlash 0.8s infinite alternate !important;
+            border-bottom: 1px dashed var(--hud-warning) !important;
+            color: #fff;
+        }
+        .row-low-stock td strong {
+            color: var(--hud-warning) !important;
+            text-shadow: 0 0 10px var(--hud-warning);
+        }
+
         /* 全局雷射掃描線動畫 */
         body::after {
             content: "";
@@ -452,7 +467,7 @@
     <div id="page5" class="page">
         <div class="page-title"><span>📅 用量歷史查詢</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
         <div class="card-form"><div class="form-group"><label>選擇分析日期：</label><select id="p5_date" onchange="renderP5()"></select></div></div>
-        <div class="data-container"><table class="data-table" id="tb_p5"><thead><tr><th>粉號</th><th>領箱數</th><th>領散粉</th><th>回庫</th><th>總消耗量</th></tr></thead><tbody></tbody></table></div>
+        <div class="data-container"><table class="data-table" id="tb_p5"><thead><tr><th>粉號</th><th>代號</th><th>色系</th><th>領箱數</th><th>領散粉</th><th>回庫</th><th>總消耗量</th></tr></thead><tbody></tbody></table></div>
     </div>
     
     <div id="page6" class="page">
@@ -874,10 +889,36 @@
         document.getElementById('p5_date').innerHTML = html;
     }
 
+    // ===== 修改區：加入代號、色系欄位，與低水位閃爍判定邏輯 =====
     function renderP5() {
         const date = document.getElementById('p5_date').value; let html = '';
         Object.values(dbData.usage).forEach(r => { 
-            if(r.date === date) html += `<tr><td><strong style="color:var(--hud-cyan);">${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td><td style="font-weight:900; color:var(--hud-warning);">${r.usage_qty || 0} KG</td></tr>`; 
+            if(r.date === date) {
+                let powderData = dbData.powder[r.id] || {};
+                let invData = dbData.inventory[r.id] || { box: 0, loose: 0 };
+                let pWeight = powderData.weight || 25;
+                let currentStockTotal = (invData.box * pWeight) + invData.loose;
+                
+                // 判斷是否低於底水位 (且有開啟安全水位預警)
+                let isLowStock = false;
+                if (powderData.safety_enabled === "true" && currentStockTotal < (Number(powderData.safety_stock) || 0)) {
+                    isLowStock = true;
+                }
+                
+                let rowClass = isLowStock ? 'class="row-low-stock"' : '';
+                let pCode = powderData.code || '無資料';
+                let pColor = powderData.color_system || '無資料';
+
+                html += `<tr ${rowClass}>
+                    <td><strong style="color:var(--hud-cyan);">${r.id}</strong></td>
+                    <td>${pCode}</td>
+                    <td>${pColor}</td>
+                    <td>${r.box}</td>
+                    <td>${r.loose}</td>
+                    <td>${r.return_qty || 0}</td>
+                    <td style="font-weight:900; color:var(--hud-warning);">${r.usage_qty || 0} KG</td>
+                </tr>`; 
+            }
         });
         document.querySelector('#tb_p5 tbody').innerHTML = html;
     }
