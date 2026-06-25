@@ -11,11 +11,7 @@
 
     <style>
         /* --- 全局樣式與優雅變數 --- */
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-
+        html, body { height: 100%; margin: 0; }
         :root {
             --primary-color: #D4B2D4; 
             --accent-color: #C5A059;  
@@ -43,30 +39,9 @@
             transition: background-image 0.6s ease-in-out;
         }
 
-        header { 
-            text-align: center; 
-            padding: 50px 20px; 
-            background: transparent; 
-            border-bottom: none; 
-            position: relative; 
-            z-index: 10;
-        }
-        header h1 { 
-            font-family: 'Cinzel', 'Noto Sans TC', serif; 
-            font-size: 2.5rem; 
-            color: #3A2E2B; 
-            letter-spacing: 3px; 
-            margin-bottom: 12px; 
-            font-weight: 700; 
-            text-shadow: 0 2px 15px rgba(255,255,255,0.9), 0 0 25px rgba(255,255,255,0.6); 
-        }
-        header p { 
-            font-size: 1.05rem; 
-            color: #4A3E3D; 
-            font-weight: 600; 
-            letter-spacing: 1px; 
-            text-shadow: 0 1px 10px rgba(255,255,255,0.9);
-        }
+        header { text-align: center; padding: 50px 20px; background: transparent; border-bottom: none; position: relative; z-index: 10; }
+        header h1 { font-family: 'Cinzel', 'Noto Sans TC', serif; font-size: 2.5rem; color: #3A2E2B; letter-spacing: 3px; margin-bottom: 12px; font-weight: 700; text-shadow: 0 2px 15px rgba(255,255,255,0.9), 0 0 25px rgba(255,255,255,0.6); }
+        header p { font-size: 1.05rem; color: #4A3E3D; font-weight: 600; letter-spacing: 1px; text-shadow: 0 1px 10px rgba(255,255,255,0.9); }
 
         .main-wrapper { max-width: 1240px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 40px; position: relative; z-index: 10; }
         @media (max-width: 992px) { .main-wrapper { grid-template-columns: 1fr; gap: 30px; } }
@@ -467,7 +442,7 @@
     </footer>
 
     <script type="module">
-        // 匯入必要的 Firestore 工具包含 query 和 orderBy 以便監聽 AI 聊天記錄
+        // 此處前端依然保留公鑰即可，無需刪除，公鑰在前端是安全且必要的
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -484,6 +459,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Supabase 保留 Anon 公鑰
         const supabaseUrl = 'https://hyvcfxwoewvbpfzvfdnn.supabase.co';
         const supabaseAnonKey = 'sb_publishable_TR5C2Zc7eOj9uUosUUsX4g_KbBOwey2';
         const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -691,7 +667,9 @@
                     priceCalculations: { basePrice: prices.stylePrice, addonPrice: prices.addonPrice, discountPrice: prices.discount, totalPrice: prices.total },
                     agreedToTerms: true,
                     customerSignature: finalSigPayload,
-                    techSignature: null, status: "待確認", warrantyScreenshot: null, 
+                    techSignature: null, 
+                    status: "待確認", 
+                    lineNotified: false, // 註記給後端發送 LINE 推播使用
                     createdAt: serverTimestamp()
                 };
 
@@ -741,7 +719,7 @@
         initSystem();
 
         /* =========================================
-           ✨ 新增：Gemini 智能客服前端邏輯
+           ✨ Gemini 智能客服前端邏輯
         ========================================= */
         const aiFabBtn = document.getElementById('aiFabBtn');
         const aiChatWindow = document.getElementById('aiChatWindow');
@@ -750,14 +728,12 @@
         const aiChatInput = document.getElementById('aiChatInput');
         const aiChatSendBtn = document.getElementById('aiChatSendBtn');
 
-        // 建立或取得客戶 Session ID (確保重整不會馬上失去對話)
         let chatSessionId = sessionStorage.getItem('gemini_chat_session');
         if (!chatSessionId) {
             chatSessionId = 'sess_' + Math.random().toString(36).substring(2, 15);
             sessionStorage.setItem('gemini_chat_session', chatSessionId);
         }
 
-        // 開關視窗
         aiFabBtn.addEventListener('click', () => {
             aiChatWindow.classList.add('active');
             aiChatInput.focus();
@@ -766,7 +742,6 @@
             aiChatWindow.classList.remove('active');
         });
 
-        // 綁定訊息監聽器 (前端接收 Tmux 後端的 AI 回覆)
         const messagesRef = collection(db, "chat_sessions", chatSessionId, "messages");
         const qMessages = query(messagesRef, orderBy("timestamp", "asc"));
         
@@ -775,11 +750,7 @@
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
                     const data = change.doc.data();
-                    
-                    // 為了避免初次載入重複渲染，或是本地剛剛送出已經畫好的訊息
-                    // 此處做簡易防呆：如果是我發出的訊息而且尚未有 timestamp，表示是我剛按的
                     if(data.role === 'user' && !data.timestamp && !isFirstLoad) return; 
-
                     appendMessageToUI(data.role, data.text);
                 }
             });
@@ -791,22 +762,18 @@
             msgDiv.className = `chat-msg ${role}`;
             msgDiv.innerText = text;
             aiChatBody.appendChild(msgDiv);
-            aiChatBody.scrollTop = aiChatBody.scrollHeight; // 自動滾動到底部
+            aiChatBody.scrollTop = aiChatBody.scrollHeight;
         }
 
-        // 傳送訊息到 Firestore
         async function sendChatMessage() {
             const text = aiChatInput.value.trim();
             if (!text) return;
 
             aiChatInput.value = "";
             aiChatInput.focus();
-
-            // 1. 先在畫面畫出客戶輸入的內容 (讓體感更即時)
             appendMessageToUI('user', text);
 
             try {
-                // 2. 寫入資料庫，Tmux 後端的 collectionGroup('messages') 會偵測到並觸發 Gemini
                 await addDoc(messagesRef, {
                     role: 'user',
                     text: text,
