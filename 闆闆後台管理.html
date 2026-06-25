@@ -105,12 +105,13 @@
         .settings-panel { background: #F9F9F9; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #EADCDD; }
         input[type="range"] { accent-color: var(--accent-purple); height: 6px; background: #EADCDD; border-radius: 5px; outline: none; }
 
-        .fullscreen-sign-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #FFFFFF; z-index: 4000; flex-direction: column; }
-        .sign-header { padding: 20px; background: var(--main-gradient); color: white; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
-        .sign-body-text { padding: 20px; background: #FFF5F6; font-size: 0.9rem; color: #555; line-height: 1.5; border-bottom: 1px solid #EADCDD; }
-        .sign-canvas-container { flex: 1; position: relative; background: #FAF6F6; cursor: crosshair; }
-        #fullCanvas { width: 100%; height: 100%; display: block; }
-        .sign-footer-controls { padding: 20px; background: white; border-top: 1px solid #EADCDD; display: flex; justify-content: space-between; gap: 15px; align-items: center; }
+        /* 修改：使用 100dvh 並修復 overflow 確保畫布不會把按鈕擠出去 */
+        .fullscreen-sign-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #FFFFFF; z-index: 4000; flex-direction: column; overflow: hidden; }
+        .sign-header { padding: 20px; background: var(--main-gradient); color: white; display: flex; justify-content: space-between; align-items: center; font-weight: 700; flex-shrink: 0; }
+        .sign-body-text { padding: 20px; background: #FFF5F6; font-size: 0.9rem; color: #555; line-height: 1.5; border-bottom: 1px solid #EADCDD; flex-shrink: 0; }
+        .sign-canvas-container { flex: 1; position: relative; background: #FAF6F6; cursor: crosshair; overflow: hidden; }
+        #fullCanvas { width: 100%; height: 100%; display: block; touch-action: none; }
+        .sign-footer-controls { padding: 20px; padding-bottom: max(20px, env(safe-area-inset-bottom)); background: white; border-top: 1px solid #EADCDD; display: flex; justify-content: space-between; gap: 15px; align-items: center; flex-shrink: 0; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
 
         .gallery-admin-grid { display: grid; gap: 15px; margin-top: 15px; }
         .gallery-admin-grid.layout-2col { grid-template-columns: repeat(2, 1fr); }
@@ -210,7 +211,7 @@
     <div id="searchModal" class="modal-overlay"><div class="modal-content" style="max-width: 500px;"><h3>🔍 顧客名單快速速查</h3><input type="text" id="searchInput" class="input-discount" placeholder="請輸入名字或電話關鍵字..."><div id="searchResultList" style="margin-top:15px; max-height:300px; overflow-y:auto;"></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeSearchBtn" style="width:100%;">關閉</button></div></div></div>
     <div id="imageModal" class="modal-overlay"><div class="modal-content" style="max-width:650px;"><h3>📑 服務合約雲端備份憑證</h3><div style="width:100%; max-height:55vh; overflow-y:auto; border:1px solid #EADCDD; border-radius:12px; margin-bottom:20px;"><img id="previewImage" src="" style="width:100%; display:block;"></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeImgModalBtn">關閉</button><button class="btn-modal btn-confirm-success" id="downloadImgBtn">📥 下載合約檔</button></div></div></div>
     <div id="deleteModal" class="modal-overlay"><div class="modal-content" style="max-width:400px; text-align:center;"><div style="font-size:3rem; margin-bottom:10px;">⚠️</div><h3 style="color:var(--danger-red);">確定要完全刪除此項預約？</h3><p style="font-size:0.9rem; color:#666;">注意：刪除後資料庫將完全移除且無法撤回！</p><div class="modal-actions"><button class="btn-modal btn-cancel" id="cancelDeleteBtn">取消保留</button><button class="btn-modal" id="confirmDeleteBtn" style="background:var(--danger-red); color:white;">確認刪除</button></div></div></div>
-    <div class="fullscreen-sign-overlay" id="fullscreenSignOverlay"><div class="sign-header"><span style="font-size:1.2rem;">✨ 美甲師結案全螢幕電子簽章系統</span><button class="close-sidebar-btn" id="abandonSignBtn">×</button></div><div class="sign-body-text">今日施作完畢後，顧客確認款式顏色符合預約期待。隨附 7 日保固。以下為雙方數位簽署確認憑證。</div><div style="padding:15px 20px; background:#FFF; border-bottom:1px solid #EADCDD; display:flex; gap:20px; align-items:center;"><div><span style="font-weight:700;">👧 顧客前台原始簽章：</span><div id="customerSigPlaceholder" style="display:inline-block; vertical-align:middle; margin-left:10px;"></div></div><div style="flex:1;"><input type="text" id="signatureInputTech" class="input-discount" style="padding:8px;" placeholder="⌨️ 亦可在此打字輸入美甲師姓名確認..."></div></div><div class="sign-canvas-container"><canvas id="fullCanvas"></canvas></div><div class="sign-footer-controls"><button class="btn-modal btn-cancel" id="clearFullSignBtn">重填清除</button><button class="btn-modal btn-confirm-success" id="submitFullSignBtn" style="background:var(--success-green);">✅ 送出結案備份</button></div></div>
+    <div class="fullscreen-sign-overlay" id="fullscreenSignOverlay"><div class="sign-header"><span style="font-size:1.2rem;">✨ 結案全螢幕電子簽章</span><button class="close-sidebar-btn" id="abandonSignBtn">×</button></div><div class="sign-body-text">今日施作完畢後，顧客確認款式顏色符合預約期待。隨附 7 日保固。</div><div style="padding:15px 20px; background:#FFF; border-bottom:1px solid #EADCDD; display:flex; gap:20px; align-items:center;"><div><span style="font-weight:700;">👧 顧客前台原始簽章：</span><div id="customerSigPlaceholder" style="display:inline-block; vertical-align:middle; margin-left:10px;"></div></div><div style="flex:1;"><input type="text" id="signatureInputTech" class="input-discount" style="padding:8px;" placeholder="⌨️ 亦可在此打字輸入美甲師姓名確認..."></div></div><div class="sign-canvas-container"><canvas id="fullCanvas"></canvas></div><div class="sign-footer-controls"><button class="btn-modal btn-cancel" id="clearFullSignBtn">重填清除</button><button class="btn-modal btn-confirm-success" id="submitFullSignBtn" style="background:var(--success-green);">✅ 送出結案備份</button></div></div>
 
     <div id="aiConfigModal" class="modal-overlay">
         <div class="modal-content" style="max-width: 500px;">
@@ -243,7 +244,6 @@
         import html2canvas from "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm";
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-        // Firebase 僅保留公開設定
         const firebaseConfig = {
             apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
             authDomain: "beautiful-68dbc.firebaseapp.com",
@@ -256,7 +256,6 @@
         const app = initializeApp(firebaseConfig); 
         const db = getFirestore(app);
 
-        // Supabase 僅保留 Anon 匿名讀寫金鑰
         const supabaseUrl = 'https://hyvcfxwoewvbpfzvfdnn.supabase.co';
         const supabaseAnonKey = 'sb_publishable_TR5C2Zc7eOj9uUosUUsX4g_KbBOwey2';
         const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
@@ -270,9 +269,6 @@
         }; 
         const screenshotsMap = new Map();
 
-        // ===================================================
-        // 畫布與全域工具邏輯 (維持不變)
-        // ===================================================
         const fullCanvas = document.getElementById('fullCanvas'); const ctx = fullCanvas.getContext('2d');
         let isDrawing = false; let hasDrawnTech = false;
 
@@ -286,7 +282,14 @@
             return new Blob(byteArrays, {type: contentType});
         }
 
-        function resizeFullCanvas() { fullCanvas.width = window.innerWidth; fullCanvas.height = window.innerHeight - 250; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = '#333333'; }
+        // 修改：使用容器本身的寬高來動態計算，確保不管螢幕多大都不會覆蓋到底部按鈕
+        function resizeFullCanvas() { 
+            const container = document.querySelector('.sign-canvas-container');
+            fullCanvas.width = container.clientWidth; 
+            fullCanvas.height = container.clientHeight; 
+            ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = '#333333'; 
+        }
+
         function initCanvasEvents() {
             function getPos(e) { const rect = fullCanvas.getBoundingClientRect(); return e.type.includes('touch') ? { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top } : { x: e.clientX - rect.left, y: e.clientY - rect.top }; }
             function start(e) { e.preventDefault(); isDrawing = true; hasDrawnTech = true; document.getElementById('signatureInputTech').value = ''; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
@@ -304,9 +307,6 @@
             finally { if(btn) { btn.innerText=text; btn.disabled=false; } } 
         }
 
-        // ===================================================
-        // 智能客服修改器邏輯 (新增)
-        // ===================================================
         let tempAiIconUrl = null;
 
         document.getElementById('menuAiConfigBtn').addEventListener('click', () => {
@@ -362,9 +362,6 @@
             }
         });
 
-        // ===================================================
-        // 原有之管理面板邏輯 (完全保留)
-        // ===================================================
         document.getElementById('bgScaleInput').addEventListener('input', (e) => document.getElementById('bgScaleDisplay').innerText = e.target.value);
         document.getElementById('addBgTitleBtn').addEventListener('click', () => saveCfg({ pageTitle: document.getElementById('bgTitleInput').value.trim() }, document.getElementById('addBgTitleBtn'), "新增"));
         document.getElementById('addBgSubtitleBtn').addEventListener('click', () => saveCfg({ pageSubtitle: document.getElementById('bgSubtitleInput').value.trim() }, document.getElementById('addBgSubtitleBtn'), "新增"));
@@ -487,7 +484,21 @@
 
         document.getElementById('bookingListTbody').addEventListener('click', (e) => {
             const id = e.target.getAttribute('data-id'); if(!id) return;
-            if(e.target.classList.contains('btn-complete-row')) { targetCompleteId = id; const b = globalBookingsData.find(x => x.id === id); const ph = document.getElementById('customerSigPlaceholder'); ph.innerHTML = ''; if(b && b.customerSignature) { if(b.customerSignature.startsWith('http')) ph.innerHTML = `<img src="${b.customerSignature}" style="max-height:45px;">`; else ph.innerHTML = `<span style="font-weight:700; background:#DDD; padding:4px 8px; border-radius:4px;">${b.customerSignature}</span>`; } else ph.innerHTML = '<span style="color:#aaa;">無存檔</span>'; document.getElementById('fullscreenSignOverlay').style.display = 'flex'; resizeFullCanvas(); ctx.clearRect(0,0,fullCanvas.width,fullCanvas.height); }
+            if(e.target.classList.contains('btn-complete-row')) { 
+                targetCompleteId = id; 
+                const b = globalBookingsData.find(x => x.id === id); 
+                const ph = document.getElementById('customerSigPlaceholder'); 
+                ph.innerHTML = ''; 
+                if(b && b.customerSignature) { 
+                    if(b.customerSignature.startsWith('http')) ph.innerHTML = `<img src="${b.customerSignature}" style="max-height:45px;">`; 
+                    else ph.innerHTML = `<span style="font-weight:700; background:#DDD; padding:4px 8px; border-radius:4px;">${b.customerSignature}</span>`; 
+                } else ph.innerHTML = '<span style="color:#aaa;">無存檔</span>'; 
+                document.getElementById('fullscreenSignOverlay').style.display = 'flex'; 
+                
+                // 修改：給 CSS 一點時間進行排版，再抓取最新的寬高計算畫布大小
+                setTimeout(resizeFullCanvas, 50); 
+                ctx.clearRect(0,0,fullCanvas.width,fullCanvas.height); 
+            }
             if(e.target.classList.contains('btn-view-img')) { document.getElementById('previewImage').src = screenshotsMap.get(id); document.getElementById('imageModal').style.display = 'flex'; }
             if(e.target.classList.contains('btn-delete-row')) { targetDeleteId = id; document.getElementById('deleteModal').style.display = 'flex'; }
         });
