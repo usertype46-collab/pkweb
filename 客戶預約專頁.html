@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
+        /* --- 全局樣式與優雅變數 --- */
         html, body { height: 100%; margin: 0; }
         :root {
             --primary-color: #D4B2D4; 
@@ -107,11 +108,7 @@
         .signature-section { margin-top: 25px; border: 1px solid #C5A059; border-radius: 12px; padding: 24px; background: #FAF6F4; box-shadow: var(--shadow-sm); }
         .signature-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
         .signature-title { font-weight: 700; font-size: 1.1rem; color: #3A2E2B; display: flex; align-items: center; gap: 6px; }
-        .signature-pad-container { position: relative; width: 100%; height: 280px; background: #FFF; border: 2px dashed #C5A059; border-radius: 8px; overflow: hidden; box-shadow: inset 0 2px 6px rgba(0,0,0,0.03); }
-        .signature-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
         .signature-input { width: 100%; padding: 14px; border: 1px solid #DCD1CC; border-radius: 8px; margin-top: 10px; display: none; font-size: 1.1rem; letter-spacing: 2px; }
-        .btn-clear { background: #EFEAE6; border: none; padding: 6px 16px; font-size: 0.9rem; font-weight: 500; border-radius: 6px; cursor: pointer; color: #5A4E4D; transition: var(--transition); }
-        .btn-clear:hover { background: #E5DDD8; color: #3A2E2B; }
         .btn-toggle-sig { background: none; border: none; color: var(--accent-dark); font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: underline; transition: var(--transition); }
         .btn-toggle-sig:hover { color: #3A2E2B; }
 
@@ -119,10 +116,28 @@
         .modal-footer { padding: 25px; border-top: 1px solid #EFE4DF; background: #FAF8F6; display: flex; justify-content: center; }
         .modal-footer .btn-submit { max-width: 500px; }
 
-        .receipt-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.98rem; }
-        .receipt-table th, .receipt-table td { border: 1px solid #EFE4DF; padding: 14px 18px; text-align: left; }
-        .receipt-table th { background-color: #FAF6F0; width: 28%; color: #3A2E2B; font-weight: 700; }
-        .receipt-table td { background-color: #FFF; }
+        /* --- ✨ 針對憑證跑版進行強制換行優化 --- */
+        #receiptCaptureArea { background: #FFFFFF; padding: 30px; border: 2px solid #EFE4DF; border-radius: 12px; position: relative; max-width: 100%; overflow: hidden; }
+        .receipt-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.98rem; table-layout: fixed; word-wrap: break-word; }
+        .receipt-table th, .receipt-table td { border: 1px solid #EFE4DF; padding: 14px 18px; text-align: left; word-break: break-all; }
+        .receipt-table th { background-color: #FAF6F0; width: 35%; color: #3A2E2B; font-weight: 700; }
+        .receipt-table td { background-color: #FFF; width: 65%; }
+
+        @media (max-width: 480px) {
+            #receiptCaptureArea { padding: 15px !important; }
+            .receipt-table { font-size: 0.85rem; }
+            .receipt-table th, .receipt-table td { padding: 10px; }
+        }
+
+        /* --- ✨ 全螢幕 100dvh 手機版簽名板獨立視窗 --- */
+        .fullscreen-sign-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #FFFFFF; z-index: 4000; flex-direction: column; overflow: hidden; }
+        .fullscreen-sign-overlay .sign-header { padding: 20px; background: linear-gradient(135deg, #423633 0%, #2A201E 100%); color: #F3D9B1; display: flex; justify-content: space-between; align-items: center; font-weight: 700; flex-shrink: 0; font-size: 1.2rem; }
+        .fullscreen-sign-overlay .sign-body-text { padding: 12px; background: #FFF3E5; font-size: 0.95rem; color: #B35900; text-align: center; font-weight: 700; flex-shrink: 0; border-bottom: 2px solid #FFDEB3; }
+        .fullscreen-sign-overlay .sign-canvas-container { flex: 1; position: relative; background: #FAF6F0; cursor: crosshair; overflow: hidden; }
+        #fsSigCanvas { width: 100%; height: 100%; display: block; touch-action: none; }
+        .fullscreen-sign-overlay .sign-footer-controls { padding: 20px; padding-bottom: max(20px, env(safe-area-inset-bottom)); background: white; display: flex; justify-content: space-between; gap: 15px; align-items: center; flex-shrink: 0; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); }
+        .btn-clear-fs { background: #EFEAE6; border: none; padding: 14px 24px; font-size: 1rem; font-weight: 700; border-radius: 10px; cursor: pointer; color: #5A4E4D; transition: var(--transition); white-space: nowrap; }
+        .btn-submit-fs { flex: 1; background: linear-gradient(90deg, #E5C07B 0%, #C5A059 100%); color: white; border: none; padding: 14px 20px; font-size: 1.1rem; font-weight: 700; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(197, 160, 89, 0.3); transition: var(--transition); text-align: center; }
 
         .alert { padding: 16px; border-radius: 10px; margin-bottom: 25px; display: none; font-weight: 600; text-align: center; box-shadow: var(--shadow-sm); }
         .alert-success { background-color: #E6F4EA; color: #137333; border: 1px solid #C4EED0; }
@@ -297,7 +312,7 @@
         <div class="section-panel" id="successReceiptSection" style="display: none; grid-column: 1 / -1; margin-top: 20px;">
             <h2 style="color: var(--accent-dark); border-bottom: 2px solid var(--accent-color);"><span>✓</span> 您的預約確認憑證（已成功送出）</h2>
             
-            <div id="receiptCaptureArea" style="background: #FFFFFF; padding: 30px; border: 2px solid #EFE4DF; border-radius: 12px; position: relative;">
+            <div id="receiptCaptureArea">
                 <h3 style="text-align: center; font-size: 1.6rem; color: #3A2E2B; margin-bottom: 5px; font-family: 'Cinzel', serif;">神の指藝Beautiful moment.</h3>
                 <p style="text-align: center; font-size: 0.9rem; color: #8C7572; margin-bottom: 25px;">線上預約服務確認單暨電子合約憑證</p>
                 
@@ -394,15 +409,15 @@
                     <div class="signature-header">
                         <span class="signature-title">
                             <svg style="width:18px;height:18px;fill:var(--accent-dark);" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                            顧客正楷全名電子簽章 (手寫/打字) *
+                            顧客正楷全名電子簽章 *
                         </span>
                         <div>
                             <button type="button" class="btn-toggle-sig" id="toggleSigModeBtn">切換為打字簽名</button>
-                            <button type="button" class="btn-clear" id="clearSigBtn">清除手寫</button>
                         </div>
                     </div>
-                    <div class="signature-pad-container" id="canvasContainer">
-                        <canvas class="signature-canvas" id="sigCanvas"></canvas>
+                    
+                    <div id="canvasModeHint" style="padding: 20px; background: #FFF; border: 2px dashed #C5A059; border-radius: 8px; text-align: center; color: #8C7572; font-weight: 500; margin-top: 10px;">
+                        🖱️ 點擊下方「前往全螢幕簽名並送出」按鈕<br>系統將開啟獨立全螢幕畫布供您手寫簽名。
                     </div>
                     <input type="text" id="sigTextInput" class="form-control signature-input" placeholder="請在此輸入您的法定全名作為電子簽章確認">
                 </div>
@@ -411,8 +426,25 @@
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn-submit" id="submitFormBtn">確認無誤並送出預約申請</button>
+                <button type="button" class="btn-submit" id="preSubmitBtn">👉 前往全螢幕簽名並送出</button>
             </div>
+        </div>
+    </div>
+
+    <div class="fullscreen-sign-overlay" id="fsSignOverlay">
+        <div class="sign-header">
+            <span>✍️ 顧客電子簽章</span>
+            <button class="modal-close" style="color: white; font-size: 2rem;" id="closeFsSignBtn">&times;</button>
+        </div>
+        <div class="sign-body-text">
+            請在下方空白處簽上您的正楷全名
+        </div>
+        <div class="sign-canvas-container" id="fsCanvasContainer">
+            <canvas id="fsSigCanvas"></canvas>
+        </div>
+        <div class="sign-footer-controls">
+            <button type="button" class="btn-clear-fs" id="fsClearSigBtn">重填清除</button>
+            <button type="button" class="btn-submit-fs" id="fsConfirmSigBtn">✅ 確認並送出預約</button>
         </div>
     </div>
 
@@ -519,7 +551,7 @@
                         document.getElementById('discountLabelTitle').innerText = `新客優惠活動 (${data.firstTimeDiscount}折)`;
                     }
 
-                    // 👉 新增：同步 AI 客服名稱與頭貼圖示
+                    // 👉 AI 智能客服同步機制
                     if (data.aiName) {
                         document.getElementById('aiChatTitleText').innerHTML = `✨ ${data.aiName}`;
                         document.getElementById('aiWelcomeMsg').innerText = `✦ 親愛的客戶您好，我是「${data.aiName}」。有任何關於美甲款式、保固範圍或預約的問題，歡迎隨時詢問我喔！`;
@@ -593,80 +625,140 @@
             return { stylePrice, addonPrice, discount, total };
         }
 
-        const modalOverlay = document.getElementById('modalOverlay'); const canvas = document.getElementById('sigCanvas');
-        const ctx = canvas.getContext('2d'); const sigTextInput = document.getElementById('sigTextInput');
-        let isDrawing = false; let sigMode = 'canvas'; 
+        const modalOverlay = document.getElementById('modalOverlay'); 
+        const sigTextInput = document.getElementById('sigTextInput');
+        let sigMode = 'canvas'; 
 
         document.getElementById('openModalBtn').addEventListener('click', () => {
             if (!currentSelection.selectedStyle) { alert("請先選擇一個核心美甲款式！"); return; }
             if (!document.getElementById('bookingDate').value || !document.getElementById('bookingTime').value) { alert("請先選擇預約日期與時段！"); return; }
-            modalOverlay.classList.add('active'); setTimeout(resizeCanvas, 120); 
+            modalOverlay.classList.add('active'); 
         });
 
         document.getElementById('closeModalBtn').addEventListener('click', () => modalOverlay.classList.remove('active'));
 
-        function resizeCanvas() {
-            canvas.width = document.getElementById('canvasContainer').clientWidth; canvas.height = document.getElementById('canvasContainer').clientHeight;
-            ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#3A2E2B";
-        }
-
-        function getCanvasPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            return e.touches ? { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top } : { x: e.offsetX || e.clientX - rect.left, y: e.offsetY || e.clientY - rect.top };
-        }
-
-        canvas.addEventListener('mousedown', (e) => { isDrawing = true; const pos = getCanvasPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); });
-        canvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; const pos = getCanvasPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); });
-        canvas.addEventListener('mouseup', () => isDrawing = false); canvas.addEventListener('mouseleave', () => isDrawing = false);
-        canvas.addEventListener('touchstart', (e) => { isDrawing = true; const pos = getCanvasPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); e.preventDefault(); }, {passive: false});
-        canvas.addEventListener('touchmove', (e) => { if (!isDrawing) return; const pos = getCanvasPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); e.preventDefault(); }, {passive: false});
-        canvas.addEventListener('touchend', () => isDrawing = false);
-
-        document.getElementById('clearSigBtn').addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+        const preSubmitBtn = document.getElementById('preSubmitBtn');
         document.getElementById('toggleSigModeBtn').addEventListener('click', (e) => {
-            if (sigMode === 'canvas') { sigMode = 'text'; document.getElementById('canvasContainer').style.display = 'none'; document.getElementById('clearSigBtn').style.display = 'none'; sigTextInput.style.display = 'block'; e.target.innerText = '切換為手寫簽名'; } 
-            else { sigMode = 'canvas'; document.getElementById('canvasContainer').style.display = 'block'; document.getElementById('clearSigBtn').style.display = 'inline-block'; sigTextInput.style.display = 'none'; e.target.innerText = '切換為打字簽名'; setTimeout(resizeCanvas, 50); }
+            if (sigMode === 'canvas') { 
+                sigMode = 'text'; 
+                document.getElementById('canvasModeHint').style.display = 'none'; 
+                sigTextInput.style.display = 'block'; 
+                e.target.innerText = '切換為手寫簽名'; 
+                preSubmitBtn.innerText = '✅ 確認無誤並送出預約申請';
+            } else { 
+                sigMode = 'canvas'; 
+                document.getElementById('canvasModeHint').style.display = 'block'; 
+                sigTextInput.style.display = 'none'; 
+                e.target.innerText = '切換為打字簽名'; 
+                preSubmitBtn.innerText = '👉 前往全螢幕簽名並送出';
+            }
+        });
+
+        /* =========================================
+           ✨ 全螢幕畫布處理邏輯 (解決位移與按鈕消失)
+        ========================================= */
+        const fsSignOverlay = document.getElementById('fsSignOverlay');
+        const fsSigCanvas = document.getElementById('fsSigCanvas');
+        const fsCtx = fsSigCanvas.getContext('2d');
+        let isFsDrawing = false;
+
+        function resizeFsCanvas() {
+            const container = document.getElementById('fsCanvasContainer');
+            fsSigCanvas.width = container.clientWidth;
+            fsSigCanvas.height = container.clientHeight;
+            fsCtx.lineWidth = 4;
+            fsCtx.lineCap = "round";
+            fsCtx.strokeStyle = "#3A2E2B";
+        }
+
+        function getFsPos(e) {
+            const rect = fsSigCanvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startFsDraw(e) { e.preventDefault(); isFsDrawing = true; const pos = getFsPos(e); fsCtx.beginPath(); fsCtx.moveTo(pos.x, pos.y); }
+        function drawFs(e) { if (!isFsDrawing) return; e.preventDefault(); const pos = getFsPos(e); fsCtx.lineTo(pos.x, pos.y); fsCtx.stroke(); }
+        function endFsDraw() { isFsDrawing = false; }
+
+        fsSigCanvas.addEventListener('mousedown', startFsDraw);
+        fsSigCanvas.addEventListener('mousemove', drawFs);
+        window.addEventListener('mouseup', endFsDraw);
+        fsSigCanvas.addEventListener('touchstart', startFsDraw, {passive: false});
+        fsSigCanvas.addEventListener('touchmove', drawFs, {passive: false});
+        window.addEventListener('touchend', endFsDraw);
+
+        document.getElementById('fsClearSigBtn').addEventListener('click', () => {
+            fsCtx.clearRect(0, 0, fsSigCanvas.width, fsSigCanvas.height);
+        });
+        document.getElementById('closeFsSignBtn').addEventListener('click', () => {
+            fsSignOverlay.style.display = 'none';
         });
 
         function isCanvasBlank(c) { const b = document.createElement('canvas'); b.width = c.width; b.height = c.height; return c.toDataURL() === b.toDataURL(); }
 
-        const pOverlay = document.getElementById('portfolioOverlay');
-        document.getElementById('openPortfolioBtn').addEventListener('click', () => pOverlay.classList.add('active'));
-        document.getElementById('closePortfolioBtn').addEventListener('click', () => pOverlay.classList.remove('active'));
+        /* =========================================
+           🔥 預約資料打包送出區
+        ========================================= */
+        preSubmitBtn.addEventListener('click', async () => {
+            const clientName = document.getElementById('clientName').value.trim();
+            const clientPhone = document.getElementById('clientPhone').value.trim();
+            const bookingDate = document.getElementById('bookingDate').value;
+            const bookingTime = document.getElementById('bookingTime').value;
+            
+            if (!clientName || !clientPhone || !bookingDate || !bookingTime) { alert("請填齊顧客姓名、電話、預約日期與時段！"); return; }
+            if (!document.getElementById('checkTerms1').checked || !document.getElementById('checkTerms2').checked || !document.getElementById('checkTerms3').checked) { alert("必須完整勾選並同意美甲服務合約所有條款！"); return; }
 
-        const submitFormBtn = document.getElementById('submitFormBtn');
+            if (sigMode === 'canvas') {
+                fsSignOverlay.style.display = 'flex';
+                setTimeout(resizeFsCanvas, 100); 
+            } else {
+                const textSig = sigTextInput.value.trim();
+                if (!textSig) { alert("請輸入顧客打字簽名！"); return; }
+                await executeBookingSubmission("[打字簽章] " + textSig, preSubmitBtn);
+            }
+        });
 
-        submitFormBtn.addEventListener('click', async () => {
+        document.getElementById('fsConfirmSigBtn').addEventListener('click', async () => {
+            if (isCanvasBlank(fsSigCanvas)) { alert("請在上方畫布完成手寫簽名！"); return; }
+            const btn = document.getElementById('fsConfirmSigBtn');
+            const oriText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = "加密上傳電子簽章中...";
+            
+            try {
+                const b64 = fsSigCanvas.toDataURL('image/png').split(',')[1];
+                const blob = b64toBlob(b64, 'image/png');
+                const fileName = `signatures/cust_${Date.now()}_${Math.floor(Math.random()*1000)}.png`;
+                
+                const { error } = await supabase.storage.from('receipts').upload(fileName, blob, { contentType: 'image/png' });
+                if(error) throw error;
+                
+                const { data: pubUrl } = supabase.storage.from('receipts').getPublicUrl(fileName);
+                
+                fsSignOverlay.style.display = 'none';
+                await executeBookingSubmission(pubUrl.publicUrl, preSubmitBtn);
+            } catch (err) {
+                alert("簽名上傳失敗：" + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = oriText;
+            }
+        });
+
+        async function executeBookingSubmission(finalSigPayload, loadingBtn) {
+            const originalText = loadingBtn.innerText;
+            loadingBtn.disabled = true; loadingBtn.innerText = "正在安全寫入雲端並生成憑證...";
+            
             const clientName = document.getElementById('clientName').value.trim();
             const clientPhone = document.getElementById('clientPhone').value.trim();
             const bookingDate = document.getElementById('bookingDate').value;
             const bookingTime = document.getElementById('bookingTime').value;
             const notes = document.getElementById('notes').value.trim();
-            
-            if (!clientName || !clientPhone || !bookingDate || !bookingTime) { alert("請填齊顧客姓名、電話、預約日期與時段！"); return; }
-            if (!document.getElementById('checkTerms1').checked || !document.getElementById('checkTerms2').checked || !document.getElementById('checkTerms3').checked) { alert("必須完整勾選並同意美甲服務合約！"); return; }
+            const prices = calculateTotal();
 
-            submitFormBtn.disabled = true; submitFormBtn.innerText = "加密上傳電子簽章中...";
-
-            let finalSigPayload = "";
             try {
-                if (sigMode === 'canvas') {
-                    if (isCanvasBlank(canvas)) { alert("請完成顧客手寫簽名！"); submitFormBtn.disabled = false; submitFormBtn.innerText = "確認無誤並送出預約申請"; return; }
-                    const b64 = canvas.toDataURL('image/png').split(',')[1];
-                    const blob = b64toBlob(b64, 'image/png');
-                    const fileName = `signatures/cust_${Date.now()}_${Math.floor(Math.random()*1000)}.png`;
-                    
-                    const { error } = await supabase.storage.from('receipts').upload(fileName, blob, { contentType: 'image/png' });
-                    if(error) throw error;
-                    
-                    const { data: pubUrl } = supabase.storage.from('receipts').getPublicUrl(fileName);
-                    finalSigPayload = pubUrl.publicUrl;
-                } else {
-                    if (!sigTextInput.value.trim()) { alert("請輸入顧客打字簽名！"); submitFormBtn.disabled = false; submitFormBtn.innerText = "確認無誤並送出預約申請"; return; }
-                    finalSigPayload = "[打字簽章] " + sigTextInput.value.trim();
-                }
-
-                const prices = calculateTotal();
                 const bookingRecord = {
                     clientName, clientPhone, bookingDate, bookingTime, notes,
                     selectedStyle: currentSelection.selectedStyle.name,
@@ -704,13 +796,17 @@
                 setTimeout(() => document.getElementById('successReceiptSection').scrollIntoView({ behavior: 'smooth' }), 400);
 
                 document.getElementById('bookingStepForm').reset();
-                ctx.clearRect(0, 0, canvas.width, canvas.height); sigTextInput.value = "";
+                fsCtx.clearRect(0, 0, fsSigCanvas.width, fsSigCanvas.height); sigTextInput.value = "";
                 document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
                 currentSelection.selectedStyle = null; currentSelection.selectedAddons.clear(); calculateTotal();
 
             } catch (err) { alert("送出失敗：" + err.message); } 
-            finally { submitFormBtn.disabled = false; submitFormBtn.innerText = "確認無誤並送出預約申請"; }
-        });
+            finally { loadingBtn.disabled = false; loadingBtn.innerText = originalText; }
+        }
+
+        const pOverlay = document.getElementById('portfolioOverlay');
+        document.getElementById('openPortfolioBtn').addEventListener('click', () => pOverlay.classList.add('active'));
+        document.getElementById('closePortfolioBtn').addEventListener('click', () => pOverlay.classList.remove('active'));
 
         document.getElementById('downloadPdfBtn').addEventListener('click', async (e) => {
             e.target.disabled = true; e.target.innerText = "正在打包 PDF 憑證...";
