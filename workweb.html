@@ -3,140 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 全球烤漆代工報價與廠內型號管理系統</title>
+    <title>2026 全球烤漆代工報價與廠內型號管理系統 v2</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; margin-bottom: 20px; }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Arial, sans-serif; }
+        .card { box-shadow: 0 6px 12px rgba(0,0,0,0.08); border: none; border-radius: 12px; margin-bottom: 20px; }
         .nav-tabs .nav-link.active { font-weight: bold; color: #0d6efd; border-bottom: 3px solid #0d6efd; }
-        .table-responsive { max-height: 500px; overflow-y: auto; }
-        .result-box { background-color: #e9ecef; padding: 15px; border-radius: 8px; font-size: 1.1em; }
+        .table-responsive { max-height: 600px; overflow-y: auto; }
+        
+        /* 艷紅色放大標題樣式 */
+        .vibrant-red-title {
+            color: #ff0033 !important;
+            font-size: 1.55rem !important;
+            font-weight: 800 !important;
+            border-bottom: 3px solid #ff0033;
+            padding-bottom: 8px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        
+        /* 公式備註字體樣式 */
+        .formula-note {
+            font-size: 0.78rem;
+            color: #6c757d;
+            margin-top: 4px;
+            display: block;
+            background-color: #f1f3f5;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border-left: 3px solid #6c757d;
+        }
+        
+        .result-box { background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 1px solid #dee2e6; }
+        .result-title { border-bottom: 2px solid #0d6efd; padding-bottom: 5px; margin-bottom: 15px; }
+        .sticky-results { position: sticky; top: 24px; }
     </style>
 </head>
 <body>
 
-<div class="container py-4">
-    <h2 class="text-center mb-4">🏭 烤漆代工報價與型號管理系統 (Firebase 同步版)</h2>
+<div class="container-fluid px-4 py-4">
+    <h2 class="text-center fw-bold text-dark mb-4">🏭 2026 全球烤漆代工報價與廠內型號管理系統</h2>
 
-    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+    <ul class="nav nav-tabs mb-4" id="systemTab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="calc-tab" data-bs-toggle="tab" data-bs-target="#calc" type="button">1. 報價試算與型號建立</button>
+            <button class="nav-link active" id="calc-tab" data-bs-toggle="tab" data-bs-target="#calc-panel" type="button">📊 1. 報價試算與型號建立 (三欄優化版)</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">2. 歷史紀錄與總價查閱</button>
+            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-panel" type="button">🌐 2. 雲端歷史紀錄與型號總價查閱</button>
         </li>
     </ul>
 
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="calc" role="tabpanel">
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card p-4">
-                        <h4 class="mb-3">輸入試算參數</h4>
-                        <form id="calcForm">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">工件型號 (Model)</label>
-                                    <input type="text" class="form-control" id="modelNo" required placeholder="例如: P-2026-A">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">工作內容 / 備註</label>
-                                    <input type="text" class="form-control" id="workNote" placeholder="例如: 雙面平光黑烤漆">
-                                </div>
-
-                                <h5 class="mt-4 border-bottom pb-2">物理與粉末參數</h5>
-                                <div class="col-md-3">
-                                    <label class="form-label">表面積 (m²)</label>
-                                    <input type="number" step="0.01" class="form-control" id="area" required value="1.5">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">目標膜厚 (μm)</label>
-                                    <input type="number" class="form-control" id="thickness" required value="60">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">粉末比重 (g/cm³)</label>
-                                    <input type="number" step="0.01" class="form-control" id="density" required value="1.5" title="一般約 1.2~1.8">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">上粉率 (%)</label>
-                                    <input type="number" class="form-control" id="efficiency" required value="60" title="計算廢粉因素">
-                                </div>
-
-                                <h5 class="mt-4 border-bottom pb-2">成本與耗材參數</h5>
-                                <div class="col-md-3">
-                                    <label class="form-label">粉末單價 (元/kg)</label>
-                                    <input type="number" class="form-control" id="powderPrice" required value="150">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">總工時 (小時)</label>
-                                    <input type="number" step="0.1" class="form-control" id="workHours" required value="0.5">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">人工費率 (元/小時)</label>
-                                    <input type="number" class="form-control" id="hourlyRate" required value="250">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">重工風險率 (%)</label>
-                                    <input type="number" class="form-control" id="reworkRate" required value="5">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">包裝費用 (元)</label>
-                                    <input type="number" class="form-control" id="packagingCost" required value="20">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">其他耗材/前處理 (元)</label>
-                                    <input type="number" class="form-control" id="consumablesCost" required value="15">
-                                </div>
-                            </div>
-                            <div class="mt-4">
-                                <button type="button" class="btn btn-primary w-100" id="btnCalculate">開始試算</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="card p-4 sticky-top" style="top: 20px;">
-                        <h4 class="mb-3">試算結果</h4>
-                        <div class="result-box mb-3">
-                            <p><strong>單件用粉量：</strong> <span id="resPowderKg" class="text-danger fw-bold">0.00</span> kg</p>
-                            <p><strong>粉末材料費：</strong> <span id="resMaterialCost">0.00</span> 元</p>
-                            <p><strong>人工費用：</strong> <span id="resLaborCost">0.00</span> 元</p>
-                            <p><strong>重工攤提費用：</strong> <span id="resReworkCost">0.00</span> 元</p>
-                            <hr>
-                            <h5 class="text-primary fw-bold">單件總報價： <span id="resTotalCost">0.00</span> 元</h5>
+    <div class="tab-content" id="systemTabContent">
+        <div class="tab-pane fade show active" id="calc-panel" role="tabpanel">
+            <form id="calcForm">
+                
+                <div class="card p-4 mb-4 bg-white">
+                    <h5 class="fw-bold border-bottom pb-2 text-secondary">📦 基礎工件宣告定義</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">工件型號 (Model No.)</label>
+                            <input type="text" class="form-control form-control-lg" id="modelNo" required placeholder="例如: P-2026-A">
+                            <span class="formula-note">系統識別唯一碼：Firebase 關聯與自動分類檢索依據</span>
                         </div>
-                        <button type="button" class="btn btn-success w-100" id="btnSaveData" disabled>將紀錄儲存至 Firebase</button>
-                        <div id="saveStatus" class="mt-2 text-center text-success fw-bold"></div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">工作內容 / 變註說明</label>
+                            <input type="text" class="form-control form-control-lg" id="workNote" placeholder="例如: 雙面平光黑烤漆 + 前處理">
+                            <span class="formula-note">製程描述備註：填寫特殊加工工藝，不加入核心代數運算</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="row">
+                    <div class="col-xl-4 col-lg-6 col-md-12">
+                        <div class="card p-4 h-100 bg-white">
+                            <h3 class="vibrant-red-title">🧪 物理與粉末參數</h3>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">表面積 (m²)</label>
+                                <input type="number" step="0.01" class="form-control" id="area" required value="1.5">
+                                <span class="formula-note">計算公式：分子因數 $S$。直接決定塗裝覆蓋之理論基礎總面積</span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">目標膜厚 (μm)</label>
+                                <input type="number" class="form-control" id="thickness" required value="60">
+                                <span class="formula-note">計算公式：分子因數 $T$。與粉末沉積重量呈絕對正比函數關係</span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">粉末比重 (g/cm³)</label>
+                                <input type="number" step="0.01" class="form-control" id="density" required value="1.5">
+                                <span class="formula-note">計算公式：分子因數 $D$。各型號漆料物理密度（通常介於 1.2~1.8）</span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">上粉率 (%)</label>
+                                <input type="number" class="form-control" id="efficiency" required value="60">
+                                <span class="formula-note">計算公式：分母修正因數 $E$。反向推導廢粉、落粉損耗率之常數</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-6 col-md-12">
+                        <div class="card p-4 h-100 bg-white">
+                            <h3 class="vibrant-red-title">💰 成本與耗材參數</h3>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">粉末單價 (元/kg)</label>
+                                    <input type="number" class="form-control" id="powderPrice" required value="150">
+                                    <span class="formula-note">材料費基準：用粉量(kg) × 單價</span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">總工時 (小時/件)</label>
+                                    <input type="number" step="0.1" class="form-control" id="workHours" required value="0.5">
+                                    <span class="formula-note">時間動因：單件耗費之總運作時間</span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">人工費率 (元/小時)</label>
+                                    <input type="number" class="form-control" id="hourlyRate" required value="250">
+                                    <span class="formula-note">人工報價公式：總工時 × 人工費率</span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">重工風險率 (%)</label>
+                                    <input type="number" class="form-control" id="reworkRate" required value="5">
+                                    <span class="formula-note">不良攤提公式：(材費+人工) × 風險率</span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">包裝費用 (元/件)</label>
+                                    <input type="number" class="form-control" id="packagingCost" required value="20">
+                                    <span class="formula-note">固定耗材：紙箱、氣泡膜等包材成本</span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">其他耗材/前處理 (元)</label>
+                                    <input type="number" class="form-control" id="consumablesCost" required value="15">
+                                    <span class="formula-note">固定耗材：吊具、洗劑、純水吊掛損耗</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-auto pt-3">
+                                <button type="button" class="btn btn-danger btn-lg w-100 fw-bold" id="btnCalculate">⚙️ 執行高階公式編譯試算</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-md-12">
+                        <div class="card p-4 h-100 bg-dark text-white sticky-results">
+                            <h3 class="result-title text-info fw-bold">🧮 試算結果核心輸出</h3>
+                            
+                            <div class="result-box text-dark mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>理論單件用粉量：</span>
+                                    <span><strong id="resPowderKg" class="text-danger">0.0000</strong> kg</span>
+                                </div>
+                                <div class="text-muted mb-3" style="font-size:0.75rem; border-top: 1px dashed #ccc; padding-top:2px;">
+                                    核心公式：(表面積 × 膜厚 × 比重) / (1000 × 上粉率)
+                                </div>
+
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>1. 粉末材料總費：</span>
+                                    <span>$<span id="resMaterialCost">0.00</span> 元</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>2. 基礎人工費用：</span>
+                                    <span>$<span id="resLaborCost">0.00</span> 元</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>3. 重工風險攤提金：</span>
+                                    <span>$<span id="resReworkCost">0.00</span> 元</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>4. 包裝與固定耗材：</span>
+                                    <span>$<span id="resFixedConsumables">0.00</span> 元</span>
+                                </div>
+                            </div>
+
+                            <div class="p-3 rounded mb-4" style="background-color: #1e293b; border-left: 5px solid #0dcaf0;">
+                                <h4 class="text-info mb-1" style="font-size: 0.95rem;">🔥 最終建議單件代工總報價</h4>
+                                <h2 class="text-warning fw-bold m-0">$ <span id="resTotalCost">0.00</span> <span style="font-size: 1rem; color:#aaa;">TWD</span></h2>
+                                <small class="text-light-50" style="font-size:0.75rem;">加總公式：材料費 + 人工費 + 重工攤提 + 包裝耗材 + 前處理</small>
+                            </div>
+
+                            <button type="button" class="btn btn-cyan btn-lg w-100 fw-bold text-dark" style="background-color: #0dcaf0;" id="btnSaveData" disabled>💾 同步紀錄至 Firebase 雲端</button>
+                            <div id="saveStatus" class="mt-3 text-center fw-bold text-success"></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
 
-        <div class="tab-pane fade" id="history" role="tabpanel">
-            <div class="card p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="m-0">雲端報價資料庫</h4>
-                    <input type="text" class="form-control w-25" id="searchInput" placeholder="輸入型號搜尋...">
+        <div class="tab-pane fade" id="history-panel" role="tabpanel">
+            <div class="card p-4 bg-white">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+                    <div>
+                        <h4 class="m-0 fw-bold text-dark">🗄️ 全球雲端動態同步報價資料庫</h4>
+                        <small class="text-muted">自動依據輸入時間與型號進行高階分類與結構化儲存</small>
+                    </div>
+                    <div class="w-100 id-search-wrap" style="max-width: 350px;">
+                        <input type="text" class="form-control" id="searchInput" placeholder="🔍 輸入完整或部分型號快速查閱總價...">
+                    </div>
                 </div>
+                
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle">
+                    <table class="table table-hover table-striped table-bordered align-middle m-0">
                         <thead class="table-dark">
                             <tr>
-                                <th>日期</th>
-                                <th>型號</th>
-                                <th>面積(m²) / 膜厚(μm)</th>
-                                <th>用粉量(kg)</th>
-                                <th>工時(hr)</th>
-                                <th>材料費</th>
-                                <th>加工及耗材費</th>
-                                <th>單件總價</th>
-                                <th>備註</th>
-                                <th>操作</th>
+                                <th>上傳時間</th>
+                                <th>工件型號 (Model)</th>
+                                <th>物理規格 (面積/膜厚)</th>
+                                <th>計算用粉量 (kg)</th>
+                                <th>計算耗時 (hr)</th>
+                                <th>材料成本</th>
+                                <th>人工及耗材費</th>
+                                <th>單件總價 (查閱)</th>
+                                <th>工作備註項目</th>
+                                <th>雲端操作</th>
                             </tr>
                         </thead>
                         <tbody id="dataTableBody">
-                            <tr><td colspan="10" class="text-center">載入中或尚無資料...</td></tr>
+                            <tr><td colspan="10" class="text-center text-muted py-4">正在連線至 Firebase 數據庫或尚無歷史紀錄...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -151,7 +237,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-    // 使用者提供的 Firebase 設定
+    // 您提供的實時 Firebase 金鑰設定檔
     const firebaseConfig = {
       apiKey: "AIzaSyAkZmxSVbQfSO76dNNeGG35-ehCfxYT6K8",
       authDomain: "workweb-15a02.firebaseapp.com",
@@ -163,149 +249,169 @@
       measurementId: "G-YSNPSTCXNL"
     };
 
-    // 初始化 Firebase 與 Realtime Database
+    // 初始化 Firebase 元件
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const quotesRef = ref(db, 'coating_quotes');
 
-    // 全域變數暫存試算結果
+    // 封裝當前成功編譯的報價物件
     let currentCalcData = null;
 
-    // 1. 試算邏輯
+    // 1. 高階代數公式試算邏輯
     document.getElementById('btnCalculate').addEventListener('click', () => {
-        // 取得所有輸入值
-        const modelNo = document.getElementById('modelNo').value;
-        const workNote = document.getElementById('workNote').value;
-        const area = parseFloat(document.getElementById('area').value);
-        const thickness = parseFloat(document.getElementById('thickness').value);
-        const density = parseFloat(document.getElementById('density').value);
-        const efficiency = parseFloat(document.getElementById('efficiency').value) / 100;
-        const powderPrice = parseFloat(document.getElementById('powderPrice').value);
-        const workHours = parseFloat(document.getElementById('workHours').value);
-        const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
-        const reworkRate = parseFloat(document.getElementById('reworkRate').value) / 100;
-        const packagingCost = parseFloat(document.getElementById('packagingCost').value);
-        const consumablesCost = parseFloat(document.getElementById('consumablesCost').value);
-
-        if(!modelNo) { alert("請輸入工件型號！"); return; }
-
-        // 公式計算：粉末重量(kg) = (面積 * 膜厚 * 比重) / (10 * 上粉率)
-        // 註: 這是考量單位換算的業界常用公式
-        const powderKg = (area * thickness * density) / (10 * (efficiency * 100)); 
+        const modelNo = document.getElementById('modelNo').value.trim();
+        const workNote = document.getElementById('workNote').value.trim();
         
-        // 成本拆解
+        // 物理代數讀取
+        const area = parseFloat(document.getElementById('area').value) || 0;
+        const thickness = parseFloat(document.getElementById('thickness').value) || 0;
+        const density = parseFloat(document.getElementById('density').value) || 0;
+        const efficiencyPercent = parseFloat(document.getElementById('efficiency').value) || 0;
+        const efficiency = efficiencyPercent / 100;
+
+        // 財務代數讀取
+        const powderPrice = parseFloat(document.getElementById('powderPrice').value) || 0;
+        const workHours = parseFloat(document.getElementById('workHours').value) || 0;
+        const hourlyRate = parseFloat(document.getElementById('hourlyRate').value) || 0;
+        const reworkRate = (parseFloat(document.getElementById('reworkRate').value) || 0) / 100;
+        const packagingCost = parseFloat(document.getElementById('packagingCost').value) || 0;
+        const consumablesCost = parseFloat(document.getElementById('consumablesCost').value) || 0;
+
+        if(!modelNo) { 
+            alert("⚠️ 觸發編譯錯誤：請務必先輸入『工件型號』，以利廠內建立自動分類檔案。"); 
+            return; 
+        }
+
+        /* 【烤漆業界標準高階計算公式】
+           單件用粉量 (kg) = (表面積 m² × 目標膜厚 μm × 粉末比重) / (1000 × 上粉率)
+           註：1000 為將微米與公分單位與公斤換算之常數系數。
+        */
+        let powderKg = 0;
+        if (efficiency > 0) {
+            powderKg = (area * thickness * density) / (1000 * efficiency);
+        }
+        
+        // 成本子項目編譯
         const materialCost = powderKg * powderPrice;
         const laborCost = workHours * hourlyRate;
-        const baseProcessCost = laborCost + packagingCost + consumablesCost;
+        const fixedConsumables = packagingCost + consumablesCost;
         
-        // 重工成本 (材料與人工因不良率產生的損耗攤提)
+        // 重工攤提因數 (考量不良率下，物料及人工的二次重噴損耗風險分攤)
         const reworkCost = (materialCost + laborCost) * reworkRate;
         
-        // 總價
-        const totalCost = materialCost + baseProcessCost + reworkCost;
+        // 總代工報價加總
+        const totalCost = materialCost + laborCost + fixedConsumables + reworkCost;
 
-        // 顯示結果
+        // 數據渲染輸出至右側獨立區塊
         document.getElementById('resPowderKg').innerText = powderKg.toFixed(4);
         document.getElementById('resMaterialCost').innerText = materialCost.toFixed(2);
         document.getElementById('resLaborCost').innerText = laborCost.toFixed(2);
         document.getElementById('resReworkCost').innerText = reworkCost.toFixed(2);
+        document.getElementById('resFixedConsumables').innerText = fixedConsumables.toFixed(2);
         document.getElementById('resTotalCost').innerText = totalCost.toFixed(2);
 
-        // 建立待存物件
+        // 封裝為結構化 JSON，準備進行 Firebase 同步
         currentCalcData = {
-            modelNo, workNote, area, thickness, density, efficiency,
-            powderPrice, workHours, hourlyRate, reworkRate,
+            modelNo, workNote, area, thickness, density, efficiencyPercent,
+            powderPrice, workHours, hourlyRate, reworkRate: parseFloat(document.getElementById('reworkRate').value),
             packagingCost, consumablesCost, powderKg, materialCost,
-            laborCost, reworkCost, baseProcessCost, totalCost,
+            laborCost, reworkCost, fixedConsumables, totalCost,
             timestamp: new Date().toISOString()
         };
 
-        // 啟用儲存按鈕
+        // 解鎖儲存功能
         document.getElementById('btnSaveData').disabled = false;
-        document.getElementById('saveStatus').innerText = "試算完成，可上傳至雲端。";
+        document.getElementById('saveStatus').innerHTML = "✨ 公式編譯成功！結果已隔離產出，請點擊下方按鈕同步雲端。";
     });
 
-    // 2. 儲存資料至 Firebase
+    // 2. Firebase Realtime Database 寫入與儲存
     document.getElementById('btnSaveData').addEventListener('click', () => {
         if (!currentCalcData) return;
         
         const newRecordRef = push(quotesRef);
         set(newRecordRef, currentCalcData).then(() => {
-            document.getElementById('saveStatus').innerText = "✅ 已成功同步至 Firebase！";
+            document.getElementById('saveStatus').innerHTML = "🚀 【同步成功】資料已實時寫入 Firebase 資料庫！";
             document.getElementById('btnSaveData').disabled = true;
-            setTimeout(() => { document.getElementById('saveStatus').innerText = ""; }, 3000);
+            document.getElementById('calcForm').reset();
+            currentCalcData = null;
+            setTimeout(() => { document.getElementById('saveStatus').innerText = ""; }, 4000);
         }).catch((error) => {
-            document.getElementById('saveStatus').innerText = "❌ 儲存失敗: " + error;
+            document.getElementById('saveStatus').innerHTML = "❌ 【同步失敗】請檢查網路或金鑰權限: " + error;
         });
     });
 
-    // 3. 即時讀取與型號查閱 (自動分類與表格生成)
-    let allRecords = {};
-    
+    // 3. 即時讀取監聽（Firebase 實時驅動，資料異動時自動重繪表格）
+    let allLocalRecords = {};
     onValue(quotesRef, (snapshot) => {
-        const data = snapshot.val();
-        allRecords = data || {};
-        renderTable(allRecords);
+        allLocalRecords = snapshot.val() || {};
+        const searchTerm = document.getElementById('searchInput').value;
+        renderDynamicTable(allLocalRecords, searchTerm);
     });
 
-    function renderTable(dataObj, filterModel = "") {
+    // 4. 自動型號分類與動態表格生成引擎
+    function renderDynamicTable(dataObj, filterModel = "") {
         const tbody = document.getElementById('dataTableBody');
         tbody.innerHTML = "";
         
         const keys = Object.keys(dataObj);
         if (keys.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='10' class='text-center'>資料庫尚無紀錄</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='10' class='text-center py-3 text-muted'>🫙 雲端資料庫目前無任何試算報價紀錄</td></tr>";
             return;
         }
 
-        // 將物件轉為陣列並以時間反序排序 (最新的在最上面)
-        const recordsArray = keys.map(key => ({ id: key, ...dataObj[key] }))
-                                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        // 以時間序列反向排序（最新建立的報價型號優先置頂）
+        const sortedRecords = keys.map(key => ({ id: key, ...dataObj[key] }))
+                                  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        recordsArray.forEach(record => {
-            // 型號搜尋過濾
+        let hasMatch = false;
+
+        sortedRecords.forEach(record => {
+            // 型號模糊比對過濾器 (不區分大小寫)
             if (filterModel && !record.modelNo.toLowerCase().includes(filterModel.toLowerCase())) {
                 return; 
             }
+            hasMatch = true;
 
             const tr = document.createElement('tr');
-            const dateStr = new Date(record.timestamp).toLocaleString('zh-TW', {hour12: false});
+            const formattedDate = new Date(record.timestamp).toLocaleString('zh-TW', { hour12: false });
             
             tr.innerHTML = `
-                <td>${dateStr}</td>
-                <td><strong>${record.modelNo}</strong></td>
+                <td style="font-size: 0.85rem;" class="text-muted">${formattedDate}</td>
+                <td><span class="badge bg-primary px-2 py-2" style="font-size:0.9rem;">${record.modelNo}</span></td>
                 <td>${record.area} m² / ${record.thickness} μm</td>
                 <td class="text-danger fw-bold">${record.powderKg.toFixed(4)}</td>
-                <td>${record.workHours}</td>
-                <td>$${record.materialCost.toFixed(2)}</td>
-                <td>$${record.baseProcessCost.toFixed(2)}</td>
-                <td class="text-primary fw-bold">$${record.totalCost.toFixed(2)}</td>
-                <td>${record.workNote || '-'}</td>
+                <td>${record.workHours} 小時</td>
+                <td>$${record.materialCost.toFixed(1)}</td>
+                <td>$${(record.fixedConsumables + record.laborCost).toFixed(1)}</td>
+                <td class="table-warning fw-bold text-dark">$${record.totalCost.toFixed(2)}</td>
+                <td style="font-size:0.85rem; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${record.workNote || ''}">${record.workNote || '-'}</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${record.id}">刪除</button>
+                    <button class="btn btn-sm btn-danger fw-bold btn-cloud-delete" data-id="${record.id}">❌ 刪除</button>
                 </td>
             `;
             tbody.appendChild(tr);
         });
+
+        if(!hasMatch && filterModel) {
+            tbody.innerHTML = `<tr><td colspan='10' class='text-center text-danger fw-bold py-3'>🔍 查無與型號 "${filterModel}" 相關的歷史總價紀錄</td></tr>`;
+        }
     }
 
-    // 4. 搜尋功能綁定
+    // 5. 即時型號檢索查閱綁定
     document.getElementById('searchInput').addEventListener('input', (e) => {
-        renderTable(allRecords, e.target.value);
+        renderDynamicTable(allLocalRecords, e.target.value);
     });
 
-    // 5. 刪除紀錄功能 (事件委派)
+    // 6. 雲端資料刪除權限調度
     document.getElementById('dataTableBody').addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-delete')) {
+        if (e.target.classList.contains('btn-cloud-delete')) {
             const id = e.target.getAttribute('data-id');
-            if (confirm("確定要刪除這筆報價紀錄嗎？此動作無法復原。")) {
-                const recordRef = ref(db, `coating_quotes/${id}`);
-                remove(recordRef);
+            if (confirm("⚠️ 警告：您正準備從 Firebase 雲端資料庫永久刪除此筆工件型號報價，確定執行？")) {
+                const targetedRef = ref(db, `coating_quotes/${id}`);
+                remove(targetedRef);
             }
         }
     });
-
 </script>
 </body>
 </html>
-
