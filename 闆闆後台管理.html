@@ -102,7 +102,6 @@
         .input-discount { width: 100%; padding: 10px 14px; border: 2px solid #EADCDD; border-radius: 8px; font-weight: 700; font-size: 1rem; outline: none; transition: var(--transition); }
         .input-discount:focus { border-color: var(--accent-purple); background-color: white; }
         
-        /* 面板與新功能專用樣式 */
         .settings-panel { background: #F9F9F9; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #EADCDD; }
         input[type="range"] { accent-color: var(--accent-purple); height: 6px; background: #EADCDD; border-radius: 5px; outline: none; }
 
@@ -113,22 +112,17 @@
         #fullCanvas { width: 100%; height: 100%; display: block; }
         .sign-footer-controls { padding: 20px; background: white; border-top: 1px solid #EADCDD; display: flex; justify-content: space-between; gap: 15px; align-items: center; }
 
-        /* 圖庫管理專用網格 */
         .gallery-admin-grid { display: grid; gap: 15px; margin-top: 15px; }
-        /* 預設為兩張並排 */
         .gallery-admin-grid.layout-2col { grid-template-columns: repeat(2, 1fr); }
-        /* 單張直式 */
         .gallery-admin-grid.layout-1col { grid-template-columns: 1fr; }
         
         .gallery-admin-item { position: relative; border-radius: 10px; overflow: hidden; border: 2px solid #EADCDD; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: var(--transition); background: white; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-        /* 設定直式比例 */
         .img-wrapper { width: 100%; aspect-ratio: 3/4; overflow: hidden; border-radius: 8px; background: #f0f0f0; display: flex; justify-content: center; align-items: center; }
         .gallery-admin-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
         
         .gallery-admin-item .del-tag { background: #FFF5F5; color: var(--danger-red); border: 1px solid #F5B7B1; padding: 6px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: 700; text-align: center; width: 100%; transition: var(--transition); }
         .gallery-admin-item .del-tag:hover { background: var(--danger-red); color: white; }
         
-        /* 升級版背景卡片專屬樣式 */
         .bg-grid-item { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 16/9; border: 2px solid #EADCDD; }
         .bg-grid-item img { width: 100%; height: 100%; object-fit: cover; }
         .bg-grid-item.active-bg-card { border-color: var(--success-green); box-shadow: 0 0 15px rgba(46,204,113,0.5); }
@@ -136,8 +130,25 @@
         .badge-in-use { position: absolute; bottom: 5px; left: 5px; background: var(--success-green); color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 700; z-index: 10; pointer-events: none; }
         .bg-del-tag { position: absolute; top: 5px; right: 5px; background: rgba(231, 76, 60, 0.9); color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: 700; z-index: 10; }
 
-        .fab-btn { position: fixed; bottom: 30px; right: 30px; z-index: 2000; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-pink); color: white; font-size: 28px; border: none; box-shadow: 0 4px 15px rgba(255, 71, 126, 0.4); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
-        .fab-btn:hover { transform: scale(1.1) rotate(10deg); }
+        .fab-search-btn { position: fixed; bottom: 100px; right: 30px; z-index: 2000; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-pink); color: white; font-size: 24px; border: none; box-shadow: 0 4px 15px rgba(255, 71, 126, 0.4); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .fab-search-btn:hover { transform: scale(1.1) rotate(10deg); }
+
+        /* ======== Gemini AI 助理專屬樣式 ======== */
+        .fab-chat-btn { position: fixed; bottom: 30px; right: 30px; z-index: 2000; width: 60px; height: 60px; border-radius: 50%; background-color: #8E7C93; color: white; font-size: 26px; border: none; box-shadow: 0 4px 15px rgba(142, 124, 147, 0.4); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .fab-chat-btn:hover { transform: scale(1.1); background-color: #7D6B82; }
+        
+        .chat-widget-container { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: white; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); border: 1px solid #EADCDD; display: none; flex-direction: column; z-index: 2500; overflow: hidden; animation: slideUp 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
+        .chat-header { background: var(--main-gradient); color: white; padding: 15px 20px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; font-size: 1.05rem; }
+        .chat-close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #FAF6F6; display: flex; flex-direction: column; gap: 10px; }
+        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; }
+        .msg-bubble.user { background: var(--accent-pink); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg-bubble.model { background: white; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #EADCDD; }
+        .chat-input-area { padding: 12px; background: white; border-top: 1px solid #EADCDD; display: flex; gap: 8px; }
+        .chat-input-area input { flex: 1; padding: 10px 14px; border: 1px solid #EADCDD; border-radius: 20px; outline: none; font-size: 0.9rem; transition: var(--transition); }
+        .chat-input-area input:focus { border-color: var(--accent-purple); }
+        .chat-input-area button { background: var(--accent-purple); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+        .chat-input-area button:hover { background: #7D6B82; transform: scale(1.05); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -200,179 +211,43 @@
         </div>
     </div>
 
-    <button class="fab-btn" id="fabSearchBtn">🔍</button>
+    <button class="fab-search-btn" id="fabSearchBtn">🔍</button>
+    
+    <button class="fab-chat-btn" id="fabChatBtn">✨</button>
 
-    <div id="infoModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>📍 店家地址與社群網址設定</h3>
-            <div style="display:flex; flex-direction:column; gap:12px; margin: 20px 0;">
-                <div><label style="font-size:0.85rem; font-weight:700;">門市現場地址</label><input type="text" id="infoAddress" class="input-discount"></div>
-                <div><label style="font-size:0.85rem; font-weight:700;">聯絡電話</label><input type="text" id="infoPhone" class="input-discount"></div>
-                <div><label style="font-size:0.85rem; font-weight:700;">Instagram 網址</label><input type="url" id="infoIg" class="input-discount"></div>
-                <div><label style="font-size:0.85rem; font-weight:700;">Line 連結</label><input type="url" id="infoLine" class="input-discount"></div>
-                <div><label style="font-size:0.85rem; font-weight:700;">Facebook 網址</label><input type="url" id="infoFb" class="input-discount"></div>
-            </div>
-            <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeInfoBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveInfoBtn">儲存設定</button></div>
+    <div class="chat-widget-container" id="chatWidget">
+        <div class="chat-header">
+            <span>✦ 神の指藝 智能顧問</span>
+            <button class="chat-close-btn" id="closeChatBtn">×</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg-bubble model">您好！我是神の指藝專屬 AI 顧問 ✨，請問有什麼預約或保固的問題想了解呢？</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="輸入您的問題..." autocomplete="off">
+            <button id="sendChatBtn">➤</button>
         </div>
     </div>
 
-    <div id="bgUploadModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 650px;">
-            <h3>🖼️ 前台大圖背景庫動態管理</h3>
-            
-            <div class="settings-panel">
-                <h4 style="margin-bottom:12px; color:var(--accent-purple); font-size:1rem;">🎛️ 背景特效與文字設定</h4>
-                
-                <div style="margin-bottom:15px;">
-                    <label style="font-size:0.85rem; font-weight:700;">圖片放大縮小比例 (<span id="bgScaleDisplay">100</span>%)</label>
-                    <input type="range" id="bgScaleInput" min="50" max="200" value="100" style="width:100%; margin-top:5px;">
-                </div>
-                
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <input type="text" id="bgTitleInput" class="input-discount" placeholder="輸入網頁主標題文字...">
-                        <button id="addBgTitleBtn" class="btn-action-ui btn-complete-row" style="white-space:nowrap;">新增</button>
-                        <button id="delBgTitleBtn" class="btn-action-ui btn-delete-row" style="white-space:nowrap;">刪除</button>
-                    </div>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <input type="text" id="bgSubtitleInput" class="input-discount" placeholder="輸入網頁副標題文字...">
-                        <button id="addBgSubtitleBtn" class="btn-action-ui btn-complete-row" style="white-space:nowrap;">新增</button>
-                        <button id="delBgSubtitleBtn" class="btn-action-ui btn-delete-row" style="white-space:nowrap;">刪除</button>
-                    </div>
-                </div>
-                <button id="saveBgSettingsBtn" class="btn-refresh" style="width:100%; margin-top:15px;">💾 同步儲存比例與文字</button>
-            </div>
-
-            <div style="border:2px dashed #EADCDD; border-radius:12px; padding:20px; text-align:center; background:#FCFAFA; margin-bottom:20px;">
-                <input type="file" id="bgFileInput" accept="image/jpeg,image/png" style="display:none;">
-                <button class="btn-refresh" onclick="document.getElementById('bgFileInput').click()">➕ 上傳新背景圖片</button>
-                <div id="bgFileNameDisplay" style="margin-top:8px; font-size:0.85rem; color:#555;"></div>
-            </div>
-
-            <label style="font-weight:700; font-size:0.9rem; color:#4A3B43;">雲端大圖背景庫清單：</label>
-            <div class="gallery-admin-grid layout-2col" id="bgAdminGrid"></div>
-
-            <div class="modal-actions" style="margin-top:20px;">
-                <button class="btn-modal btn-cancel" id="closeBgBtn" style="width:100%;">關閉背景庫</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="galleryModal" class="modal-overlay">
-        <div class="modal-content" style="max-width:700px;">
-            <h3>📸 上傳作品集與排版管理</h3>
-            
-            <div class="settings-panel">
-                <h4 style="margin-bottom:12px; color:var(--accent-purple); font-size:1rem;">🎛️ 排版與顯示設定</h4>
-                <div style="display:flex; gap:15px; margin-bottom:10px; flex-wrap:wrap;">
-                    <div style="flex:1; min-width:200px;">
-                        <label style="font-size:0.85rem; font-weight:700; display:block; margin-bottom:5px;">前台與預覽排版方式</label>
-                        <select id="portfolioLayoutSelect" class="input-discount" style="padding:8px;">
-                            <option value="1col">單張直式 (大圖呈現)</option>
-                            <option value="2col">2張並排直式 (並列呈現)</option>
-                        </select>
-                    </div>
-                    <div style="flex:1; min-width:200px;">
-                        <label style="font-size:0.85rem; font-weight:700; display:block; margin-bottom:5px;">圖片縮放比例 (<span id="portScaleDisplay">100</span>%)</label>
-                        <input type="range" id="portScaleInput" min="50" max="150" value="100" style="width:100%; margin-top:8px;">
-                    </div>
-                </div>
-                <button id="savePortSettingsBtn" class="btn-refresh" style="width:100%; margin-top:10px;">💾 儲存全域排版與縮放設定</button>
-            </div>
-
-            <div style="border:2px dashed #EADCDD; border-radius:12px; padding:20px; text-align:center; background:#FCFAFA; margin-bottom:20px;">
-                <input type="file" id="galleryFileInput" accept="image/jpeg,image/png" style="display:none;">
-                <button class="btn-refresh" onclick="document.getElementById('galleryFileInput').click()">➕ 新增作品照片</button>
-                <div id="galleryFileNameDisplay" style="margin-top:8px; font-size:0.85rem; color:#555;"></div>
-            </div>
-            
-            <label style="font-weight:700; font-size:0.9rem;">目前作品照片清單 (可個別新增文字標示)：</label>
-            <div class="gallery-admin-grid layout-2col" id="galleryAdminGrid"></div>
-            
-            <div class="modal-actions" style="margin-top:20px;"><button class="btn-modal btn-cancel" id="closeGalleryBtn" style="width:100%;">關閉視窗</button></div>
-        </div>
-    </div>
-
-    <div id="discountModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>⚙️ 優惠活動折扣設定</h3>
-            <div style="margin: 25px 0; text-align: center; background:#FCFAFA; padding:20px; border-radius:12px; border:1px solid #EADCDD;">
-                <label style="font-size: 0.95rem; font-weight: 700;">新客初次預約折數：</label>
-                <input type="number" id="discountConfigInput" class="input-discount" style="width:100px; display:inline-block; text-align:center;" min="10" max="99"> 折
-            </div>
-            <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeDiscountBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveDiscountBtn">確認修改</button></div>
-        </div>
-    </div>
-
-    <div id="timeSlotConfigModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 450px;">
-            <h3>🕒 編輯可預約時段</h3>
-            <div class="config-table-wrapper"><table><thead><tr><th style="text-align:center;">開放預約時段</th><th style="text-align:center;">操作</th></tr></thead><tbody id="timeSlotListTbody"></tbody></table></div>
-            <button class="btn-refresh" id="addTimeSlotRowBtn" style="width: 100%; margin-bottom: 15px;">➕ 新增時段</button>
-            <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeTimeSlotModalBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveTimeSlotBtn">💾 儲存時段</button></div>
-        </div>
-    </div>
-
-    <div id="styleConfigModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 550px;">
-            <h3>💅 編輯核心款式項目及價錢</h3>
-            <div class="config-table-wrapper"><table><thead><tr><th>款式名稱</th><th>價格 (元)</th><th style="text-align:center;">操作</th></tr></thead><tbody id="styleListTbody"></tbody></table></div>
-            <button class="btn-refresh" id="addStyleRowBtn" style="width: 100%; margin-bottom: 15px;">➕ 新增款式</button>
-            <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeStyleModalBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveStyleBtn">💾 儲存同步</button></div>
-        </div>
-    </div>
-
-    <div id="addonConfigModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 550px;">
-            <h3>✨ 編輯附加服務項目及價錢</h3>
-            <div class="config-table-wrapper"><table><thead><tr><th>服務名稱</th><th>價格 (元)</th><th style="text-align:center;">操作</th></tr></thead><tbody id="addonListTbody"></tbody></table></div>
-            <button class="btn-refresh" id="addAddonRowBtn" style="width: 100%; margin-bottom: 15px;">➕ 新增服務</button>
-            <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeAddonModalBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveAddonBtn">💾 儲存服務</button></div>
-        </div>
-    </div>
-
-    <div id="searchModal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 500px;">
-            <h3>🔍 顧客名單快速速查</h3>
-            <input type="text" id="searchInput" class="input-discount" placeholder="請輸入名字或電話關鍵字...">
-            <div id="searchResultList" style="margin-top:15px; max-height:300px; overflow-y:auto;"></div>
-            <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeSearchBtn" style="width:100%;">關閉</button></div>
-        </div>
-    </div>
-
-    <div id="imageModal" class="modal-overlay">
-        <div class="modal-content" style="max-width:650px;">
-            <h3>📑 服務合約雲端備份憑證</h3>
-            <div style="width:100%; max-height:55vh; overflow-y:auto; border:1px solid #EADCDD; border-radius:12px; margin-bottom:20px;"><img id="previewImage" src="" style="width:100%; display:block;"></div>
-            <div class="modal-actions"><button class="btn-modal btn-cancel" id="closeImgModalBtn">關閉</button><button class="btn-modal btn-confirm-success" id="downloadImgBtn">📥 下載合約檔</button></div>
-        </div>
-    </div>
-
-    <div id="deleteModal" class="modal-overlay">
-        <div class="modal-content" style="max-width:400px; text-align:center;">
-            <div style="font-size:3rem; margin-bottom:10px;">⚠️</div><h3 style="color:var(--danger-red);">確定要完全刪除此項預約？</h3>
-            <p style="font-size:0.9rem; color:#666;">注意：刪除後資料庫將完全移除且無法撤回！</p>
-            <div class="modal-actions"><button class="btn-modal btn-cancel" id="cancelDeleteBtn">取消保留</button><button class="btn-modal" id="confirmDeleteBtn" style="background:var(--danger-red); color:white;">確認刪除</button></div>
-        </div>
-    </div>
-
-    <div class="fullscreen-sign-overlay" id="fullscreenSignOverlay">
-        <div class="sign-header"><span style="font-size:1.2rem;">✨ 美甲師結案全螢幕電子簽章系統</span><button class="close-sidebar-btn" id="abandonSignBtn">×</button></div>
-        <div class="sign-body-text">今日施作完畢後，顧客確認款式顏色符合預約期待。隨附 7 日保固。以下為雙方數位簽署確認憑證。</div>
-        <div style="padding:15px 20px; background:#FFF; border-bottom:1px solid #EADCDD; display:flex; gap:20px; align-items:center;">
-            <div><span style="font-weight:700;">👧 顧客前台原始簽章：</span><div id="customerSigPlaceholder" style="display:inline-block; vertical-align:middle; margin-left:10px;"></div></div>
-            <div style="flex:1;"><input type="text" id="signatureInputTech" class="input-discount" style="padding:8px;" placeholder="⌨️ 亦可在此打字輸入美甲師姓名確認..."></div>
-        </div>
-        <div class="sign-canvas-container"><canvas id="fullCanvas"></canvas></div>
-        <div class="sign-footer-controls"><button class="btn-modal btn-cancel" id="clearFullSignBtn">重填清除</button><button class="btn-modal btn-confirm-success" id="submitFullSignBtn" style="background:var(--success-green);">✅ 送出結案備份</button></div>
-    </div>
+    <div id="infoModal" class="modal-overlay"><div class="modal-content"><h3>📍 店家地址與社群網址設定</h3><div style="display:flex; flex-direction:column; gap:12px; margin: 20px 0;"><div><label style="font-size:0.85rem; font-weight:700;">門市現場地址</label><input type="text" id="infoAddress" class="input-discount"></div><div><label style="font-size:0.85rem; font-weight:700;">聯絡電話</label><input type="text" id="infoPhone" class="input-discount"></div><div><label style="font-size:0.85rem; font-weight:700;">Instagram 網址</label><input type="url" id="infoIg" class="input-discount"></div><div><label style="font-size:0.85rem; font-weight:700;">Line 連結</label><input type="url" id="infoLine" class="input-discount"></div><div><label style="font-size:0.85rem; font-weight:700;">Facebook 網址</label><input type="url" id="infoFb" class="input-discount"></div></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeInfoBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveInfoBtn">儲存設定</button></div></div></div>
+    <div id="bgUploadModal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><h3>🖼️ 前台大圖背景庫動態管理</h3><div class="settings-panel"><h4 style="margin-bottom:12px; color:var(--accent-purple); font-size:1rem;">🎛️ 背景特效與文字設定</h4><div style="margin-bottom:15px;"><label style="font-size:0.85rem; font-weight:700;">圖片放大縮小比例 (<span id="bgScaleDisplay">100</span>%)</label><input type="range" id="bgScaleInput" min="50" max="200" value="100" style="width:100%; margin-top:5px;"></div><div style="display:flex; flex-direction:column; gap:10px;"><div style="display:flex; gap:10px; align-items:center;"><input type="text" id="bgTitleInput" class="input-discount" placeholder="輸入網頁主標題文字..."><button id="addBgTitleBtn" class="btn-action-ui btn-complete-row" style="white-space:nowrap;">新增</button><button id="delBgTitleBtn" class="btn-action-ui btn-delete-row" style="white-space:nowrap;">刪除</button></div><div style="display:flex; gap:10px; align-items:center;"><input type="text" id="bgSubtitleInput" class="input-discount" placeholder="輸入網頁副標題文字..."><button id="addBgSubtitleBtn" class="btn-action-ui btn-complete-row" style="white-space:nowrap;">新增</button><button id="delBgSubtitleBtn" class="btn-action-ui btn-delete-row" style="white-space:nowrap;">刪除</button></div></div><button id="saveBgSettingsBtn" class="btn-refresh" style="width:100%; margin-top:15px;">💾 同步儲存比例與文字</button></div><div style="border:2px dashed #EADCDD; border-radius:12px; padding:20px; text-align:center; background:#FCFAFA; margin-bottom:20px;"><input type="file" id="bgFileInput" accept="image/jpeg,image/png" style="display:none;"><button class="btn-refresh" onclick="document.getElementById('bgFileInput').click()">➕ 上傳新背景圖片</button><div id="bgFileNameDisplay" style="margin-top:8px; font-size:0.85rem; color:#555;"></div></div><label style="font-weight:700; font-size:0.9rem; color:#4A3B43;">雲端大圖背景庫清單：</label><div class="gallery-admin-grid layout-2col" id="bgAdminGrid"></div><div class="modal-actions" style="margin-top:20px;"><button class="btn-modal btn-cancel" id="closeBgBtn" style="width:100%;">關閉背景庫</button></div></div></div>
+    <div id="galleryModal" class="modal-overlay"><div class="modal-content" style="max-width:700px;"><h3>📸 上傳作品集與排版管理</h3><div class="settings-panel"><h4 style="margin-bottom:12px; color:var(--accent-purple); font-size:1rem;">🎛️ 排版與顯示設定</h4><div style="display:flex; gap:15px; margin-bottom:10px; flex-wrap:wrap;"><div style="flex:1; min-width:200px;"><label style="font-size:0.85rem; font-weight:700; display:block; margin-bottom:5px;">前台與預覽排版方式</label><select id="portfolioLayoutSelect" class="input-discount" style="padding:8px;"><option value="1col">單張直式 (大圖呈現)</option><option value="2col">2張並排直式 (並列呈現)</option></select></div><div style="flex:1; min-width:200px;"><label style="font-size:0.85rem; font-weight:700; display:block; margin-bottom:5px;">圖片縮放比例 (<span id="portScaleDisplay">100</span>%)</label><input type="range" id="portScaleInput" min="50" max="150" value="100" style="width:100%; margin-top:8px;"></div></div><button id="savePortSettingsBtn" class="btn-refresh" style="width:100%; margin-top:10px;">💾 儲存全域排版與縮放設定</button></div><div style="border:2px dashed #EADCDD; border-radius:12px; padding:20px; text-align:center; background:#FCFAFA; margin-bottom:20px;"><input type="file" id="galleryFileInput" accept="image/jpeg,image/png" style="display:none;"><button class="btn-refresh" onclick="document.getElementById('galleryFileInput').click()">➕ 新增作品照片</button><div id="galleryFileNameDisplay" style="margin-top:8px; font-size:0.85rem; color:#555;"></div></div><label style="font-weight:700; font-size:0.9rem;">目前作品照片清單 (可個別新增文字標示)：</label><div class="gallery-admin-grid layout-2col" id="galleryAdminGrid"></div><div class="modal-actions" style="margin-top:20px;"><button class="btn-modal btn-cancel" id="closeGalleryBtn" style="width:100%;">關閉視窗</button></div></div></div>
+    <div id="discountModal" class="modal-overlay"><div class="modal-content"><h3>⚙️ 優惠活動折扣設定</h3><div style="margin: 25px 0; text-align: center; background:#FCFAFA; padding:20px; border-radius:12px; border:1px solid #EADCDD;"><label style="font-size: 0.95rem; font-weight: 700;">新客初次預約折數：</label><input type="number" id="discountConfigInput" class="input-discount" style="width:100px; display:inline-block; text-align:center;" min="10" max="99"> 折</div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeDiscountBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveDiscountBtn">確認修改</button></div></div></div>
+    <div id="timeSlotConfigModal" class="modal-overlay"><div class="modal-content" style="max-width: 450px;"><h3>🕒 編輯可預約時段</h3><div class="config-table-wrapper"><table><thead><tr><th style="text-align:center;">開放預約時段</th><th style="text-align:center;">操作</th></tr></thead><tbody id="timeSlotListTbody"></tbody></table></div><button class="btn-refresh" id="addTimeSlotRowBtn" style="width: 100%; margin-bottom: 15px;">➕ 新增時段</button><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeTimeSlotModalBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveTimeSlotBtn">💾 儲存時段</button></div></div></div>
+    <div id="styleConfigModal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><h3>💅 編輯核心款式項目及價錢</h3><div class="config-table-wrapper"><table><thead><tr><th>款式名稱</th><th>價格 (元)</th><th style="text-align:center;">操作</th></tr></thead><tbody id="styleListTbody"></tbody></table></div><button class="btn-refresh" id="addStyleRowBtn" style="width: 100%; margin-bottom: 15px;">➕ 新增款式</button><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeStyleModalBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveStyleBtn">💾 儲存同步</button></div></div></div>
+    <div id="addonConfigModal" class="modal-overlay"><div class="modal-content" style="max-width: 550px;"><h3>✨ 編輯附加服務項目及價錢</h3><div class="config-table-wrapper"><table><thead><tr><th>服務名稱</th><th>價格 (元)</th><th style="text-align:center;">操作</th></tr></thead><tbody id="addonListTbody"></tbody></table></div><button class="btn-refresh" id="addAddonRowBtn" style="width: 100%; margin-bottom: 15px;">➕ 新增服務</button><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeAddonModalBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveAddonBtn">💾 儲存服務</button></div></div></div>
+    <div id="searchModal" class="modal-overlay"><div class="modal-content" style="max-width: 500px;"><h3>🔍 顧客名單快速速查</h3><input type="text" id="searchInput" class="input-discount" placeholder="請輸入名字或電話關鍵字..."><div id="searchResultList" style="margin-top:15px; max-height:300px; overflow-y:auto;"></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeSearchBtn" style="width:100%;">關閉</button></div></div></div>
+    <div id="imageModal" class="modal-overlay"><div class="modal-content" style="max-width:650px;"><h3>📑 服務合約雲端備份憑證</h3><div style="width:100%; max-height:55vh; overflow-y:auto; border:1px solid #EADCDD; border-radius:12px; margin-bottom:20px;"><img id="previewImage" src="" style="width:100%; display:block;"></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeImgModalBtn">關閉</button><button class="btn-modal btn-confirm-success" id="downloadImgBtn">📥 下載合約檔</button></div></div></div>
+    <div id="deleteModal" class="modal-overlay"><div class="modal-content" style="max-width:400px; text-align:center;"><div style="font-size:3rem; margin-bottom:10px;">⚠️</div><h3 style="color:var(--danger-red);">確定要完全刪除此項預約？</h3><p style="font-size:0.9rem; color:#666;">注意：刪除後資料庫將完全移除且無法撤回！</p><div class="modal-actions"><button class="btn-modal btn-cancel" id="cancelDeleteBtn">取消保留</button><button class="btn-modal" id="confirmDeleteBtn" style="background:var(--danger-red); color:white;">確認刪除</button></div></div></div>
+    <div class="fullscreen-sign-overlay" id="fullscreenSignOverlay"><div class="sign-header"><span style="font-size:1.2rem;">✨ 美甲師結案全螢幕電子簽章系統</span><button class="close-sidebar-btn" id="abandonSignBtn">×</button></div><div class="sign-body-text">今日施作完畢後，顧客確認款式顏色符合預約期待。隨附 7 日保固。以下為雙方數位簽署確認憑證。</div><div style="padding:15px 20px; background:#FFF; border-bottom:1px solid #EADCDD; display:flex; gap:20px; align-items:center;"><div><span style="font-weight:700;">👧 顧客前台原始簽章：</span><div id="customerSigPlaceholder" style="display:inline-block; vertical-align:middle; margin-left:10px;"></div></div><div style="flex:1;"><input type="text" id="signatureInputTech" class="input-discount" style="padding:8px;" placeholder="⌨️ 亦可在此打字輸入美甲師姓名確認..."></div></div><div class="sign-canvas-container"><canvas id="fullCanvas"></canvas></div><div class="sign-footer-controls"><button class="btn-modal btn-cancel" id="clearFullSignBtn">重填清除</button><button class="btn-modal btn-confirm-success" id="submitFullSignBtn" style="background:var(--success-green);">✅ 送出結案備份</button></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, doc, deleteDoc, updateDoc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, deleteDoc, updateDoc, onSnapshot, setDoc, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import html2canvas from "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm";
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
+        // Firebase 僅保留公開設定
         const firebaseConfig = {
             apiKey: "AIzaSyAvLmHzZK6HwMLJFo3JyzY_T_azpElk1Lc",
             authDomain: "beautiful-68dbc.firebaseapp.com",
@@ -382,8 +257,10 @@
             messagingSenderId: "348466975949",
             appId: "1:348466975949:web:44eb81d962fe957fa34584"
         };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig); 
+        const db = getFirestore(app);
 
+        // Supabase 僅保留 Anon 匿名讀寫金鑰
         const supabaseUrl = 'https://hyvcfxwoewvbpfzvfdnn.supabase.co';
         const supabaseAnonKey = 'sb_publishable_TR5C2Zc7eOj9uUosUUsX4g_KbBOwey2';
         const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
@@ -396,6 +273,9 @@
         }; 
         const screenshotsMap = new Map();
 
+        // ===================================================
+        // 畫布與全域工具邏輯 (維持不變)
+        // ===================================================
         const fullCanvas = document.getElementById('fullCanvas'); const ctx = fullCanvas.getContext('2d');
         let isDrawing = false; let hasDrawnTech = false;
 
@@ -409,11 +289,7 @@
             return new Blob(byteArrays, {type: contentType});
         }
 
-        function resizeFullCanvas() {
-            fullCanvas.width = window.innerWidth; fullCanvas.height = window.innerHeight - 250; 
-            ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = '#333333';
-        }
-
+        function resizeFullCanvas() { fullCanvas.width = window.innerWidth; fullCanvas.height = window.innerHeight - 250; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.strokeStyle = '#333333'; }
         function initCanvasEvents() {
             function getPos(e) { const rect = fullCanvas.getBoundingClientRect(); return e.type.includes('touch') ? { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top } : { x: e.clientX - rect.left, y: e.clientY - rect.top }; }
             function start(e) { e.preventDefault(); isDrawing = true; hasDrawnTech = true; document.getElementById('signatureInputTech').value = ''; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
@@ -422,317 +298,229 @@
             fullCanvas.addEventListener('mousedown', start); fullCanvas.addEventListener('mousemove', move); window.addEventListener('mouseup', stop);
             fullCanvas.addEventListener('touchstart', start, {passive:false}); fullCanvas.addEventListener('touchmove', move, {passive:false}); window.addEventListener('touchend', stop);
         }
-
         document.getElementById('clearFullSignBtn').addEventListener('click', () => { ctx.clearRect(0,0,fullCanvas.width,fullCanvas.height); document.getElementById('signatureInputTech').value = ''; hasDrawnTech = false; });
         document.getElementById('signatureInputTech').addEventListener('input', () => { if(hasDrawnTech) { ctx.clearRect(0,0,fullCanvas.width,fullCanvas.height); hasDrawnTech = false; } });
 
-        // ===================================================
-        // 通用設定存取函式
-        // ===================================================
         async function saveCfg(dataObj, btn, text) { 
-            try { 
-                if(btn) { btn.innerText="儲存中..."; btn.disabled=true; }
-                await setDoc(doc(db, "system_settings", "booking_config"), dataObj, { merge: true }); 
-                alert("🎉 設定已即時同步連動至前台！"); 
-                return true; 
-            } catch(e) { 
-                alert("儲存失敗: " + e.message); 
-                return false; 
-            } finally { 
-                if(btn) { btn.innerText=text; btn.disabled=false; }
-            } 
+            try { if(btn) { btn.innerText="儲存中..."; btn.disabled=true; } await setDoc(doc(db, "system_settings", "booking_config"), dataObj, { merge: true }); alert("🎉 設定已即時同步連動至前台！"); return true; } 
+            catch(e) { alert("儲存失敗: " + e.message); return false; } 
+            finally { if(btn) { btn.innerText=text; btn.disabled=false; } } 
         }
 
         // ===================================================
-        // 增強版：大圖背景管理 (含縮放與標題設定)
+        // Gemini AI 助理客戶端邏輯
         // ===================================================
-        // 綁定 Slider 事件
-        document.getElementById('bgScaleInput').addEventListener('input', (e) => document.getElementById('bgScaleDisplay').innerText = e.target.value);
-        
-        // 標題新增按鈕
-        document.getElementById('addBgTitleBtn').addEventListener('click', () => saveCfg({ pageTitle: document.getElementById('bgTitleInput').value.trim() }, document.getElementById('addBgTitleBtn'), "新增"));
-        document.getElementById('addBgSubtitleBtn').addEventListener('click', () => saveCfg({ pageSubtitle: document.getElementById('bgSubtitleInput').value.trim() }, document.getElementById('addBgSubtitleBtn'), "新增"));
-        
-        // 標題刪除/清除按鈕
-        document.getElementById('delBgTitleBtn').addEventListener('click', () => { document.getElementById('bgTitleInput').value=''; saveCfg({ pageTitle: "" }, document.getElementById('delBgTitleBtn'), "刪除"); });
-        document.getElementById('delBgSubtitleBtn').addEventListener('click', () => { document.getElementById('bgSubtitleInput').value=''; saveCfg({ pageSubtitle: "" }, document.getElementById('delBgSubtitleBtn'), "刪除"); });
+        const chatWidget = document.getElementById('chatWidget');
+        const fabChatBtn = document.getElementById('fabChatBtn');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+        const sendChatBtn = document.getElementById('sendChatBtn');
+        const chatInput = document.getElementById('chatInput');
+        const chatMessages = document.getElementById('chatMessages');
 
-        // 儲存背景面板設定
-        document.getElementById('saveBgSettingsBtn').addEventListener('click', () => {
-            saveCfg({ 
-                bgScale: parseInt(document.getElementById('bgScaleInput').value) || 100,
-                pageTitle: document.getElementById('bgTitleInput').value.trim(),
-                pageSubtitle: document.getElementById('bgSubtitleInput').value.trim()
-            }, document.getElementById('saveBgSettingsBtn'), "💾 同步儲存比例與文字");
+        // 生成或取得固定的 Session ID
+        let sessionId = localStorage.getItem('gemini_session_id');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+            localStorage.setItem('gemini_session_id', sessionId);
+        }
+
+        // UI 開關
+        fabChatBtn.addEventListener('click', () => { chatWidget.style.display = 'flex'; });
+        closeChatBtn.addEventListener('click', () => { chatWidget.style.display = 'none'; });
+
+        // 監聽 AI 訊息回覆
+        const messagesRef = collection(db, "chat_sessions", sessionId, "messages");
+        const q = query(messagesRef, orderBy("timestamp", "asc"));
+        
+        onSnapshot(q, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const data = change.doc.data();
+                    const div = document.createElement('div');
+                    div.className = `msg-bubble ${data.role}`;
+                    div.innerText = data.text;
+                    chatMessages.appendChild(div);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            });
         });
 
-        async function renderAdminBgGallery() {
-            const grid = document.getElementById('bgAdminGrid');
-            grid.innerHTML = '<p style="color:#aaa; font-size:0.85rem; grid-column:1/-1;">正在讀取 Supabase 雲端背景圖庫...</p>';
+        // 傳送訊息
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            chatInput.value = '';
+            
             try {
-                const { data, error } = await supabaseClient.storage.from('receipts').list('website-assets', { limit: 100 });
-                if(error) throw error;
-                const bgFiles = data.filter(x => x.name.startsWith('bg_'));
-                grid.innerHTML = '';
-                
+                // 將訊息寫入 Firestore，觸發 Tmux 後端監聽
+                await addDoc(messagesRef, {
+                    role: 'user',
+                    text: text,
+                    timestamp: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("發送失敗:", error);
+                alert("訊息發送失敗，請確認網路連線。");
+            }
+        }
+
+        sendChatBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+
+        // ===================================================
+        // 原有之管理面板邏輯 (完全保留)
+        // ===================================================
+        document.getElementById('bgScaleInput').addEventListener('input', (e) => document.getElementById('bgScaleDisplay').innerText = e.target.value);
+        document.getElementById('addBgTitleBtn').addEventListener('click', () => saveCfg({ pageTitle: document.getElementById('bgTitleInput').value.trim() }, document.getElementById('addBgTitleBtn'), "新增"));
+        document.getElementById('addBgSubtitleBtn').addEventListener('click', () => saveCfg({ pageSubtitle: document.getElementById('bgSubtitleInput').value.trim() }, document.getElementById('addBgSubtitleBtn'), "新增"));
+        document.getElementById('delBgTitleBtn').addEventListener('click', () => { document.getElementById('bgTitleInput').value=''; saveCfg({ pageTitle: "" }, document.getElementById('delBgTitleBtn'), "刪除"); });
+        document.getElementById('delBgSubtitleBtn').addEventListener('click', () => { document.getElementById('bgSubtitleInput').value=''; saveCfg({ pageSubtitle: "" }, document.getElementById('delBgSubtitleBtn'), "刪除"); });
+        document.getElementById('saveBgSettingsBtn').addEventListener('click', () => { saveCfg({ bgScale: parseInt(document.getElementById('bgScaleInput').value) || 100, pageTitle: document.getElementById('bgTitleInput').value.trim(), pageSubtitle: document.getElementById('bgSubtitleInput').value.trim() }, document.getElementById('saveBgSettingsBtn'), "💾 同步儲存比例與文字"); });
+
+        async function renderAdminBgGallery() {
+            const grid = document.getElementById('bgAdminGrid'); grid.innerHTML = '<p style="color:#aaa; font-size:0.85rem; grid-column:1/-1;">正在讀取 Supabase 雲端背景圖庫...</p>';
+            try {
+                const { data, error } = await supabaseClient.storage.from('receipts').list('website-assets', { limit: 100 }); if(error) throw error;
+                const bgFiles = data.filter(x => x.name.startsWith('bg_')); grid.innerHTML = '';
                 if(bgFiles.length === 0) { grid.innerHTML = '<p style="color:#ccc; font-size:0.85rem; grid-column:1/-1; text-align:center;">尚無背景圖片，請點擊上方上傳</p>'; return; }
-                
                 bgFiles.forEach(item => {
-                    const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(`website-assets/${item.name}`);
-                    const isUsing = (pUrl.publicUrl === globalConfig.activeBgUrl);
-                    
-                    const div = document.createElement('div');
-                    div.className = `bg-grid-item ${isUsing ? 'active-bg-card' : ''}`;
-                    div.innerHTML = `
-                        <img src="${pUrl.publicUrl}">
-                        ${isUsing ? '<span class="badge-in-use">使用中</span>' : `<button class="btn-use-bg" data-url="${pUrl.publicUrl}">✨ 套用</button>`}
-                        <button class="bg-del-tag" data-name="${item.name}">刪除</button>
-                    `;
+                    const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(`website-assets/${item.name}`); const isUsing = (pUrl.publicUrl === globalConfig.activeBgUrl);
+                    const div = document.createElement('div'); div.className = `bg-grid-item ${isUsing ? 'active-bg-card' : ''}`;
+                    div.innerHTML = `<img src="${pUrl.publicUrl}">${isUsing ? '<span class="badge-in-use">使用中</span>' : `<button class="btn-use-bg" data-url="${pUrl.publicUrl}">✨ 套用</button>`}<button class="bg-del-tag" data-name="${item.name}">刪除</button>`;
                     grid.appendChild(div);
                 });
             } catch(e) { grid.innerHTML = '讀取背景圖庫失敗。'; }
         }
 
-        document.getElementById('menuBgUploadBtn').addEventListener('click', () => { 
-            closeSidebar(); 
-            document.getElementById('bgScaleInput').value = globalConfig.bgScale || 100;
-            document.getElementById('bgScaleDisplay').innerText = globalConfig.bgScale || 100;
-            document.getElementById('bgTitleInput').value = globalConfig.pageTitle || '';
-            document.getElementById('bgSubtitleInput').value = globalConfig.pageSubtitle || '';
-            document.getElementById('bgUploadModal').style.display='flex'; 
-            renderAdminBgGallery(); 
-        });
+        document.getElementById('menuBgUploadBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('bgScaleInput').value = globalConfig.bgScale || 100; document.getElementById('bgScaleDisplay').innerText = globalConfig.bgScale || 100; document.getElementById('bgTitleInput').value = globalConfig.pageTitle || ''; document.getElementById('bgSubtitleInput').value = globalConfig.pageSubtitle || ''; document.getElementById('bgUploadModal').style.display='flex'; renderAdminBgGallery(); });
         document.getElementById('closeBgBtn').addEventListener('click', () => { document.getElementById('bgUploadModal').style.display='none'; });
         
         document.getElementById('bgFileInput').addEventListener('change', async (e) => {
             if(e.target.files.length > 0) {
-                const file = e.target.files[0];
-                document.getElementById('bgFileNameDisplay').innerText = `上傳中：${file.name}...`;
+                const file = e.target.files[0]; document.getElementById('bgFileNameDisplay').innerText = `上傳中：${file.name}...`;
                 try {
                     const uniqName = `website-assets/bg_${Date.now()}_${Math.floor(Math.random()*1000)}.jpg`;
-                    const { error } = await supabaseClient.storage.from('receipts').upload(uniqName, file, { contentType: file.type });
-                    if(error) throw error;
-                    
+                    const { error } = await supabaseClient.storage.from('receipts').upload(uniqName, file, { contentType: file.type }); if(error) throw error;
                     const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(uniqName);
                     await setDoc(doc(db, "system_settings", "booking_config"), { activeBgUrl: pUrl.publicUrl }, { merge: true });
-                    
-                    document.getElementById('bgFileNameDisplay').innerText = '';
-                    alert('🎉 背景上傳成功！已同步連動渲染至前台預約頁。');
-                    renderAdminBgGallery();
+                    document.getElementById('bgFileNameDisplay').innerText = ''; alert('🎉 背景上傳成功！已同步連動渲染至前台預約頁。'); renderAdminBgGallery();
                 } catch(err) { alert('背景上傳失敗：' + err.message); document.getElementById('bgFileNameDisplay').innerText = ''; }
             }
         });
 
         document.getElementById('bgAdminGrid').addEventListener('click', async (e) => {
-            if(e.target.classList.contains('btn-use-bg')) {
-                const targetUrl = e.target.getAttribute('data-url');
-                await setDoc(doc(db, "system_settings", "booking_config"), { activeBgUrl: targetUrl }, { merge: true });
-                alert('✅ 已成功變更前台網頁大背景！');
-                renderAdminBgGallery();
-            }
+            if(e.target.classList.contains('btn-use-bg')) { const targetUrl = e.target.getAttribute('data-url'); await setDoc(doc(db, "system_settings", "booking_config"), { activeBgUrl: targetUrl }, { merge: true }); alert('✅ 已成功變更前台網頁大背景！'); renderAdminBgGallery(); }
             if(e.target.classList.contains('bg-del-tag')) {
                 const targetName = e.target.getAttribute('data-name');
                 if(confirm('確定要直接從 Supabase 儲存桶徹底移除這張背景圖嗎？')) {
-                    const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(`website-assets/${targetName}`);
-                    await supabaseClient.storage.from('receipts').remove([`website-assets/${targetName}`]);
-                    if(pUrl.publicUrl === globalConfig.activeBgUrl) await setDoc(doc(db, "system_settings", "booking_config"), { activeBgUrl: "" }, { merge: true });
-                    renderAdminBgGallery();
+                    const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(`website-assets/${targetName}`); await supabaseClient.storage.from('receipts').remove([`website-assets/${targetName}`]);
+                    if(pUrl.publicUrl === globalConfig.activeBgUrl) await setDoc(doc(db, "system_settings", "booking_config"), { activeBgUrl: "" }, { merge: true }); renderAdminBgGallery();
                 }
             }
         });
 
-        // ===================================================
-        // 增強版：作品集排版與標示管理
-        // ===================================================
-        // 排版與縮放設定面板事件
         document.getElementById('portScaleInput').addEventListener('input', (e) => document.getElementById('portScaleDisplay').innerText = e.target.value);
-        document.getElementById('portfolioLayoutSelect').addEventListener('change', (e) => {
-            const grid = document.getElementById('galleryAdminGrid');
-            grid.className = `gallery-admin-grid layout-${e.target.value}`;
-        });
-        
-        document.getElementById('savePortSettingsBtn').addEventListener('click', () => {
-            saveCfg({ 
-                portfolioLayout: document.getElementById('portfolioLayoutSelect').value,
-                portfolioScale: parseInt(document.getElementById('portScaleInput').value) || 100
-            }, document.getElementById('savePortSettingsBtn'), "💾 儲存全域排版與縮放設定");
-        });
+        document.getElementById('portfolioLayoutSelect').addEventListener('change', (e) => { document.getElementById('galleryAdminGrid').className = `gallery-admin-grid layout-${e.target.value}`; });
+        document.getElementById('savePortSettingsBtn').addEventListener('click', () => { saveCfg({ portfolioLayout: document.getElementById('portfolioLayoutSelect').value, portfolioScale: parseInt(document.getElementById('portScaleInput').value) || 100 }, document.getElementById('savePortSettingsBtn'), "💾 儲存全域排版與縮放設定"); });
 
         async function renderAdminGallery() {
-            const grid = document.getElementById('galleryAdminGrid');
-            const layout = globalConfig.portfolioLayout || '2col';
-            const scale = (globalConfig.portfolioScale || 100) / 100;
-            const captions = globalConfig.portfolioCaptions || {};
-            
-            grid.className = `gallery-admin-grid layout-${layout}`;
-            grid.innerHTML = '<p style="color:#aaa; font-size:0.85rem; grid-column:1/-1;">正在讀取作品集照片...</p>';
-            
+            const grid = document.getElementById('galleryAdminGrid'); const layout = globalConfig.portfolioLayout || '2col'; const scale = (globalConfig.portfolioScale || 100) / 100; const captions = globalConfig.portfolioCaptions || {};
+            grid.className = `gallery-admin-grid layout-${layout}`; grid.innerHTML = '<p style="color:#aaa; font-size:0.85rem; grid-column:1/-1;">正在讀取作品集照片...</p>';
             try {
-                const { data, error } = await supabaseClient.storage.from('receipts').list('website-assets', { limit: 100 });
-                if(error) throw error;
-                const filtered = data.filter(x => x.name.startsWith('portfolio_'));
-                grid.innerHTML = '';
-                
+                const { data, error } = await supabaseClient.storage.from('receipts').list('website-assets', { limit: 100 }); if(error) throw error;
+                const filtered = data.filter(x => x.name.startsWith('portfolio_')); grid.innerHTML = '';
                 if(filtered.length === 0) { grid.innerHTML = '<p style="color:#ccc; font-size:0.85rem; grid-column:1/-1; text-align:center;">目前無作品照片</p>'; return; }
-                
                 filtered.forEach(item => {
-                    const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(`website-assets/${item.name}`);
-                    const div = document.createElement('div'); 
-                    div.className = 'gallery-admin-item';
-                    
-                    div.innerHTML = `
-                        <div class="img-wrapper">
-                            <img src="${pUrl.publicUrl}" style="transform: scale(${scale});">
-                        </div>
-                        <input type="text" class="input-discount cap-input" data-name="${item.name}" placeholder="輸入款式名稱或介紹..." value="${captions[item.name] || ''}" style="padding: 6px 10px; font-size: 0.85rem;">
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn-save-cap" data-name="${item.name}" style="flex:1; background:var(--accent-purple); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:700;">💾 存標示</button>
-                            <button class="del-tag" data-name="${item.name}" style="flex:1;">刪除圖</button>
-                        </div>
-                    `;
+                    const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(`website-assets/${item.name}`); const div = document.createElement('div'); div.className = 'gallery-admin-item';
+                    div.innerHTML = `<div class="img-wrapper"><img src="${pUrl.publicUrl}" style="transform: scale(${scale});"></div><input type="text" class="input-discount cap-input" data-name="${item.name}" placeholder="輸入款式名稱或介紹..." value="${captions[item.name] || ''}" style="padding: 6px 10px; font-size: 0.85rem;"><div style="display:flex; gap:8px;"><button class="btn-save-cap" data-name="${item.name}" style="flex:1; background:var(--accent-purple); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:700;">💾 存標示</button><button class="del-tag" data-name="${item.name}" style="flex:1;">刪除圖</button></div>`;
                     grid.appendChild(div);
                 });
             } catch(e) { grid.innerHTML = '讀取作品集目錄清單失敗。'; }
         }
 
-        document.getElementById('menuGalleryBtn').addEventListener('click', () => { 
-            closeSidebar(); 
-            document.getElementById('portfolioLayoutSelect').value = globalConfig.portfolioLayout || '2col';
-            document.getElementById('portScaleInput').value = globalConfig.portfolioScale || 100;
-            document.getElementById('portScaleDisplay').innerText = globalConfig.portfolioScale || 100;
-            document.getElementById('galleryModal').style.display='flex'; 
-            renderAdminGallery(); 
-        });
+        document.getElementById('menuGalleryBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('portfolioLayoutSelect').value = globalConfig.portfolioLayout || '2col'; document.getElementById('portScaleInput').value = globalConfig.portfolioScale || 100; document.getElementById('portScaleDisplay').innerText = globalConfig.portfolioScale || 100; document.getElementById('galleryModal').style.display='flex'; renderAdminGallery(); });
         document.getElementById('closeGalleryBtn').addEventListener('click', () => { document.getElementById('galleryModal').style.display='none'; });
         
         document.getElementById('galleryFileInput').addEventListener('change', async (e) => {
             if(e.target.files.length > 0) {
                 const file = e.target.files[0]; document.getElementById('galleryFileNameDisplay').innerText = `上傳中...`;
                 try {
-                    const uniqName = `website-assets/portfolio_${Date.now()}_${Math.floor(Math.random()*1000)}.jpg`;
-                    await supabaseClient.storage.from('receipts').upload(uniqName, file, { contentType:'image/jpeg' });
+                    const uniqName = `website-assets/portfolio_${Date.now()}_${Math.floor(Math.random()*1000)}.jpg`; await supabaseClient.storage.from('receipts').upload(uniqName, file, { contentType:'image/jpeg' });
                     document.getElementById('galleryFileNameDisplay').innerText = ''; alert('作品追加成功！'); renderAdminGallery();
                 } catch(err) { alert('上傳作品失敗'); }
             }
         });
         
-        // 綁定圖庫的文字標示與刪除按鈕
         document.getElementById('galleryAdminGrid').addEventListener('click', async (e) => {
             if(e.target.classList.contains('del-tag')) {
                 if(confirm('確定移除這張作品照？')) {
-                    const name = e.target.getAttribute('data-name');
-                    await supabaseClient.storage.from('receipts').remove([`website-assets/${name}`]);
-                    // 同步清理標示文字
-                    let newCaps = { ...(globalConfig.portfolioCaptions || {}) };
-                    if(newCaps[name]) { delete newCaps[name]; await saveCfg({ portfolioCaptions: newCaps }); }
-                    renderAdminGallery();
+                    const name = e.target.getAttribute('data-name'); await supabaseClient.storage.from('receipts').remove([`website-assets/${name}`]);
+                    let newCaps = { ...(globalConfig.portfolioCaptions || {}) }; if(newCaps[name]) { delete newCaps[name]; await saveCfg({ portfolioCaptions: newCaps }); } renderAdminGallery();
                 }
             }
             if(e.target.classList.contains('btn-save-cap')) {
-                const name = e.target.getAttribute('data-name');
-                const inputVal = e.target.parentElement.parentElement.querySelector('.cap-input').value.trim();
-                let newCaps = { ...(globalConfig.portfolioCaptions || {}) };
-                newCaps[name] = inputVal;
-                
-                const btn = e.target; btn.innerText = "儲存中..."; btn.disabled = true;
-                await setDoc(doc(db, "system_settings", "booking_config"), { portfolioCaptions: newCaps }, { merge: true });
-                btn.innerText = "✅ 已存"; btn.style.background = "var(--success-green)";
-                setTimeout(() => { btn.innerText = "💾 存標示"; btn.style.background = "var(--accent-purple)"; btn.disabled = false; }, 1500);
+                const name = e.target.getAttribute('data-name'); const inputVal = e.target.parentElement.parentElement.querySelector('.cap-input').value.trim();
+                let newCaps = { ...(globalConfig.portfolioCaptions || {}) }; newCaps[name] = inputVal;
+                const btn = e.target; btn.innerText = "儲存中..."; btn.disabled = true; await setDoc(doc(db, "system_settings", "booking_config"), { portfolioCaptions: newCaps }, { merge: true });
+                btn.innerText = "✅ 已存"; btn.style.background = "var(--success-green)"; setTimeout(() => { btn.innerText = "💾 存標示"; btn.style.background = "var(--accent-purple)"; btn.disabled = false; }, 1500);
             }
         });
 
-        // --- 即時清單同步渲染 ---
         function initRealtimeSync() {
-            onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => { 
-                if (docSnap.exists()) globalConfig = { ...globalConfig, ...docSnap.data() }; 
-            });
-
+            onSnapshot(doc(db, "system_settings", "booking_config"), (docSnap) => { if (docSnap.exists()) globalConfig = { ...globalConfig, ...docSnap.data() }; });
             onSnapshot(collection(db, "nail_bookings"), (snapshot) => {
                 let list = []; snapshot.forEach(d => list.push({ id: d.id, ...d.data() }));
                 list.sort((a,b) => (a.bookingDate !== b.bookingDate) ? a.bookingDate.localeCompare(b.bookingDate) : a.bookingTime.localeCompare(b.bookingTime));
                 globalBookingsData = list;
-
                 const counts = {}; list.forEach(item => { const k = `${item.bookingDate}_${item.bookingTime}`; counts[k] = (counts[k] || 0) + 1; if(item.warrantyScreenshot) screenshotsMap.set(item.id, item.warrantyScreenshot); });
                 const tbody = document.getElementById('bookingListTbody');
                 if(list.length === 0) { document.getElementById('loading').innerText = "目前尚無預約客戶。"; document.getElementById('bookingTable').style.display = 'none'; return; }
-
                 tbody.innerHTML = '';
                 list.forEach(item => {
-                    const tr = document.createElement('tr'); const key = `${item.bookingDate}_${item.bookingTime}`;
-                    if(counts[key] > 1) tr.className = 'overlap-row';
-
-                    let nameHtml = `<span class="client-name">${item.clientName || '未填'}</span>`;
-                    if(item.status === 'completed') nameHtml += `<br><span class="status-completed">✅ 雙簽結案</span>`;
-
+                    const tr = document.createElement('tr'); const key = `${item.bookingDate}_${item.bookingTime}`; if(counts[key] > 1) tr.className = 'overlap-row';
+                    let nameHtml = `<span class="client-name">${item.clientName || '未填'}</span>`; if(item.status === 'completed') nameHtml += `<br><span class="status-completed">✅ 雙簽結案</span>`;
                     let addonHtml = ''; (item.selectedAddons || []).forEach((a, i) => addonHtml += `<span class="addon-tag">${i+1}. ${a}</span>`);
                     let priceHtml = item.priceCalculations ? `<span class="total-price">$${item.priceCalculations.totalPrice.toLocaleString()}</span>` : '$0';
-                    
                     let signHtml = '<span style="color:#aaa;">未簽署</span>';
-                    if(item.warrantyScreenshot) signHtml = `<button class="btn-action-ui btn-view-img" data-id="${item.id}">👁️ 查閱合約</button>`;
-                    else if(item.customerSignature) signHtml = `<span style="color:var(--accent-pink); font-weight:700;">✍️ 顧客已簽</span>`;
-
-                    tr.innerHTML = `
-                        <td><div class="datetime-badge"><span class="date-item">📅 ${item.bookingDate}</span><span class="time-item">${item.bookingTime}</span>${counts[key]>1?'<span class="overlap-warning">重疊</span>':''}</div></td>
-                        <td>${nameHtml}</td><td><strong>${item.clientPhone || ''}</strong></td><td>${item.selectedStyle || ''}</td><td>${addonHtml || '無'}</td><td>${priceHtml}</td><td style="text-align:center;">${signHtml}</td>
-                        <td><div class="notes-text">${item.notes || '無'}</div></td>
-                        <td><div class="action-btns">${item.status==='completed'?'':`<button class="btn-action-ui btn-complete-row" data-id="${item.id}">✅ 結案簽名</button>`}<button class="btn-action-ui btn-delete-row" data-id="${item.id}">🗑️ 刪除</button></div></td>
-                    `;
+                    if(item.warrantyScreenshot) signHtml = `<button class="btn-action-ui btn-view-img" data-id="${item.id}">👁️ 查閱合約</button>`; else if(item.customerSignature) signHtml = `<span style="color:var(--accent-pink); font-weight:700;">✍️ 顧客已簽</span>`;
+                    tr.innerHTML = `<td><div class="datetime-badge"><span class="date-item">📅 ${item.bookingDate}</span><span class="time-item">${item.bookingTime}</span>${counts[key]>1?'<span class="overlap-warning">重疊</span>':''}</div></td><td>${nameHtml}</td><td><strong>${item.clientPhone || ''}</strong></td><td>${item.selectedStyle || ''}</td><td>${addonHtml || '無'}</td><td>${priceHtml}</td><td style="text-align:center;">${signHtml}</td><td><div class="notes-text">${item.notes || '無'}</div></td><td><div class="action-btns">${item.status==='completed'?'':`<button class="btn-action-ui btn-complete-row" data-id="${item.id}">✅ 結案簽名</button>`}<button class="btn-action-ui btn-delete-row" data-id="${item.id}">🗑️ 刪除</button></div></td>`;
                     tbody.appendChild(tr);
                 });
                 document.getElementById('loading').style.display = 'none'; document.getElementById('bookingTable').style.display = 'table';
             });
         }
 
-        // 表格按鈕點擊委派
         document.getElementById('bookingListTbody').addEventListener('click', (e) => {
             const id = e.target.getAttribute('data-id'); if(!id) return;
-            if(e.target.classList.contains('btn-complete-row')) {
-                targetCompleteId = id; const b = globalBookingsData.find(x => x.id === id);
-                const ph = document.getElementById('customerSigPlaceholder'); ph.innerHTML = '';
-                if(b && b.customerSignature) {
-                    if(b.customerSignature.startsWith('http')) ph.innerHTML = `<img src="${b.customerSignature}" style="max-height:45px;">`;
-                    else ph.innerHTML = `<span style="font-weight:700; background:#DDD; padding:4px 8px; border-radius:4px;">${b.customerSignature}</span>`;
-                } else ph.innerHTML = '<span style="color:#aaa;">無存檔</span>';
-                document.getElementById('fullscreenSignOverlay').style.display = 'flex'; resizeFullCanvas(); ctx.clearRect(0,0,fullCanvas.width,fullCanvas.height);
-            }
+            if(e.target.classList.contains('btn-complete-row')) { targetCompleteId = id; const b = globalBookingsData.find(x => x.id === id); const ph = document.getElementById('customerSigPlaceholder'); ph.innerHTML = ''; if(b && b.customerSignature) { if(b.customerSignature.startsWith('http')) ph.innerHTML = `<img src="${b.customerSignature}" style="max-height:45px;">`; else ph.innerHTML = `<span style="font-weight:700; background:#DDD; padding:4px 8px; border-radius:4px;">${b.customerSignature}</span>`; } else ph.innerHTML = '<span style="color:#aaa;">無存檔</span>'; document.getElementById('fullscreenSignOverlay').style.display = 'flex'; resizeFullCanvas(); ctx.clearRect(0,0,fullCanvas.width,fullCanvas.height); }
             if(e.target.classList.contains('btn-view-img')) { document.getElementById('previewImage').src = screenshotsMap.get(id); document.getElementById('imageModal').style.display = 'flex'; }
             if(e.target.classList.contains('btn-delete-row')) { targetDeleteId = id; document.getElementById('deleteModal').style.display = 'flex'; }
         });
 
-        // 完工雙簽截圖封裝存入 Supabase `receipts`
         document.getElementById('abandonSignBtn').addEventListener('click', () => document.getElementById('fullscreenSignOverlay').style.display='none');
         document.getElementById('submitFullSignBtn').addEventListener('click', async () => {
-            if(!targetCompleteId) return; const typed = document.getElementById('signatureInputTech').value.trim();
-            if(!hasDrawnTech && !typed) { alert('請簽名或輸入全名確認！'); return; }
-
+            if(!targetCompleteId) return; const typed = document.getElementById('signatureInputTech').value.trim(); if(!hasDrawnTech && !typed) { alert('請簽名或輸入全名確認！'); return; }
             try {
                 document.getElementById('submitFullSignBtn').innerText = "雲端合約截圖備份中..."; document.getElementById('submitFullSignBtn').disabled = true;
                 const dummy = document.createElement('div'); dummy.style.padding = '40px'; dummy.style.width = '750px'; dummy.style.background = '#FFF'; dummy.style.position = 'fixed'; dummy.style.top = '-9999px';
-                const b = globalBookingsData.find(x => x.id === targetCompleteId);
-                const techSigSrc = hasDrawnTech ? fullCanvas.toDataURL('image/png') : `[打字認證] ${typed}`;
-                
+                const b = globalBookingsData.find(x => x.id === targetCompleteId); const techSigSrc = hasDrawnTech ? fullCanvas.toDataURL('image/png') : `[打字認證] ${typed}`;
                 dummy.innerHTML = `<div style="border:2px solid #333; padding:30px; border-radius:12px;"><h2 style="text-align:center;">✨ 神の指藝 完工確認與保固書 ✨</h2><hr><p><b>日期：</b>${b?.bookingDate} ${b?.bookingTime}</p><p><b>顧客：</b>${b?.clientName}</p><p><b>款式：</b>${b?.selectedStyle}</p><div style="background:#F9F9F9; padding:15px; margin:20px 0;">${document.querySelector('.sign-body-text').innerHTML}</div><div style="display:flex; justify-content:space-between; margin-top:40px;"><div><p>👧 顧客簽署：</p><div>${document.getElementById('customerSigPlaceholder').innerHTML}</div></div><div><p>💅 美甲師確認：</p><div>${hasDrawnTech?`<img src="${techSigSrc}" style="max-height:60px;">`: `<span>${typed}</span>`}</div></div></div></div>`;
                 document.body.appendChild(dummy); const capCanvas = await html2canvas(dummy, { backgroundColor:'#FFFFFF', scale:2 });
                 const base64Str = capCanvas.toDataURL('image/jpeg', 0.9).split(',')[1]; document.body.removeChild(dummy);
-
                 const filename = `website-assets/signed_contract_${Date.now()}_${targetCompleteId}.jpg`;
                 await supabaseClient.storage.from('receipts').upload(filename, b64toBlob(base64Str, 'image/jpeg'), { contentType:'image/jpeg', upsert:true });
                 const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(filename);
-
                 await updateDoc(doc(db, "nail_bookings", targetCompleteId), { status: "completed", techSignature: techSigSrc, warrantyScreenshot: pUrl.publicUrl, completedAt: new Date().toISOString() });
                 document.getElementById('fullscreenSignOverlay').style.display = 'none'; alert('🎉 結案成功！雲端數位合約已備份至 Supabase。');
             } catch(e) { alert('結案失敗：'+e.message); } finally { document.getElementById('submitFullSignBtn').innerText = "✅ 送出結案備份"; document.getElementById('submitFullSignBtn').disabled = false; targetCompleteId=null; }
         });
 
-        // 刪除確認執行
         document.getElementById('cancelDeleteBtn').addEventListener('click', () => document.getElementById('deleteModal').style.display='none');
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => { if(targetDeleteId) { await deleteDoc(doc(db, "nail_bookings", targetDeleteId)); document.getElementById('deleteModal').style.display='none'; targetDeleteId=null; } });
-
-        // 其他基礎配置通用綁定
         document.getElementById('menuInfoBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('infoAddress').value=globalConfig.shopAddress||''; document.getElementById('infoPhone').value=globalConfig.shopPhone||''; document.getElementById('infoIg').value=globalConfig.shopIg||''; document.getElementById('infoLine').value=globalConfig.shopLine||''; document.getElementById('infoFb').value=globalConfig.shopFb||''; document.getElementById('infoModal').style.display='flex'; });
         document.getElementById('closeInfoBtn').addEventListener('click', () => document.getElementById('infoModal').style.display='none');
         document.getElementById('saveInfoBtn').addEventListener('click', async () => { if(await saveCfg({ shopAddress:document.getElementById('infoAddress').value.trim(), shopPhone:document.getElementById('infoPhone').value.trim(), shopIg:document.getElementById('infoIg').value.trim(), shopLine:document.getElementById('infoLine').value.trim(), shopFb:document.getElementById('infoFb').value.trim() }, document.getElementById('saveInfoBtn'), "儲存設定")) document.getElementById('infoModal').style.display='none'; });
-
         document.getElementById('menuDiscountBtn').addEventListener('click', () => { closeSidebar(); document.getElementById('discountModal').style.display='flex'; document.getElementById('discountConfigInput').value=globalConfig.firstTimeDiscount||95; });
         document.getElementById('closeDiscountBtn').addEventListener('click', () => document.getElementById('discountModal').style.display='none');
         document.getElementById('saveDiscountBtn').addEventListener('click', async () => { const v=parseInt(document.getElementById('discountConfigInput').value); if(v>=10&&v<=99) if(await saveCfg({ firstTimeDiscount:v }, document.getElementById('saveDiscountBtn'), "確認修改")) document.getElementById('discountModal').style.display='none'; });
