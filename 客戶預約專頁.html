@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
-        /* --- 全局樣式與優雅變數 --- */
         html, body { height: 100%; margin: 0; }
         :root {
             --primary-color: #D4B2D4; 
@@ -148,7 +147,7 @@
         .gallery-item:hover img { transform: scale(1.05); }
 
         /* --- 智能客服 UI 樣式 --- */
-        .ai-fab { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #C5A059 0%, #A67C37 100%); color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 25px rgba(197, 160, 89, 0.4); z-index: 1500; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border: 2px solid #FFF; }
+        .ai-fab { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #C5A059 0%, #A67C37 100%); color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 8px 25px rgba(197, 160, 89, 0.4); z-index: 1500; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border: 2px solid #FFF; overflow: hidden; }
         .ai-fab:hover { transform: scale(1.1) rotate(5deg); }
         .ai-fab svg { width: 32px; height: 32px; fill: currentColor; }
         
@@ -204,11 +203,11 @@
     
     <div class="ai-chat-window" id="aiChatWindow">
         <div class="ai-chat-header">
-            <span>✨ 預約顧問 Gemini</span>
+            <span id="aiChatTitleText">✨ 預約顧問 Gemini</span>
             <button class="ai-chat-close" id="aiChatCloseBtn">&times;</button>
         </div>
         <div class="ai-chat-body" id="aiChatBody">
-            <div class="chat-msg model">✦ 親愛的客戶您好，我是神の指藝智能顧問。有任何關於美甲款式、保固範圍或預約的問題，歡迎隨時詢問我喔！</div>
+            <div class="chat-msg model" id="aiWelcomeMsg">✦ 親愛的客戶您好，我是神の指藝智能顧問。有任何關於美甲款式、保固範圍或預約的問題，歡迎隨時詢問我喔！</div>
         </div>
         <div class="ai-chat-footer">
             <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="輸入訊息詢問顧問...">
@@ -442,7 +441,6 @@
     </footer>
 
     <script type="module">
-        // 此處前端依然保留公鑰即可，無需刪除，公鑰在前端是安全且必要的
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -459,7 +457,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Supabase 保留 Anon 公鑰
         const supabaseUrl = 'https://hyvcfxwoewvbpfzvfdnn.supabase.co';
         const supabaseAnonKey = 'sb_publishable_TR5C2Zc7eOj9uUosUUsX4g_KbBOwey2';
         const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -520,6 +517,16 @@
                     if (data.firstTimeDiscount) {
                         systemDiscount = data.firstTimeDiscount / 100;
                         document.getElementById('discountLabelTitle').innerText = `新客優惠活動 (${data.firstTimeDiscount}折)`;
+                    }
+
+                    // 👉 新增：同步 AI 客服名稱與頭貼圖示
+                    if (data.aiName) {
+                        document.getElementById('aiChatTitleText').innerHTML = `✨ ${data.aiName}`;
+                        document.getElementById('aiWelcomeMsg').innerText = `✦ 親愛的客戶您好，我是「${data.aiName}」。有任何關於美甲款式、保固範圍或預約的問題，歡迎隨時詢問我喔！`;
+                    }
+                    if (data.aiIconUrl) {
+                        const fab = document.getElementById('aiFabBtn');
+                        fab.innerHTML = `<img src="${data.aiIconUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
                     }
 
                     const timeSelect = document.getElementById('bookingTime');
@@ -669,7 +676,7 @@
                     customerSignature: finalSigPayload,
                     techSignature: null, 
                     status: "待確認", 
-                    lineNotified: false, // 註記給後端發送 LINE 推播使用
+                    lineNotified: false, 
                     createdAt: serverTimestamp()
                 };
 
