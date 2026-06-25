@@ -130,25 +130,8 @@
         .badge-in-use { position: absolute; bottom: 5px; left: 5px; background: var(--success-green); color: white; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 700; z-index: 10; pointer-events: none; }
         .bg-del-tag { position: absolute; top: 5px; right: 5px; background: rgba(231, 76, 60, 0.9); color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; cursor: pointer; font-weight: 700; z-index: 10; }
 
-        .fab-search-btn { position: fixed; bottom: 100px; right: 30px; z-index: 2000; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-pink); color: white; font-size: 24px; border: none; box-shadow: 0 4px 15px rgba(255, 71, 126, 0.4); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+        .fab-search-btn { position: fixed; bottom: 30px; right: 30px; z-index: 2000; width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-pink); color: white; font-size: 24px; border: none; box-shadow: 0 4px 15px rgba(255, 71, 126, 0.4); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
         .fab-search-btn:hover { transform: scale(1.1) rotate(10deg); }
-
-        /* ======== Gemini AI 助理專屬樣式 ======== */
-        .fab-chat-btn { position: fixed; bottom: 30px; right: 30px; z-index: 2000; width: 60px; height: 60px; border-radius: 50%; background-color: #8E7C93; color: white; font-size: 26px; border: none; box-shadow: 0 4px 15px rgba(142, 124, 147, 0.4); cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
-        .fab-chat-btn:hover { transform: scale(1.1); background-color: #7D6B82; }
-        
-        .chat-widget-container { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: white; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); border: 1px solid #EADCDD; display: none; flex-direction: column; z-index: 2500; overflow: hidden; animation: slideUp 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
-        .chat-header { background: var(--main-gradient); color: white; padding: 15px 20px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; font-size: 1.05rem; }
-        .chat-close-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #FAF6F6; display: flex; flex-direction: column; gap: 10px; }
-        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 0.9rem; line-height: 1.4; word-wrap: break-word; }
-        .msg-bubble.user { background: var(--accent-pink); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .msg-bubble.model { background: white; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #EADCDD; }
-        .chat-input-area { padding: 12px; background: white; border-top: 1px solid #EADCDD; display: flex; gap: 8px; }
-        .chat-input-area input { flex: 1; padding: 10px 14px; border: 1px solid #EADCDD; border-radius: 20px; outline: none; font-size: 0.9rem; transition: var(--transition); }
-        .chat-input-area input:focus { border-color: var(--accent-purple); }
-        .chat-input-area button { background: var(--accent-purple); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
-        .chat-input-area button:hover { background: #7D6B82; transform: scale(1.05); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -174,6 +157,10 @@
             <li><button id="menuDiscountBtn">⚙️ 優惠活動折扣設定</button></li>
             <li><button id="menuStyleBtn">💅 編輯核心款式與價錢</button></li>
             <li><button id="menuAddonBtn">✨ 編輯附加服務與價錢</button></li>
+        </ul>
+        <div class="sidebar-menu-title">系統與客服設定</div>
+        <ul class="sidebar-menu">
+            <li><button id="menuAiConfigBtn">🤖 智能客服修改器</button></li>
         </ul>
     </div>
 
@@ -212,22 +199,6 @@
     </div>
 
     <button class="fab-search-btn" id="fabSearchBtn">🔍</button>
-    
-    <button class="fab-chat-btn" id="fabChatBtn">✨</button>
-
-    <div class="chat-widget-container" id="chatWidget">
-        <div class="chat-header">
-            <span>✦ 神の指藝 智能顧問</span>
-            <button class="chat-close-btn" id="closeChatBtn">×</button>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="msg-bubble model">您好！我是神の指藝專屬 AI 顧問 ✨，請問有什麼預約或保固的問題想了解呢？</div>
-        </div>
-        <div class="chat-input-area">
-            <input type="text" id="chatInput" placeholder="輸入您的問題..." autocomplete="off">
-            <button id="sendChatBtn">➤</button>
-        </div>
-    </div>
 
     <div id="infoModal" class="modal-overlay"><div class="modal-content"><h3>📍 店家地址與社群網址設定</h3><div style="display:flex; flex-direction:column; gap:12px; margin: 20px 0;"><div><label style="font-size:0.85rem; font-weight:700;">門市現場地址</label><input type="text" id="infoAddress" class="input-discount"></div><div><label style="font-size:0.85rem; font-weight:700;">聯絡電話</label><input type="text" id="infoPhone" class="input-discount"></div><div><label style="font-size:0.85rem; font-weight:700;">Instagram 網址</label><input type="url" id="infoIg" class="input-discount"></div><div><label style="font-size:0.85rem; font-weight:700;">Line 連結</label><input type="url" id="infoLine" class="input-discount"></div><div><label style="font-size:0.85rem; font-weight:700;">Facebook 網址</label><input type="url" id="infoFb" class="input-discount"></div></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeInfoBtn">取消</button><button class="btn-modal btn-confirm-success" id="saveInfoBtn">儲存設定</button></div></div></div>
     <div id="bgUploadModal" class="modal-overlay"><div class="modal-content" style="max-width: 650px;"><h3>🖼️ 前台大圖背景庫動態管理</h3><div class="settings-panel"><h4 style="margin-bottom:12px; color:var(--accent-purple); font-size:1rem;">🎛️ 背景特效與文字設定</h4><div style="margin-bottom:15px;"><label style="font-size:0.85rem; font-weight:700;">圖片放大縮小比例 (<span id="bgScaleDisplay">100</span>%)</label><input type="range" id="bgScaleInput" min="50" max="200" value="100" style="width:100%; margin-top:5px;"></div><div style="display:flex; flex-direction:column; gap:10px;"><div style="display:flex; gap:10px; align-items:center;"><input type="text" id="bgTitleInput" class="input-discount" placeholder="輸入網頁主標題文字..."><button id="addBgTitleBtn" class="btn-action-ui btn-complete-row" style="white-space:nowrap;">新增</button><button id="delBgTitleBtn" class="btn-action-ui btn-delete-row" style="white-space:nowrap;">刪除</button></div><div style="display:flex; gap:10px; align-items:center;"><input type="text" id="bgSubtitleInput" class="input-discount" placeholder="輸入網頁副標題文字..."><button id="addBgSubtitleBtn" class="btn-action-ui btn-complete-row" style="white-space:nowrap;">新增</button><button id="delBgSubtitleBtn" class="btn-action-ui btn-delete-row" style="white-space:nowrap;">刪除</button></div></div><button id="saveBgSettingsBtn" class="btn-refresh" style="width:100%; margin-top:15px;">💾 同步儲存比例與文字</button></div><div style="border:2px dashed #EADCDD; border-radius:12px; padding:20px; text-align:center; background:#FCFAFA; margin-bottom:20px;"><input type="file" id="bgFileInput" accept="image/jpeg,image/png" style="display:none;"><button class="btn-refresh" onclick="document.getElementById('bgFileInput').click()">➕ 上傳新背景圖片</button><div id="bgFileNameDisplay" style="margin-top:8px; font-size:0.85rem; color:#555;"></div></div><label style="font-weight:700; font-size:0.9rem; color:#4A3B43;">雲端大圖背景庫清單：</label><div class="gallery-admin-grid layout-2col" id="bgAdminGrid"></div><div class="modal-actions" style="margin-top:20px;"><button class="btn-modal btn-cancel" id="closeBgBtn" style="width:100%;">關閉背景庫</button></div></div></div>
@@ -240,6 +211,31 @@
     <div id="imageModal" class="modal-overlay"><div class="modal-content" style="max-width:650px;"><h3>📑 服務合約雲端備份憑證</h3><div style="width:100%; max-height:55vh; overflow-y:auto; border:1px solid #EADCDD; border-radius:12px; margin-bottom:20px;"><img id="previewImage" src="" style="width:100%; display:block;"></div><div class="modal-actions"><button class="btn-modal btn-cancel" id="closeImgModalBtn">關閉</button><button class="btn-modal btn-confirm-success" id="downloadImgBtn">📥 下載合約檔</button></div></div></div>
     <div id="deleteModal" class="modal-overlay"><div class="modal-content" style="max-width:400px; text-align:center;"><div style="font-size:3rem; margin-bottom:10px;">⚠️</div><h3 style="color:var(--danger-red);">確定要完全刪除此項預約？</h3><p style="font-size:0.9rem; color:#666;">注意：刪除後資料庫將完全移除且無法撤回！</p><div class="modal-actions"><button class="btn-modal btn-cancel" id="cancelDeleteBtn">取消保留</button><button class="btn-modal" id="confirmDeleteBtn" style="background:var(--danger-red); color:white;">確認刪除</button></div></div></div>
     <div class="fullscreen-sign-overlay" id="fullscreenSignOverlay"><div class="sign-header"><span style="font-size:1.2rem;">✨ 美甲師結案全螢幕電子簽章系統</span><button class="close-sidebar-btn" id="abandonSignBtn">×</button></div><div class="sign-body-text">今日施作完畢後，顧客確認款式顏色符合預約期待。隨附 7 日保固。以下為雙方數位簽署確認憑證。</div><div style="padding:15px 20px; background:#FFF; border-bottom:1px solid #EADCDD; display:flex; gap:20px; align-items:center;"><div><span style="font-weight:700;">👧 顧客前台原始簽章：</span><div id="customerSigPlaceholder" style="display:inline-block; vertical-align:middle; margin-left:10px;"></div></div><div style="flex:1;"><input type="text" id="signatureInputTech" class="input-discount" style="padding:8px;" placeholder="⌨️ 亦可在此打字輸入美甲師姓名確認..."></div></div><div class="sign-canvas-container"><canvas id="fullCanvas"></canvas></div><div class="sign-footer-controls"><button class="btn-modal btn-cancel" id="clearFullSignBtn">重填清除</button><button class="btn-modal btn-confirm-success" id="submitFullSignBtn" style="background:var(--success-green);">✅ 送出結案備份</button></div></div>
+
+    <div id="aiConfigModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3>🤖 智能客服修改器</h3>
+            <div class="settings-panel">
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:0.85rem; font-weight:700;">助手名稱</label>
+                    <input type="text" id="aiNameInput" class="input-discount" placeholder="例如：神の指藝 智能顧問" value="">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:0.85rem; font-weight:700;">懸浮圖示 (上傳圖片同步至 Supabase)</label>
+                    <div style="border:2px dashed #EADCDD; border-radius:12px; padding:20px; text-align:center; background:#FCFAFA; margin-top: 8px;">
+                        <img id="aiIconPreview" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; display: none; margin: 0 auto 10px; border: 2px solid var(--accent-purple);">
+                        <input type="file" id="aiIconFileInput" accept="image/jpeg,image/png,image/svg+xml" style="display:none;">
+                        <button class="btn-refresh" onclick="document.getElementById('aiIconFileInput').click()">➕ 上傳新圖示</button>
+                        <div id="aiIconFileNameDisplay" style="margin-top:8px; font-size:0.85rem; color:#555;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modal btn-cancel" id="closeAiConfigBtn">取消</button>
+                <button class="btn-modal btn-confirm-success" id="saveAiConfigBtn">💾 儲存設定</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -269,7 +265,8 @@
         let globalConfig = { 
             firstTimeDiscount: 95, pageTitle: "", pageSubtitle: "", styles: [], addons: [], timeSlots: [], 
             shopAddress: "", shopPhone: "", shopIg: "", shopLine: "", shopFb: "", activeBgUrl: "",
-            bgScale: 100, portfolioLayout: '2col', portfolioScale: 100, portfolioCaptions: {}
+            bgScale: 100, portfolioLayout: '2col', portfolioScale: 100, portfolioCaptions: {},
+            aiName: "", aiIconUrl: ""
         }; 
         const screenshotsMap = new Map();
 
@@ -308,65 +305,62 @@
         }
 
         // ===================================================
-        // Gemini AI 助理客戶端邏輯
+        // 智能客服修改器邏輯 (新增)
         // ===================================================
-        const chatWidget = document.getElementById('chatWidget');
-        const fabChatBtn = document.getElementById('fabChatBtn');
-        const closeChatBtn = document.getElementById('closeChatBtn');
-        const sendChatBtn = document.getElementById('sendChatBtn');
-        const chatInput = document.getElementById('chatInput');
-        const chatMessages = document.getElementById('chatMessages');
+        let tempAiIconUrl = null;
 
-        // 生成或取得固定的 Session ID
-        let sessionId = localStorage.getItem('gemini_session_id');
-        if (!sessionId) {
-            sessionId = 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-            localStorage.setItem('gemini_session_id', sessionId);
-        }
-
-        // UI 開關
-        fabChatBtn.addEventListener('click', () => { chatWidget.style.display = 'flex'; });
-        closeChatBtn.addEventListener('click', () => { chatWidget.style.display = 'none'; });
-
-        // 監聽 AI 訊息回覆
-        const messagesRef = collection(db, "chat_sessions", sessionId, "messages");
-        const q = query(messagesRef, orderBy("timestamp", "asc"));
-        
-        onSnapshot(q, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") {
-                    const data = change.doc.data();
-                    const div = document.createElement('div');
-                    div.className = `msg-bubble ${data.role}`;
-                    div.innerText = data.text;
-                    chatMessages.appendChild(div);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-            });
+        document.getElementById('menuAiConfigBtn').addEventListener('click', () => {
+            closeSidebar();
+            document.getElementById('aiNameInput').value = globalConfig.aiName || '';
+            const preview = document.getElementById('aiIconPreview');
+            if (globalConfig.aiIconUrl) {
+                preview.src = globalConfig.aiIconUrl;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+            tempAiIconUrl = null;
+            document.getElementById('aiIconFileNameDisplay').innerText = '';
+            document.getElementById('aiConfigModal').style.display = 'flex';
         });
 
-        // 傳送訊息
-        async function sendMessage() {
-            const text = chatInput.value.trim();
-            if (!text) return;
-            chatInput.value = '';
-            
-            try {
-                // 將訊息寫入 Firestore，觸發 Tmux 後端監聽
-                await addDoc(messagesRef, {
-                    role: 'user',
-                    text: text,
-                    timestamp: serverTimestamp()
-                });
-            } catch (error) {
-                console.error("發送失敗:", error);
-                alert("訊息發送失敗，請確認網路連線。");
+        document.getElementById('closeAiConfigBtn').addEventListener('click', () => {
+            document.getElementById('aiConfigModal').style.display = 'none';
+        });
+
+        document.getElementById('aiIconFileInput').addEventListener('change', async (e) => {
+            if(e.target.files.length > 0) {
+                const file = e.target.files[0];
+                document.getElementById('aiIconFileNameDisplay').innerText = `上傳中...`;
+                try {
+                    const uniqName = `website-assets/ai_icon_${Date.now()}_${Math.floor(Math.random()*1000)}.png`;
+                    const { error } = await supabaseClient.storage.from('receipts').upload(uniqName, file, { contentType: file.type });
+                    if(error) throw error;
+                    
+                    const { data: pUrl } = supabaseClient.storage.from('receipts').getPublicUrl(uniqName);
+                    tempAiIconUrl = pUrl.publicUrl;
+                    
+                    const preview = document.getElementById('aiIconPreview');
+                    preview.src = tempAiIconUrl;
+                    preview.style.display = 'block';
+                    document.getElementById('aiIconFileNameDisplay').innerText = '上傳成功！請點擊下方儲存。';
+                } catch(err) {
+                    alert('圖示上傳失敗：' + err.message);
+                    document.getElementById('aiIconFileNameDisplay').innerText = '';
+                }
             }
-        }
+        });
 
-        sendChatBtn.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
+        document.getElementById('saveAiConfigBtn').addEventListener('click', async () => {
+            const newName = document.getElementById('aiNameInput').value.trim();
+            const payload = { aiName: newName };
+            if (tempAiIconUrl) {
+                payload.aiIconUrl = tempAiIconUrl;
+            }
+            if (await saveCfg(payload, document.getElementById('saveAiConfigBtn'), "💾 儲存設定")) {
+                document.getElementById('aiConfigModal').style.display = 'none';
+            }
+        });
 
         // ===================================================
         // 原有之管理面板邏輯 (完全保留)
