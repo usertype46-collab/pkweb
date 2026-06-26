@@ -385,7 +385,7 @@
                     2. 若有懷孕、特殊疾病、藥物治療中、皮膚敏感等情況，已主動告知美甲師。<br>
                     3. 若指甲已有裂痕、受傷、受撞擊、咬甲、摳甲等情況，可能影響施作效果及持久度。</p>
                     <h4>二、施作後保固說明</h4>
-                    <p>本店提供施作日起 7 日內保固服務。保固範圍限於：非人為因素造成之凝膠脫落、凝膠大面積翹起、凝膠異常剝離。保固期間內請拍照並主動聯繫預約修補時間。</p>
+                    <p>本店提供施作日起 7 日內保固服務。保固範圍限於：非人為因素造成之凝膠脫落、凝膠大面積翹起、凝膠異常剝離。保固範圍內請拍照並主動聯繫預約修補時間。</p>
                     <h4>三、不列入保固範圍</h4>
                     <p>以下情況恕不提供免費保固：撞擊、摳除、咬甲等人為因素；使用指甲開罐、摳貼貼紙、刮除物品等不當使用；經常接觸化學藥劑；長時間泡水、泡溫泉、游泳；自行修剪、打磨或摳除凝膠；個人體質易出油、流汗量較高等因素影響持久度；他店修改、補甲或拆甲後產生之問題。</p>
                     <h4>四、施作風險說明</h4>
@@ -551,7 +551,6 @@
                         document.getElementById('discountLabelTitle').innerText = `新客優惠活動 (${data.firstTimeDiscount}折)`;
                     }
 
-                    // 👉 AI 智能客服同步機制
                     if (data.aiName) {
                         document.getElementById('aiChatTitleText').innerHTML = `✨ ${data.aiName}`;
                         document.getElementById('aiWelcomeMsg').innerText = `✦ 親愛的客戶您好，我是「${data.aiName}」。有任何關於美甲款式、保固範圍或預約的問題，歡迎隨時詢問我喔！`;
@@ -815,6 +814,9 @@
 
         initSystem();
 
+        // ==========================================
+        // ✨ AI 客服控制邏輯 (修正版：不留歷史問題)
+        // ==========================================
         const aiFabBtn = document.getElementById('aiFabBtn');
         const aiChatWindow = document.getElementById('aiChatWindow');
         const aiChatCloseBtn = document.getElementById('aiChatCloseBtn');
@@ -822,11 +824,8 @@
         const aiChatInput = document.getElementById('aiChatInput');
         const aiChatSendBtn = document.getElementById('aiChatSendBtn');
 
-        let chatSessionId = sessionStorage.getItem('gemini_chat_session');
-        if (!chatSessionId) {
-            chatSessionId = 'sess_' + Math.random().toString(36).substring(2, 15);
-            sessionStorage.setItem('gemini_chat_session', chatSessionId);
-        }
+        // 💡 核心變更：不再從 sessionStorage 讀取舊對話，每次客戶載入網頁，皆當場生成全新的隨機會話 ID
+        const chatSessionId = 'sess_' + Math.random().toString(36).substring(2, 15);
 
         aiFabBtn.addEventListener('click', () => {
             aiChatWindow.classList.add('active');
@@ -836,15 +835,14 @@
             aiChatWindow.classList.remove('active');
         });
 
-        // --- 修正後的前端 AI 監聽邏輯 ---
         const messagesRef = collection(db, "chat_sessions", chatSessionId, "messages");
         const qMessages = query(messagesRef, orderBy("timestamp", "asc"));
         
+        // 監聽全新空白的對話（因為會話 ID 剛剛隨機建立，資料庫一開始絕對是空集合，保證無舊問題跑出）
         onSnapshot(qMessages, (snapshot) => {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
                     const data = change.doc.data();
-                    // Firebase 有延遲補償機制，我們直接統一交由 snapshot 渲染畫面
                     appendMessageToUI(data.role, data.text);
                 }
             });
@@ -855,7 +853,7 @@
             msgDiv.className = `chat-msg ${role}`;
             msgDiv.innerText = text;
             aiChatBody.appendChild(msgDiv);
-            aiChatBody.scrollTop = aiChatBody.scrollHeight; // 確保自動捲動到底部
+            aiChatBody.scrollTop = aiChatBody.scrollHeight;
         }
 
         async function sendChatMessage() {
@@ -865,7 +863,6 @@
             aiChatInput.value = "";
             aiChatInput.focus();
 
-            // 注意：拿掉了手動 appendMessageToUI，讓 Firebase 幫我們統一處理，避免重複印出對話
             try {
                 await addDoc(messagesRef, {
                     role: 'user',
