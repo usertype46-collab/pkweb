@@ -836,19 +836,18 @@
             aiChatWindow.classList.remove('active');
         });
 
+        // --- 修正後的前端 AI 監聽邏輯 ---
         const messagesRef = collection(db, "chat_sessions", chatSessionId, "messages");
         const qMessages = query(messagesRef, orderBy("timestamp", "asc"));
         
-        let isFirstLoad = true;
         onSnapshot(qMessages, (snapshot) => {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
                     const data = change.doc.data();
-                    if(data.role === 'user' && !data.timestamp && !isFirstLoad) return; 
+                    // Firebase 有延遲補償機制，我們直接統一交由 snapshot 渲染畫面
                     appendMessageToUI(data.role, data.text);
                 }
             });
-            isFirstLoad = false;
         });
 
         function appendMessageToUI(role, text) {
@@ -856,7 +855,7 @@
             msgDiv.className = `chat-msg ${role}`;
             msgDiv.innerText = text;
             aiChatBody.appendChild(msgDiv);
-            aiChatBody.scrollTop = aiChatBody.scrollHeight;
+            aiChatBody.scrollTop = aiChatBody.scrollHeight; // 確保自動捲動到底部
         }
 
         async function sendChatMessage() {
@@ -865,8 +864,8 @@
 
             aiChatInput.value = "";
             aiChatInput.focus();
-            appendMessageToUI('user', text);
 
+            // 注意：拿掉了手動 appendMessageToUI，讓 Firebase 幫我們統一處理，避免重複印出對話
             try {
                 await addDoc(messagesRef, {
                     role: 'user',
