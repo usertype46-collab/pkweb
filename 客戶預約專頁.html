@@ -75,6 +75,7 @@
         .form-group label { display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: #3A2E2B; }
         .form-control { width: 100%; padding: 14px 16px; border: 1px solid #DCD1CC; border-radius: 10px; font-size: 1rem; color: var(--text-color); background-color: #FAFAFA; transition: var(--transition); font-family: inherit; }
         .form-control:focus { outline: none; border-color: var(--accent-color); background-color: #FFF; box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.12); }
+        .form-control:disabled { background-color: #EFEAE6; cursor: not-allowed; color: #8C7572; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 
@@ -274,8 +275,8 @@
                     </div>
                     <div class="form-group">
                         <label for="bookingTime">預約時段 *</label>
-                        <select id="bookingTime" class="form-control" required>
-                            <option value="">請選擇時段</option>
+                        <select id="bookingTime" class="form-control" required disabled>
+                            <option value="">請先選擇上方預約日期</option>
                         </select>
                     </div>
                 </div>
@@ -473,8 +474,9 @@
     </footer>
 
     <script type="module">
+        // --- 引入額外的 getDocs, where 用來查詢特定日期的訂單 ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, onSnapshot, serverTimestamp, query, orderBy, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
         
         const firebaseConfig = {
@@ -492,6 +494,9 @@
         const supabaseUrl = 'https://hyvcfxwoewvbpfzvfdnn.supabase.co';
         const supabaseAnonKey = 'sb_publishable_TR5C2Zc7eOj9uUosUUsX4g_KbBOwey2';
         const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+        // 新增全域變數記錄從資料庫抓出來的可用時段表
+        let globalTimeSlots = [];
 
         function b64toBlob(b64Data, contentType='') {
             const byteCharacters = atob(b64Data);
@@ -560,11 +565,11 @@
                         fab.innerHTML = `<img src="${data.aiIconUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
                     }
 
+                    // --- 更新初始化時段邏輯 ---
+                    globalTimeSlots = data.timeSlots || ['10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00', '20:00'];
                     const timeSelect = document.getElementById('bookingTime');
-                    timeSelect.innerHTML = '<option value="">請選擇時段</option>';
-                    (data.timeSlots || ['10:00','13:00','16:00','19:00']).forEach(t => {
-                        timeSelect.innerHTML += `<option value="${t}">${t}</option>`;
-                    });
+                    timeSelect.innerHTML = '<option value="">請先選擇上方預約日期</option>';
+                    timeSelect.disabled = true;
 
                     if(data.shopAddress) document.getElementById('ftAddr').innerHTML = `🏠 <strong>地址：</strong> ${data.shopAddress}`;
                     if(data.shopPhone) document.getElementById('ftPhone').innerHTML = `📞 <strong>電話：</strong> ${data.shopPhone}`;
@@ -577,6 +582,75 @@
                     renderUIComponents(); calculateTotal();
                 }
             });
+        }
+
+        // --- 將時間字串轉為當日分鐘數，方便數學計算 ---
+        function timeToMins(timeStr) {
+            const [h, m] = timeStr.split(':').map(Number);
+            return h * 60 + (m || 0);
+        }
+
+        // --- 監聽日期變更，觸發防撞期檢查 ---
+        document.getElementById('bookingDate').addEventListener('change', async (e) => {
+            const selectedDate = e.target.value;
+            const timeSelect = document.getElementById('bookingTime');
+            if (!selectedDate) {
+                timeSelect.innerHTML = '<option value="">請先選擇上方預約日期</option>';
+                timeSelect.disabled = true;
+                return;
+            }
+            await updateAvailableTimeSlots(selectedDate);
+        });
+
+        // --- 防撞期核心邏輯 ---
+        async function updateAvailableTimeSlots(dateStr) {
+            const timeSelect = document.getElementById('bookingTime');
+            timeSelect.innerHTML = '<option value="">查詢時段中...</option>';
+            timeSelect.disabled = true;
+
+            try {
+                // 1. 去資料庫抓取當天所有的預約紀錄
+                const q = query(collection(db, "nail_bookings"), where("bookingDate", "==", dateStr));
+                const querySnapshot = await getDocs(q);
+                const bookedTimes = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // 排除被取消的預約
+                    if (data.status !== '已取消') {
+                        bookedTimes.push(data.bookingTime);
+                    }
+                });
+
+                // 2. 重新產生選項，判斷前後 3 小時 (180 分鐘)
+                timeSelect.innerHTML = '<option value="">請選擇時段</option>';
+                
+                globalTimeSlots.forEach(slot => {
+                    const slotMins = timeToMins(slot);
+                    let isBlocked = false;
+
+                    for (const bTime of bookedTimes) {
+                        const bMins = timeToMins(bTime);
+                        // 如果(當前檢查時段與已預約時段) 差距小於 180 分鐘，代表會發生衝突！
+                        if (Math.abs(slotMins - bMins) < 180) {
+                            isBlocked = true;
+                            break;
+                        }
+                    }
+
+                    if (isBlocked) {
+                        timeSelect.innerHTML += `<option value="${slot}" disabled>${slot} (已預約)</option>`;
+                    } else {
+                        timeSelect.innerHTML += `<option value="${slot}">${slot}</option>`;
+                    }
+                });
+
+            } catch (error) {
+                console.error("讀取時段失敗:", error);
+                timeSelect.innerHTML = '<option value="">讀取失敗，請重試或聯繫客服</option>';
+            } finally {
+                timeSelect.disabled = false;
+            }
         }
 
         function renderUIComponents() {
@@ -788,7 +862,12 @@
                 modalOverlay.classList.remove('active'); document.getElementById('successAlert').style.display = 'block';
                 setTimeout(() => document.getElementById('successReceiptSection').scrollIntoView({ behavior: 'smooth' }), 400);
 
+                // 送出完成後將選單歸零、停用
                 document.getElementById('bookingStepForm').reset();
+                const timeSelect = document.getElementById('bookingTime');
+                timeSelect.innerHTML = '<option value="">請先選擇上方預約日期</option>';
+                timeSelect.disabled = true;
+
                 fsCtx.clearRect(0, 0, fsSigCanvas.width, fsSigCanvas.height); sigTextInput.value = "";
                 document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
                 currentSelection.selectedStyle = null; currentSelection.selectedAddons.clear(); calculateTotal();
@@ -824,7 +903,6 @@
         const aiChatInput = document.getElementById('aiChatInput');
         const aiChatSendBtn = document.getElementById('aiChatSendBtn');
 
-        // 💡 核心變更：不再從 sessionStorage 讀取舊對話，每次客戶載入網頁，皆當場生成全新的隨機會話 ID
         const chatSessionId = 'sess_' + Math.random().toString(36).substring(2, 15);
 
         aiFabBtn.addEventListener('click', () => {
@@ -838,7 +916,6 @@
         const messagesRef = collection(db, "chat_sessions", chatSessionId, "messages");
         const qMessages = query(messagesRef, orderBy("timestamp", "asc"));
         
-        // 監聽全新空白的對話（因為會話 ID 剛剛隨機建立，資料庫一開始絕對是空集合，保證無舊問題跑出）
         onSnapshot(qMessages, (snapshot) => {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
