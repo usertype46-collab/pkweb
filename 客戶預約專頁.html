@@ -654,9 +654,6 @@
             }
         });
 
-        /* =========================================
-           ✨ 全螢幕畫布處理邏輯 (解決位移與按鈕消失)
-        ========================================= */
         const fsSignOverlay = document.getElementById('fsSignOverlay');
         const fsSigCanvas = document.getElementById('fsSigCanvas');
         const fsCtx = fsSigCanvas.getContext('2d');
@@ -698,9 +695,6 @@
 
         function isCanvasBlank(c) { const b = document.createElement('canvas'); b.width = c.width; b.height = c.height; return c.toDataURL() === b.toDataURL(); }
 
-        /* =========================================
-           🔥 預約資料打包送出區
-        ========================================= */
         preSubmitBtn.addEventListener('click', async () => {
             const clientName = document.getElementById('clientName').value.trim();
             const clientPhone = document.getElementById('clientPhone').value.trim();
@@ -821,9 +815,6 @@
 
         initSystem();
 
-        /* =========================================
-           ✨ Gemini 智能客服前端邏輯
-        ========================================= */
         const aiFabBtn = document.getElementById('aiFabBtn');
         const aiChatWindow = document.getElementById('aiChatWindow');
         const aiChatCloseBtn = document.getElementById('aiChatCloseBtn');
@@ -867,7 +858,7 @@
             aiChatBody.appendChild(msgDiv);
             aiChatBody.scrollTop = aiChatBody.scrollHeight;
         }
-        // 修改這裡：加上 processed: false
+
         async function sendChatMessage() {
             const text = aiChatInput.value.trim();
             if (!text) return;
@@ -880,8 +871,8 @@
                 await addDoc(messagesRef, {
                     role: 'user',
                     text: text,
-                    timestamp: serverTimestamp()
-                    processed: false // 👈 後端藉由這個欄位來判定是否需要回覆
+                    timestamp: serverTimestamp(),
+                    processed: false 
                 });
             } catch (error) {
                 console.error("發送訊息失敗: ", error);
