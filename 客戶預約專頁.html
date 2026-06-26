@@ -881,7 +881,6 @@
                     role: 'user',
                     text: text,
                     timestamp: serverTimestamp()
-                    processed: false // 👈 後端藉由這個欄位來判定是否需要回覆
                 });
             } catch (error) {
                 console.error("發送訊息失敗: ", error);
