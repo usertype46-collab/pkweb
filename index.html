@@ -48,9 +48,9 @@
             overflow-x: hidden;
         }
 
-        /* 跑馬燈警報樣式 */
+        /* 跑馬燈警報樣式 (已修正：改為相對定位獨立區塊，避免遮擋 UI) */
         #marqueeContainer {
-            position: fixed; top: 0; left: 0; width: 100%; z-index: 99999;
+            position: relative; width: 100%; z-index: 9000;
             background: var(--hud-warning); color: var(--hud-danger);
             font-weight: 900; font-size: 20px; padding: 10px 0;
             overflow: hidden; white-space: nowrap;
@@ -526,7 +526,7 @@
     </div>
 </div>
 
- <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <script>
