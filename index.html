@@ -54,11 +54,11 @@
             background: var(--hud-warning); color: var(--hud-danger);
             font-weight: 900; font-size: 20px; padding: 10px 0;
             overflow: hidden; white-space: nowrap;
-            animation: flash 0.5s infinite alternate;
+            animation: flash 1s infinite alternate;
             display: none; box-shadow: 0 0 20px var(--hud-warning);
         }
         @keyframes flash { from { opacity: 1; } to { opacity: 0.2; } }
-        .marquee-content { display: inline-block; animation: scrollText 40s linear infinite; }
+        .marquee-content { display: inline-block; animation: scrollText 30s linear infinite; }
         @keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
         /* 歷史紀錄底水位閃爍警示動畫 */
