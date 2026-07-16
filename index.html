@@ -696,7 +696,7 @@
             let p = dbData.powder[id];
             if(p.safety_enabled === "true") {
                 let inv = dbData.inventory[id] || { box: 0, loose: 0 };
-                let total = (inv.box * (p.weight || 25)) + inv.loose;
+                let total = (Number(inv.box) * (Number(p.weight) || 25)) + Number(inv.loose);
                 if(total < (Number(p.safety_stock) || 0)) {
                     alerts.push(`⚠️ 粉體告急：${id} [${p.code || ''}] 現存 ${total} KG 低於臨界安全水位！`);
                 }
@@ -707,7 +707,7 @@
             let c = dbData.consumables[name];
             if(c.safety_enabled === "true") {
                 let inv = dbData.consumables_inventory[name] || { qty: 0 };
-                if(inv.qty < (Number(c.safety_stock) || 0)) {
+                if(Number(inv.qty) < (Number(c.safety_stock) || 0)) {
                     alerts.push(`🚨 耗材補貨：[${name}] 目前庫存剩餘 ${inv.qty} ${c.unit || ''}，低於預警水位 (${c.safety_stock})！`);
                 }
             }
@@ -772,7 +772,7 @@
         for(let id in dbData.inventory) {
             let inv = dbData.inventory[id];
             let w = dbData.powder[id] ? dbData.powder[id].weight : 25;
-            let total = (inv.box * w) + inv.loose;
+            let total = (Number(inv.box) * Number(w)) + Number(inv.loose);
             htmlP2 += `<tr><td><strong style="color:var(--hud-cyan);">${id}</strong></td><td>${inv.box}</td><td>${inv.loose}</td><td style="font-weight:900; color:#fff; font-size:16px; font-family:'Courier New', Courier, monospace;">${total} KG</td></tr>`;
         }
         document.querySelector('#tb_p2 tbody').innerHTML = htmlP2;
@@ -829,7 +829,7 @@
         for(let name in dbData.consumables) {
             let c = dbData.consumables[name];
             let inv = dbData.consumables_inventory[name] || { qty: 0 };
-            let isLow = c.safety_enabled === "true" && inv.qty < (Number(c.safety_stock) || 0);
+            let isLow = c.safety_enabled === "true" && Number(inv.qty) < (Number(c.safety_stock) || 0);
             let rowClass = isLow ? 'class="row-low-stock"' : '';
             htmlP12 += `<tr ${rowClass}><td><strong style="color:var(--hud-cyan);">${name}</strong></td><td style="font-size:16px; font-weight:900;">${inv.qty}</td><td>${c.unit || ''}</td><td>${c.safety_stock || 0}</td><td>${c.supplier || ''}</td><td>${isLow ? '<strong style="color:var(--hud-warning);">⚠️ 補貨警報</strong>' : '<span style="color:var(--hud-success);">正常狀態</span>'}</td></tr>`;
         }
@@ -868,17 +868,20 @@
         const safety_enabled = document.getElementById('p9_safety_enabled').value;
 
         if(!name) return alert('錯誤：耗材品名不允許空白！');
+        // 防呆：禁止輸入 Firebase 節點保留字元，避免發生寫入崩潰
+        if(/[.#$\[\]\/]/.test(name)) return alert('錯誤：耗材品名不可包含特殊符號 (如 . # $ [ ] /)');
         
         let updates = {};
         updates[`/consumables/${name}`] = { unit, supplier, safety_stock, safety_enabled };
         if(!dbData.consumables_inventory[name]) updates[`/consumables_inventory/${name}`] = { qty: 0 };
         
-        db.ref().update(updates);
-        // 清空欄位
-        document.getElementById('p9_name').value = ''; document.getElementById('p9_unit').value = ''; document.getElementById('p9_supplier').value = '';
-        document.getElementById('p9_name').readOnly = false;
-        document.getElementById('btn_saveP9').innerText = "確認寫入耗材庫";
-        alert('✅ 耗材規格變更寫入完成！');
+        db.ref().update(updates).then(() => {
+            // 清空欄位
+            document.getElementById('p9_name').value = ''; document.getElementById('p9_unit').value = ''; document.getElementById('p9_supplier').value = '';
+            document.getElementById('p9_name').readOnly = false;
+            document.getElementById('btn_saveP9').innerText = "確認寫入耗材庫";
+            alert('✅ 耗材規格變更寫入完成！');
+        }).catch(err => alert('❌ 寫入失敗: ' + err.message));
     }
 
     function editP9(name) {
@@ -902,18 +905,21 @@
         if(!id) return alert('警告：未指定目標耗材項目');
 
         let inv = dbData.consumables_inventory[id] || { qty: 0 };
+        let currentQty = Number(inv.qty) || 0;
         let c = dbData.consumables[id] || {};
         let updates = {};
         let key = editKeys.con_purchase;
 
         if(key) {
-            // 編輯模式：先沖銷舊入庫紀錄之差額
+            // 編輯模式：先沖銷舊入庫紀錄之差額 (避免修改本地快取物件，改用自變數)
             const old = dbData.consumables_purchase[key];
             if(old) {
-                if(old.id === id) { inv.qty -= old.qty; }
-                else {
+                if(old.id === id) { 
+                    currentQty -= (Number(old.qty) || 0); 
+                } else {
                     let oldInv = dbData.consumables_inventory[old.id] || { qty: 0 };
-                    updates[`/consumables_inventory/${old.id}`] = { qty: Math.max(0, oldInv.qty - old.qty) };
+                    let oldQtyNum = Number(oldInv.qty) || 0;
+                    updates[`/consumables_inventory/${old.id}`] = { qty: Math.max(0, oldQtyNum - (Number(old.qty) || 0)) };
                 }
             }
             updates[`/consumables_purchase/${key}`] = { date, id, qty, unit: c.unit||'', supplier: c.supplier||'' };
@@ -924,10 +930,12 @@
             updates[`/consumables_purchase/${key}`] = { date, id, qty, unit: c.unit||'', supplier: c.supplier||'' };
         }
 
-        updates[`/consumables_inventory/${id}`] = { qty: inv.qty + qty };
-        db.ref().update(updates);
-        document.getElementById('p10_qty').value = 0;
-        alert('✅ 耗材入庫對帳矩陣更新完畢！');
+        updates[`/consumables_inventory/${id}`] = { qty: currentQty + qty };
+        
+        db.ref().update(updates).then(() => {
+            document.getElementById('p10_qty').value = 0;
+            alert('✅ 耗材入庫對帳矩陣更新完畢！');
+        }).catch(err => alert('❌ 寫入失敗: ' + err.message));
     }
 
     function editP10(key) {
@@ -950,25 +958,28 @@
         if(!id) return alert('警告：未選取耗材品名');
 
         let inv = dbData.consumables_inventory[id] || { qty: 0 };
+        let currentQty = Number(inv.qty) || 0;
         let c = dbData.consumables[id] || {};
         let updates = {};
         let key = editKeys.con_usage;
 
         // 計算預期剩餘防爆庫存機制
-        let simulatedQty = inv.qty;
+        let simulatedQty = currentQty;
         if(key) {
             const old = dbData.consumables_usage[key];
-            if(old && old.id === id) simulatedQty += old.qty;
+            if(old && old.id === id) simulatedQty += (Number(old.qty) || 0);
         }
         if(simulatedQty - qty < 0) return alert('⚠️ 核心警報：物資短缺！現存庫存不足以支持本次領用！');
 
         if(key) {
             const old = dbData.consumables_usage[key];
             if(old) {
-                if(old.id === id) { inv.qty += old.qty; }
-                else {
+                if(old.id === id) { 
+                    currentQty += (Number(old.qty) || 0); 
+                } else {
                     let oldInv = dbData.consumables_inventory[old.id] || { qty: 0 };
-                    updates[`/consumables_inventory/${old.id}`] = { qty: oldInv.qty + old.qty };
+                    let oldQtyNum = Number(oldInv.qty) || 0;
+                    updates[`/consumables_inventory/${old.id}`] = { qty: oldQtyNum + (Number(old.qty) || 0) };
                 }
             }
             updates[`/consumables_usage/${key}`] = { date, id, qty, unit: c.unit||'', supplier: c.supplier||'' };
@@ -979,11 +990,13 @@
             updates[`/consumables_usage/${key}`] = { date, id, qty, unit: c.unit||'', supplier: c.supplier||'' };
         }
 
-        updates[`/consumables_inventory/${id}`] = { qty: inv.qty - qty };
-        db.ref().update(updates);
-        document.getElementById('p11_qty').value = 0;
-        onConsumableChange('p11');
-        alert('✅ 領用出庫，庫存已扣除完成！');
+        updates[`/consumables_inventory/${id}`] = { qty: Math.max(0, currentQty - qty) };
+        
+        db.ref().update(updates).then(() => {
+            document.getElementById('p11_qty').value = 0;
+            onConsumableChange('p11');
+            alert('✅ 領用出庫，庫存已扣除完成！');
+        }).catch(err => alert('❌ 寫入失敗: ' + err.message));
     }
 
     function editP11(key) {
@@ -1000,7 +1013,7 @@
 
     // ========================================================================
 
-    // 原粉體系統原本功能存檔邏輯
+    // 原粉體系統原本功能存檔邏輯 (加固防止NaN)
     function saveP1() {
         const id = document.getElementById('p1_id').value.trim(); 
         const code = document.getElementById('p1_code').value.trim(); 
@@ -1011,14 +1024,18 @@
         const safety_enabled = document.getElementById('p1_safety_enabled').value;
 
         if(!id) return alert('錯誤：系統粉號為必填參數！');
+        if(/[.#$\[\]\/]/.test(id)) return alert('錯誤：粉號不可包含特殊符號 (. # $ [ ] /)');
+        
         let updates = {}; 
         updates[`/powder/${id}`] = { code, color_system, weight, supplier, safety_stock, safety_enabled };
         if(!dbData.inventory[id]) updates[`/inventory/${id}`] = { box: 0, loose: 0 };
-        db.ref().update(updates);
-        document.getElementById('p1_id').value = ''; document.getElementById('p1_code').value = ''; document.getElementById('p1_color').value = ''; document.getElementById('p1_supplier').value = '';
-        document.getElementById('p1_id').readOnly = false;
-        document.getElementById('btn_saveP1').innerText = "寫入資料庫";
-        alert('✅ 晶片寫入成功！');
+        
+        db.ref().update(updates).then(() => {
+            document.getElementById('p1_id').value = ''; document.getElementById('p1_code').value = ''; document.getElementById('p1_color').value = ''; document.getElementById('p1_supplier').value = '';
+            document.getElementById('p1_id').readOnly = false;
+            document.getElementById('btn_saveP1').innerText = "寫入資料庫";
+            alert('✅ 晶片寫入成功！');
+        }).catch(err => alert('❌ 寫入失敗: ' + err.message));
     }
 
     function editP1(id) {
@@ -1033,8 +1050,11 @@
 
     function saveP2() {
         const id = document.getElementById('p2_id').value; if(!id) return alert('警告：未指定目標粉號');
-        db.ref(`/inventory/${id}`).set({ box: Number(document.getElementById('p2_box').value) || 0, loose: Number(document.getElementById('p2_loose').value) || 0 });
-        alert('✅ 庫存參數已強制覆寫！');
+        db.ref(`/inventory/${id}`).set({ 
+            box: Number(document.getElementById('p2_box').value) || 0, 
+            loose: Number(document.getElementById('p2_loose').value) || 0 
+        }).then(() => alert('✅ 庫存參數已強制覆寫！'))
+          .catch(err => alert('❌ 寫入失敗: ' + err.message));
     }
 
     function saveP3() {
@@ -1042,19 +1062,26 @@
         const box = Number(document.getElementById('p3_box').value) || 0; const loose = Number(document.getElementById('p3_loose').value) || 0;
         if(!id) return alert('警告：未指定目標粉號');
         let inv = dbData.inventory[id] || { box: 0, loose: 0 };
+        let curBox = Number(inv.box) || 0; let curLoose = Number(inv.loose) || 0;
         let updates = {}; let key = editKeys.purchase;
+        
         if(key) {
             const old = dbData.purchase[key];
             if(old) {
-                if(old.id === id) { inv.box -= old.box; inv.loose -= old.loose; } 
-                else { let oldInv = dbData.inventory[old.id] || { box: 0, loose: 0 }; updates[`/inventory/${old.id}`] = { box: Math.max(0, oldInv.box - old.box), loose: Math.max(0, oldInv.loose - old.loose) }; }
+                if(old.id === id) { curBox -= (Number(old.box)||0); curLoose -= (Number(old.loose)||0); } 
+                else { 
+                    let oldInv = dbData.inventory[old.id] || { box: 0, loose: 0 }; 
+                    updates[`/inventory/${old.id}`] = { box: Math.max(0, (Number(oldInv.box)||0) - (Number(old.box)||0)), loose: Math.max(0, (Number(oldInv.loose)||0) - (Number(old.loose)||0)) }; 
+                }
             }
             updates[`/purchase/${key}`] = { date, id, box, loose }; editKeys.purchase = null; document.getElementById('btn_saveP3').innerText = "確認執行入庫";
         } else { key = db.ref().child('purchase').push().key; updates[`/purchase/${key}`] = { date, id, box, loose }; }
-        updates[`/inventory/${id}`] = { box: inv.box + box, loose: inv.loose + loose };
-        db.ref().update(updates);
-        document.getElementById('p3_box').value = 0; document.getElementById('p3_loose').value = 0; 
-        alert('✅ 入庫序列已確認執行！');
+        
+        updates[`/inventory/${id}`] = { box: curBox + box, loose: curLoose + loose };
+        db.ref().update(updates).then(() => {
+            document.getElementById('p3_box').value = 0; document.getElementById('p3_loose').value = 0; 
+            alert('✅ 入庫序列已確認執行！');
+        }).catch(err => alert('❌ 寫入失敗: ' + err.message));
     }
 
     function editP3(key) {
@@ -1078,7 +1105,7 @@
         const box = Number(document.getElementById('p4_box').value) || 0;
         const loose = Number(document.getElementById('p4_loose').value) || 0;
         const ret = Number(document.getElementById('p4_return').value) || 0;
-        const w = dbData.powder[id] ? dbData.powder[id].weight : 25;
+        const w = dbData.powder[id] ? Number(dbData.powder[id].weight) : 25;
         const totalUsage = (box * w) + loose - ret;
         document.getElementById('p4_usage').value = isNaN(totalUsage) ? 0 : totalUsage + " KG";
     }
@@ -1088,26 +1115,33 @@
         const box = Number(document.getElementById('p4_box').value) || 0; const loose = Number(document.getElementById('p4_loose').value) || 0;
         const return_qty = Number(document.getElementById('p4_return').value) || 0;
         if(!id) return alert('警告：未指定目標粉號');
-        const w = dbData.powder[id] ? dbData.powder[id].weight : 25;
+        const w = dbData.powder[id] ? Number(dbData.powder[id].weight) : 25;
         const usage_qty = (box * w) + loose - return_qty;
+        
         let inv = dbData.inventory[id] || { box: 0, loose: 0 };
+        let curBox = Number(inv.box) || 0; let curLoose = Number(inv.loose) || 0;
         let updates = {}; let key = editKeys.usage;
 
         if(key) {
             const old = dbData.usage[key];
             if(old) {
-                if(old.id === id) { inv.box += old.box; inv.loose += (old.loose - (old.return_qty || 0)); } 
-                else { let oldInv = dbData.inventory[old.id] || { box: 0, loose: 0 }; updates[`/inventory/${old.id}`] = { box: oldInv.box + old.box, loose: oldInv.loose + old.loose - (old.return_qty || 0) }; }
+                if(old.id === id) { curBox += (Number(old.box)||0); curLoose += ((Number(old.loose)||0) - (Number(old.return_qty) || 0)); } 
+                else { 
+                    let oldInv = dbData.inventory[old.id] || { box: 0, loose: 0 }; 
+                    updates[`/inventory/${old.id}`] = { box: (Number(oldInv.box)||0) + (Number(old.box)||0), loose: (Number(oldInv.loose)||0) + (Number(old.loose)||0) - (Number(old.return_qty) || 0) }; 
+                }
             }
             updates[`/usage/${key}`] = { date, id, box, loose, return_qty, usage_qty }; editKeys.usage = null; document.getElementById('btn_saveP4').innerText = "確認執行出庫";
         } else { key = db.ref().child('usage').push().key; updates[`/usage/${key}`] = { date, id, box, loose, return_qty, usage_qty }; }
 
-        let newBox = inv.box - box; let newLoose = inv.loose - loose + return_qty;
+        let newBox = curBox - box; let newLoose = curLoose - loose + return_qty;
         if(newBox < 0 || newLoose < 0) return alert('⚠️ 嚴重警告：庫存呈現負數異常，阻止出庫！');
+        
         updates[`/inventory/${id}`] = { box: newBox, loose: newLoose };
-        db.ref().update(updates);
-        document.getElementById('p4_box').value = 0; document.getElementById('p4_loose').value = 0; document.getElementById('p4_return').value = 0;
-        fetchCurrentStock(); alert('✅ 出庫能量扣除完畢！');
+        db.ref().update(updates).then(() => {
+            document.getElementById('p4_box').value = 0; document.getElementById('p4_loose').value = 0; document.getElementById('p4_return').value = 0;
+            fetchCurrentStock(); alert('✅ 出庫能量扣除完畢！');
+        }).catch(err => alert('❌ 寫入失敗: ' + err.message));
     }
 
     function editP4(key) {
@@ -1125,7 +1159,9 @@
         let updates = {}; let key = editKeys.waste;
         if(key) { updates[`/waste/${key}`] = { date, qty }; editKeys.waste = null; document.getElementById('btn_saveP7').innerText = "寫入回收紀錄"; } 
         else { key = db.ref().child('waste').push().key; updates[`/waste/${key}`] = { date, qty }; }
-        db.ref().update(updates); document.getElementById('p7_qty').value = ''; alert('✅ 廢棄質能回收參數更新完畢！');
+        db.ref().update(updates).then(() => {
+            document.getElementById('p7_qty').value = ''; alert('✅ 廢棄質能回收參數更新完畢！');
+        }).catch(err => alert('❌ 寫入失敗: ' + err.message));
     }
 
     function editP7(key) {
@@ -1135,25 +1171,26 @@
         document.getElementById('p7_date').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 全功能刪除回算事件控制器
+    // 全功能刪除回算事件控制器 (加固防 NaN)
     function delData(node, key) {
         if(confirm('啟動刪除程序：確定抹除此筆紀錄？系統將自動重算平衡矩陣。')) {
             let updates = {};
             if(node === 'purchase') {
                 const r = dbData.purchase[key];
-                if(r) { let inv = dbData.inventory[r.id] || { box: 0, loose: 0 }; updates[`/inventory/${r.id}`] = { box: Math.max(0, inv.box - r.box), loose: Math.max(0, inv.loose - r.loose) }; }
+                if(r) { let inv = dbData.inventory[r.id] || { box: 0, loose: 0 }; updates[`/inventory/${r.id}`] = { box: Math.max(0, (Number(inv.box)||0) - (Number(r.box)||0)), loose: Math.max(0, (Number(inv.loose)||0) - (Number(r.loose)||0)) }; }
             } else if(node === 'usage') {
                 const r = dbData.usage[key];
-                if(r) { let inv = dbData.inventory[r.id] || { box: 0, loose: 0 }; updates[`/inventory/${r.id}`] = { box: inv.box + r.box, loose: inv.loose + r.loose - (r.return_qty || 0) }; }
+                if(r) { let inv = dbData.inventory[r.id] || { box: 0, loose: 0 }; updates[`/inventory/${r.id}`] = { box: (Number(inv.box)||0) + (Number(r.box)||0), loose: (Number(inv.loose)||0) + (Number(r.loose)||0) - (Number(r.return_qty) || 0) }; }
             } else if(node === 'consumables_purchase') {
                 const r = dbData.consumables_purchase[key];
-                if(r) { let inv = dbData.consumables_inventory[r.id] || { qty: 0 }; updates[`/consumables_inventory/${r.id}`] = { qty: Math.max(0, inv.qty - r.qty) }; }
+                if(r) { let inv = dbData.consumables_inventory[r.id] || { qty: 0 }; updates[`/consumables_inventory/${r.id}`] = { qty: Math.max(0, (Number(inv.qty)||0) - (Number(r.qty)||0)) }; }
             } else if(node === 'consumables_usage') {
                 const r = dbData.consumables_usage[key];
-                if(r) { let inv = dbData.consumables_inventory[r.id] || { qty: 0 }; updates[`/consumables_inventory/${r.id}`] = { qty: inv.qty + r.qty }; }
+                if(r) { let inv = dbData.consumables_inventory[r.id] || { qty: 0 }; updates[`/consumables_inventory/${r.id}`] = { qty: (Number(inv.qty)||0) + (Number(r.qty)||0) }; }
             }
             updates[`/${node}/${key}`] = null;
-            db.ref().update(updates).then(() => alert('✅ 目標資料已自系統徹底抹除並重算庫存！'));
+            db.ref().update(updates).then(() => alert('✅ 目標資料已自系統徹底抹除並重算庫存！'))
+              .catch(err => alert('❌ 刪除過程錯誤: ' + err.message));
         }
     }
 
@@ -1169,7 +1206,7 @@
         Object.values(dbData.usage).forEach(r => { 
             if(r.date === date) {
                 let powderData = dbData.powder[r.id] || {}; let invData = dbData.inventory[r.id] || { box: 0, loose: 0 };
-                let currentStockTotal = (invData.box * (powderData.weight || 25)) + invData.loose;
+                let currentStockTotal = (Number(invData.box) * (Number(powderData.weight) || 25)) + Number(invData.loose);
                 let isLowStock = powderData.safety_enabled === "true" && currentStockTotal < (Number(powderData.safety_stock) || 0);
                 
                 html += `<tr ${isLowStock ? 'class="row-low-stock"' : ''}>
@@ -1187,7 +1224,7 @@
         const id = document.getElementById('p6_id').value; const res = document.getElementById('p6_result');
         if(!id) { res.style.display = 'none'; return; }
         let d = dbData.powder[id] || {}; let inv = dbData.inventory[id] || {box:0, loose:0};
-        let total = (inv.box * (d.weight || 25)) + inv.loose;
+        let total = (Number(inv.box) * (Number(d.weight) || 25)) + Number(inv.loose);
         res.style.display = 'block';
         res.innerHTML = `<div class="dashboard-grid"><div class="dash-card"><div class="dash-card-header">📋 粉末資料</div><div class="info-row"><span class="info-label">粉號</span><span class="info-value" style="color:var(--hud-cyan); font-size:18px;">${id}</span></div><div class="info-row"><span class="info-label">代號</span><span class="info-value">${d.code || '無資料'}</span></div><div class="info-row"><span class="info-label">色系</span><span class="info-value">${d.color_system || '無資料'}</span></div><div class="info-row"><span class="info-label">廠商</span><span class="info-value">${d.supplier || '無資料'}</span></div><div class="info-row"><span class="info-label">淨重</span><span class="info-value">${d.weight || 25} KG</span></div></div><div class="split-stats"><div class="stat-box box-stat"><div class="stat-unit">📦 箱數</div><div class="num">${inv.box}</div><div class="stat-unit">箱</div></div><div class="stat-box loose-stat"><div class="stat-unit">⚖️ 散粉</div><div class="num">${inv.loose}</div><div class="stat-unit">KG</div></div></div><div class="dash-card total-card"><div class="total-label">⚡ 總重量估測</div><div><span class="total-value">${total}</span> <span class="total-unit">KG</span></div></div></div>`;
     }
@@ -1243,11 +1280,11 @@
                     if(node === 'powder' && cols.length >= 3) { updates[`/${node}/${cols[0]}`] = { code: cols[1], color_system: cols.length>=5?cols[2]:'', weight: isNaN(Number(cols.length>=5?cols[3]:cols[2]))?25:Number(cols.length>=5?cols[3]:cols[2]), supplier: cols.length>=5?cols[4]:'', safety_stock: cols.length>=6?cols[5]:0, safety_enabled: cols.length>=7?cols[6]:'false' }; }
                     else if(node === 'inventory' && cols.length >= 3) { updates[`/${node}/${cols[0]}`] = { box: isNaN(Number(cols[1]))?0:Number(cols[1]), loose: isNaN(Number(cols[2]))?0:Number(cols[2]) }; }
                     else if(node === 'purchase' && cols.length >= 4) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], id: cols[1], box: isNaN(Number(cols[2]))?0:Number(cols[2]), loose: isNaN(Number(cols[3]))?0:Number(cols[3]) }; }
-                    else if(node === 'usage' && cols.length >= 4) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], id: cols[1], box: isNaN(Number(cols[2]))?0:Number(cols[2]), loose: isNaN(Number(cols[3]))?0:Number(cols[3]), return_qty: cols.length>=6?Number(cols[4]):0, usage_qty: cols.length>=6?Number(cols[5]):((Number(cols[2])*(dbData.powder[cols[1]]?.weight||25))+Number(cols[3])-(cols.length>=6?Number(cols[4]):0)) }; }
+                    else if(node === 'usage' && cols.length >= 4) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], id: cols[1], box: isNaN(Number(cols[2]))?0:Number(cols[2]), loose: isNaN(Number(cols[3]))?0:Number(cols[3]), return_qty: cols.length>=6?Number(cols[4]):0, usage_qty: cols.length>=6?Number(cols[5]):((Number(cols[2])*(Number(dbData.powder[cols[1]]?.weight)||25))+Number(cols[3])-(cols.length>=6?Number(cols[4]):0)) }; }
                     else if(node === 'waste' && cols.length >= 2) { updates[`/${node}/${db.ref().child(node).push().key}`] = { date: cols[0], qty: isNaN(Number(cols[1]))?0:Number(cols[1]) }; }
                 }
                 if(Object.keys(updates).length === 0) return alert("❌ 警告：未解析到合法規格參數");
-                db.ref().update(updates).then(() => { alert("✅ 大量數據序列已成功注入系統樞紐！"); document.getElementById(inputId).value = ''; });
+                db.ref().update(updates).then(() => { alert("✅ 大量數據序列已成功注入系統樞紐！"); document.getElementById(inputId).value = ''; }).catch(err => alert("❌ 批次寫入失敗: " + err.message));
             } catch (err) { alert("❌ 資料封包解析錯誤: " + err.message); }
         };
         reader.readAsText(file); 
