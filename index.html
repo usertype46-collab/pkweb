@@ -48,19 +48,6 @@
             overflow-x: hidden;
         }
 
-        /* 跑馬燈警報樣式 */
-        #marqueeContainer {
-            position: relative; width: 100%; z-index: 9000;
-            background: var(--hud-warning); color: var(--hud-danger);
-            font-weight: 900; font-size: 20px; padding: 10px 0;
-            overflow: hidden; white-space: nowrap;
-            animation: flash 1s infinite alternate;
-            display: none; box-shadow: 0 0 20px var(--hud-warning);
-        }
-        @keyframes flash { from { opacity: 1; } to { opacity: 0.2; } }
-        .marquee-content { display: inline-block; animation: scrollText 30s linear infinite; }
-        @keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
         /* 歷史紀錄底水位閃爍警示動畫 */
         @keyframes rowAlertFlash {
             0% { background-color: rgba(255, 183, 0, 0.05); }
@@ -97,37 +84,6 @@
             50% { transform: scaleY(0.01) scaleX(1); }
             100% { opacity: 1; filter: contrast(1) brightness(1); transform: scaleY(1) scaleX(1); }
         }
-
-        /* 黑洞深淵安全驗證遮罩 */
-        #loginOverlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(3, 6, 13, 0.9); backdrop-filter: blur(10px); 
-            display: flex; justify-content: center; align-items: center; z-index: 10000; 
-        }
-        .login-box { 
-            background: rgba(0, 20, 40, 0.8); 
-            padding: 40px; 
-            width: 90%; max-width: 400px; text-align: center; 
-            border: 1px solid var(--hud-cyan);
-            box-shadow: 0 0 30px var(--hud-cyan-dim), inset 0 0 20px var(--hud-cyan-dim);
-            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
-            position: relative;
-        }
-        .login-box::before {
-            content: "[ 系統鎖定 ]";
-            position: absolute; top: 10px; left: 20px;
-            color: var(--hud-cyan); font-size: 12px; letter-spacing: 2px;
-        }
-        .login-box h2 { color: var(--hud-cyan); margin-bottom: 25px; font-weight: 800; font-size: 24px; letter-spacing: 3px; text-shadow: 0 0 15px var(--hud-cyan); margin-top: 15px; }
-        .login-box input { 
-            width: 100%; padding: 15px; margin-bottom: 25px; 
-            border: 1px solid var(--hud-cyan-dim); 
-            background: rgba(0, 243, 255, 0.05); color: var(--hud-cyan);
-            font-size: 16px; letter-spacing: 2px;
-            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-            transition: 0.3s;
-        }
-        .login-box input:focus { border-color: var(--hud-cyan); outline: none; box-shadow: 0 0 15px var(--hud-cyan-dim); background: rgba(0, 243, 255, 0.1); }
 
         /* 主容器 - 星艦中控面板 */
         .container { 
@@ -200,6 +156,33 @@
         .menu-item::after { content: '►'; font-size: 12px; color: var(--hud-cyan); opacity: 0.5; transition: 0.3s; }
         .menu-item:hover::after { opacity: 1; transform: translateX(5px); text-shadow: 0 0 10px var(--hud-cyan); }
 
+        /* 低水位黃色對話框樣式 */
+        .alert-item {
+            background: rgba(255, 183, 0, 0.1);
+            border: 1px dashed var(--hud-warning);
+            padding: 12px 15px;
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .alert-item:hover {
+            background: rgba(255, 183, 0, 0.25);
+            border-style: solid;
+            box-shadow: 0 0 10px rgba(255, 183, 0, 0.4);
+            transform: translateX(3px);
+        }
+        .alert-item::after {
+            content: '[ 變更狀態 ]';
+            font-size: 12px;
+            color: var(--hud-warning);
+            letter-spacing: 1px;
+        }
+
         /* 未來風按鈕體系 */
         .btn { 
             border: 1px solid transparent; padding: 12px 20px; 
@@ -221,6 +204,9 @@
         
         .btn-secondary { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.2); color: #fff; }
         .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); border-color: #fff; }
+
+        .btn-warning { background: rgba(255, 183, 0, 0.15); border-color: var(--hud-warning); color: var(--hud-warning); }
+        .btn-warning:hover { background: var(--hud-warning); color: #000; box-shadow: 0 0 20px var(--hud-warning); }
 
         .page { display: none; animation: hudBootUp 0.4s ease forwards; }
         .page-title { 
@@ -346,22 +332,10 @@
 </head>
 <body>
 
-<div id="marqueeContainer"><div class="marquee-content" id="marqueeText"></div></div>
-
-<div id="loginOverlay">
-    <div class="login-box">
-        <h2>系統安全驗證</h2>
-        <input type="password" id="admin_pwd" placeholder="請輸入安全授權碼">
-        <button class="btn btn-primary" style="margin-bottom: 20px;" onclick="login('admin')">授權登入</button>
-        <div style="margin: 15px 0; color: var(--hud-cyan-dim); font-size: 12px; letter-spacing: 4px;">▼ ▼ ▼</div>
-        <button class="btn btn-secondary" onclick="login('viewer')">檢視者登入</button>
-    </div>
-</div>
-
 <div class="container">
     <div class="header-bar">
         <div>伺服器狀態：<span class="status-badge" id="syncStatus">連線中...</span></div>
-        <div>存取層級：<span class="role-badge" id="roleDisplay">等待授權</span></div>
+        <div>存取層級：<span class="role-badge" id="roleDisplay"><span style="color:var(--text-muted); font-weight:900; letter-spacing:2px;">[ 檢視者 ]</span></span></div>
     </div>
 
     <div id="homePage" class="page" style="display: block;">
@@ -385,6 +359,14 @@
             <div class="menu-item admin-only" onclick="goPage(10)">10.耗材入庫紀錄</div>
             <div class="menu-item admin-only" onclick="goPage(11)">11.耗材領用紀錄</div>
             <div class="menu-item" style="border-color: var(--hud-purple); color: var(--hud-success);" onclick="goPage(12)">12.耗材監控中心</div>
+        </div>
+
+        <!-- 低水位警告黃色對話框區塊 -->
+        <div id="lowStockCard" style="display: none; margin-top: 25px; background: rgba(255, 183, 0, 0.08); border: 1px solid var(--hud-warning); padding: 20px; clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px); box-shadow: 0 0 20px rgba(255, 183, 0, 0.25);">
+            <div style="color: var(--hud-warning); font-weight: 900; font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; letter-spacing: 2px;">
+                ⚠️ 低水位與庫存警報 (點選項目可申請處理)
+            </div>
+            <div id="lowStockContainer" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
     </div>
 
@@ -597,6 +579,18 @@
 
 </div>
 
+<!-- 低水位警告確認彈出視窗遮罩 -->
+<div id="alertOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 6, 13, 0.85); backdrop-filter: blur(8px); z-index: 10000; justify-content: center; align-items: center;">
+    <div style="background: rgba(4, 9, 20, 0.95); border: 1px solid var(--hud-warning); padding: 30px; width: 90%; max-width: 420px; text-align: center; clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px); box-shadow: 0 0 30px rgba(255, 183, 0, 0.3);">
+        <h3 style="color: var(--hud-warning); font-weight: 900; margin-bottom: 20px; font-size: 20px; letter-spacing: 2px;">⚠️ 低水位預警處置</h3>
+        <p id="alertModalMsg" style="color: var(--text-main); font-size: 15px; margin-bottom: 25px; line-height: 1.6; word-break: break-all;"></p>
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <button class="btn btn-warning" style="flex: 1;" onclick="applyWarningAction(true)">〔已申請〕</button>
+            <button class="btn btn-secondary" style="flex: 1;" onclick="applyWarningAction(false)">〔取消〕</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
@@ -615,34 +609,27 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 數據緩衝初始化擴充 (加入耗材專屬矩陣)
+    // 數據緩衝初始化擴充
     let dbData = { 
         powder: {}, inventory: {}, purchase: {}, usage: {}, waste: {},
         consumables: {}, consumables_inventory: {}, consumables_purchase: {}, consumables_usage: {} 
     };
-    let userRole = 'guest';
+    let userRole = 'viewer'; // 預設使用檢視者權限登入
     let editKeys = { purchase: null, usage: null, waste: null, con_registry: null, con_purchase: null, con_usage: null };
+
+    // 低水位已申請警告集合
+    let appliedAlerts = new Set();
+    let currentAlertItemKey = null;
 
     const today = new Date().toISOString().split('T')[0];
     ['p3_date', 'p4_date', 'p7_date', 'p10_date', 'p11_date'].forEach(id => { 
         if(document.getElementById(id)) document.getElementById(id).value = today; 
     });
 
-    // 安全授權登入
-    function login(role) {
-        if(role === 'admin') {
-            const pwd = document.getElementById('admin_pwd').value;
-            if(pwd !== 'M0282') return alert('驗證失敗：授權碼錯誤！');
-            userRole = 'admin';
-        } else {
-            userRole = 'viewer';
-        }
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('roleDisplay').innerHTML = role === 'admin' 
-            ? '<span style="color:var(--hud-danger); font-weight:900; letter-spacing:2px;">[ 管理員 ]</span>' 
-            : '<span style="color:var(--text-muted); font-weight:900; letter-spacing:2px;">[ 檢視者 ]</span>';
+    // 頁面初始化自動套用權限
+    window.addEventListener('DOMContentLoaded', () => {
         applyPermissions();
-    }
+    });
 
     // 存取層級權限套用
     function applyPermissions() {
@@ -688,9 +675,27 @@
         }
     });
 
-    // 全方位安全水位預警探針 (包含粉體與耗材)
+    // 低水位警告對話框彈出控制
+    function openAlertModal(key, msg) {
+        currentAlertItemKey = key;
+        document.getElementById('alertModalMsg').innerText = msg;
+        document.getElementById('alertOverlay').style.display = 'flex';
+    }
+
+    function applyWarningAction(isApplied) {
+        if(isApplied && currentAlertItemKey) {
+            appliedAlerts.add(currentAlertItemKey);
+        }
+        document.getElementById('alertOverlay').style.display = 'none';
+        currentAlertItemKey = null;
+        checkLowStock();
+    }
+
+    // 安全水位預警探針 (顯示於耗材監控中心下方黃色對話框)
     function checkLowStock() {
         let alerts = [];
+        let activeKeys = new Set();
+
         // 1. 粉體監控
         for (let id in dbData.powder) {
             let p = dbData.powder[id];
@@ -698,28 +703,55 @@
                 let inv = dbData.inventory[id] || { box: 0, loose: 0 };
                 let total = (Number(inv.box) * (Number(p.weight) || 25)) + Number(inv.loose);
                 if(total < (Number(p.safety_stock) || 0)) {
-                    alerts.push(`⚠️ 粉體告急：${id} [${p.code || ''}] 現存 ${total} KG 低於臨界安全水位！`);
+                    let key = 'powder_' + id;
+                    activeKeys.add(key);
+                    if(!appliedAlerts.has(key)) {
+                        alerts.push({
+                            key: key,
+                            msg: `⚠️ 粉體告急：${id} [${p.code || ''}] 現存 ${total} KG，低於安全水位 (${p.safety_stock} KG)！`
+                        });
+                    }
                 }
             }
         }
-        // 2. 新增耗材監控
+        
+        // 2. 耗材監控
         for (let name in dbData.consumables) {
             let c = dbData.consumables[name];
             if(c.safety_enabled === "true") {
                 let inv = dbData.consumables_inventory[name] || { qty: 0 };
                 if(Number(inv.qty) < (Number(c.safety_stock) || 0)) {
-                    alerts.push(`🚨 耗材補貨：[${name}] 目前庫存剩餘 ${inv.qty} ${c.unit || ''}，低於預警水位 (${c.safety_stock})！`);
+                    let key = 'con_' + name;
+                    activeKeys.add(key);
+                    if(!appliedAlerts.has(key)) {
+                        alerts.push({
+                            key: key,
+                            msg: `🚨 耗材補貨：[${name}] 剩餘 ${inv.qty} ${c.unit || ''}，低於預警水位 (${c.safety_stock})！`
+                        });
+                    }
                 }
             }
         }
+
+        // 自動清理已補貨回復正常水位的標記
+        appliedAlerts.forEach(k => {
+            if(!activeKeys.has(k)) appliedAlerts.delete(k);
+        });
         
-        const container = document.getElementById('marqueeContainer');
-        const text = document.getElementById('marqueeText');
+        const card = document.getElementById('lowStockCard');
+        const container = document.getElementById('lowStockContainer');
+
         if(alerts.length > 0) {
-            container.style.display = 'block';
-            text.innerHTML = alerts.join('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+            card.style.display = 'block';
+            let html = '';
+            alerts.forEach(item => {
+                html += `<div class="alert-item" onclick="openAlertModal('${item.key}', '${item.msg}')">
+                            <span>${item.msg}</span>
+                         </div>`;
+            });
+            container.innerHTML = html;
         } else {
-            container.style.display = 'none';
+            card.style.display = 'none';
         }
     }
 
@@ -800,8 +832,6 @@
         document.querySelector('#tb_p7 tbody').innerHTML = htmlP7;
         if(document.querySelector('#tb_p8 tbody')) document.querySelector('#tb_p8 tbody').innerHTML = htmlP8;
 
-        // ==================== 耗材核心渲染邏輯 ====================
-        
         // TB 9: 耗材清冊
         let htmlP9 = '';
         for(let name in dbData.consumables) {
@@ -824,7 +854,7 @@
         });
         if(document.querySelector('#tb_p11 tbody')) document.querySelector('#tb_p11 tbody').innerHTML = htmlP11;
 
-        // TB 12: 耗材即時動態動態監控
+        // TB 12: 耗材即時動態監控
         let htmlP12 = '';
         for(let name in dbData.consumables) {
             let c = dbData.consumables[name];
@@ -837,8 +867,6 @@
 
         applyPermissions();
     }
-
-    // ======================== 新增耗材模組邏輯控制核心 ========================
 
     // 耗材連動自動填表單功能
     function onConsumableChange(pagePrefix) {
@@ -868,7 +896,6 @@
         const safety_enabled = document.getElementById('p9_safety_enabled').value;
 
         if(!name) return alert('錯誤：耗材品名不允許空白！');
-        // 防呆：禁止輸入 Firebase 節點保留字元，避免發生寫入崩潰
         if(/[.#$\[\]\/]/.test(name)) return alert('錯誤：耗材品名不可包含特殊符號 (如 . # $ [ ] /)');
         
         let updates = {};
@@ -876,7 +903,6 @@
         if(!dbData.consumables_inventory[name]) updates[`/consumables_inventory/${name}`] = { qty: 0 };
         
         db.ref().update(updates).then(() => {
-            // 清空欄位
             document.getElementById('p9_name').value = ''; document.getElementById('p9_unit').value = ''; document.getElementById('p9_supplier').value = '';
             document.getElementById('p9_name').readOnly = false;
             document.getElementById('btn_saveP9').innerText = "確認寫入耗材庫";
@@ -911,7 +937,6 @@
         let key = editKeys.con_purchase;
 
         if(key) {
-            // 編輯模式：先沖銷舊入庫紀錄之差額 (避免修改本地快取物件，改用自變數)
             const old = dbData.consumables_purchase[key];
             if(old) {
                 if(old.id === id) { 
@@ -963,7 +988,6 @@
         let updates = {};
         let key = editKeys.con_usage;
 
-        // 計算預期剩餘防爆庫存機制
         let simulatedQty = currentQty;
         if(key) {
             const old = dbData.consumables_usage[key];
@@ -1011,9 +1035,7 @@
         document.getElementById('p11_date').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // ========================================================================
-
-    // 原粉體系統原本功能存檔邏輯 (加固防止NaN)
+    // 原粉體系統原本功能存檔邏輯
     function saveP1() {
         const id = document.getElementById('p1_id').value.trim(); 
         const code = document.getElementById('p1_code').value.trim(); 
@@ -1171,7 +1193,7 @@
         document.getElementById('p7_date').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 全功能刪除回算事件控制器 (加固防 NaN)
+    // 全功能刪除回算事件控制器
     function delData(node, key) {
         if(confirm('啟動刪除程序：確定抹除此筆紀錄？系統將自動重算平衡矩陣。')) {
             let updates = {};
