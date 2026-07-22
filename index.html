@@ -612,13 +612,13 @@
     // 數據緩衝初始化擴充
     let dbData = { 
         powder: {}, inventory: {}, purchase: {}, usage: {}, waste: {},
-        consumables: {}, consumables_inventory: {}, consumables_purchase: {}, consumables_usage: {} 
+        consumables: {}, consumables_inventory: {}, consumables_purchase: {}, consumables_usage: {},
+        applied_alerts: {} 
     };
     let userRole = 'viewer'; // 預設使用檢視者權限登入
     let editKeys = { purchase: null, usage: null, waste: null, con_registry: null, con_purchase: null, con_usage: null };
 
-    // 低水位已申請警告集合
-    let appliedAlerts = new Set();
+    // 用於儲存當前正在處理的警告對象
     let currentAlertItemKey = null;
 
     const today = new Date().toISOString().split('T')[0];
@@ -665,7 +665,7 @@
         if(snapshot.exists()) {
             dbData = snapshot.val();
             // 防止全新無資料時節點遺失錯誤
-            ['powder','inventory','purchase','usage','waste','consumables','consumables_inventory','consumables_purchase','consumables_usage'].forEach(k => { 
+            ['powder','inventory','purchase','usage','waste','consumables','consumables_inventory','consumables_purchase','consumables_usage','applied_alerts'].forEach(k => { 
                 if(!dbData[k]) dbData[k] = {}; 
             });
             const statusEl = document.getElementById('syncStatus');
@@ -682,19 +682,25 @@
         document.getElementById('alertOverlay').style.display = 'flex';
     }
 
+    // 套用或取消低水位警告暫停功能
     function applyWarningAction(isApplied) {
         if(isApplied && currentAlertItemKey) {
-            appliedAlerts.add(currentAlertItemKey);
+            // 將已申請狀態寫入 Firebase 以便全伺服器同步
+            db.ref('/applied_alerts/' + currentAlertItemKey).set(true).then(() => {
+                document.getElementById('alertOverlay').style.display = 'none';
+                currentAlertItemKey = null;
+            });
+        } else {
+            document.getElementById('alertOverlay').style.display = 'none';
+            currentAlertItemKey = null;
         }
-        document.getElementById('alertOverlay').style.display = 'none';
-        currentAlertItemKey = null;
-        checkLowStock();
     }
 
-    // 安全水位預警探針 (顯示於耗材監控中心下方黃色對話框)
+    // 安全水位預警探針 (顯示於首頁黃色對話框)
     function checkLowStock() {
         let alerts = [];
         let activeKeys = new Set();
+        let appliedAlerts = dbData.applied_alerts || {};
 
         // 1. 粉體監控
         for (let id in dbData.powder) {
@@ -705,7 +711,8 @@
                 if(total < (Number(p.safety_stock) || 0)) {
                     let key = 'powder_' + id;
                     activeKeys.add(key);
-                    if(!appliedAlerts.has(key)) {
+                    // 如果這個項目尚未被標記為「已申請」，才顯示於對話框內
+                    if(!appliedAlerts[key]) {
                         alerts.push({
                             key: key,
                             msg: `⚠️ 粉體告急：${id} [${p.code || ''}] 現存 ${total} KG，低於安全水位 (${p.safety_stock} KG)！`
@@ -723,7 +730,8 @@
                 if(Number(inv.qty) < (Number(c.safety_stock) || 0)) {
                     let key = 'con_' + name;
                     activeKeys.add(key);
-                    if(!appliedAlerts.has(key)) {
+                    // 如果這個項目尚未被標記為「已申請」，才顯示於對話框內
+                    if(!appliedAlerts[key]) {
                         alerts.push({
                             key: key,
                             msg: `🚨 耗材補貨：[${name}] 剩餘 ${inv.qty} ${c.unit || ''}，低於預警水位 (${c.safety_stock})！`
@@ -733,11 +741,19 @@
             }
         }
 
-        // 自動清理已補貨回復正常水位的標記
-        appliedAlerts.forEach(k => {
-            if(!activeKeys.has(k)) appliedAlerts.delete(k);
-        });
+        // 自動清理：如果已經補貨完成（數字大於水位，不再處於 activeKeys 中），從 Firebase 刪除這個已申請標記
+        let updates = {};
+        for(let k in appliedAlerts) {
+            if(!activeKeys.has(k)) {
+                updates[`/applied_alerts/${k}`] = null;
+            }
+        }
+        // 若有項目需要清理，提交更新 (這會自動觸發下一次的 on('value') 所以不用再呼叫其它 UI function)
+        if(Object.keys(updates).length > 0) {
+            db.ref().update(updates);
+        }
         
+        // 渲染黃色首頁警告對話框
         const card = document.getElementById('lowStockCard');
         const container = document.getElementById('lowStockContainer');
 
@@ -859,9 +875,29 @@
         for(let name in dbData.consumables) {
             let c = dbData.consumables[name];
             let inv = dbData.consumables_inventory[name] || { qty: 0 };
+            
+            // 判斷是否低於安全水位
             let isLow = c.safety_enabled === "true" && Number(inv.qty) < (Number(c.safety_stock) || 0);
-            let rowClass = isLow ? 'class="row-low-stock"' : '';
-            htmlP12 += `<tr ${rowClass}><td><strong style="color:var(--hud-cyan);">${name}</strong></td><td style="font-size:16px; font-weight:900;">${inv.qty}</td><td>${c.unit || ''}</td><td>${c.safety_stock || 0}</td><td>${c.supplier || ''}</td><td>${isLow ? '<strong style="color:var(--hud-warning);">⚠️ 補貨警報</strong>' : '<span style="color:var(--hud-success);">正常狀態</span>'}</td></tr>`;
+            
+            // 判斷是否已經有同仁按過「已申請」
+            let isApplied = dbData.applied_alerts && dbData.applied_alerts['con_' + name];
+            
+            // 只有當低於水位 且 尚未被申請時，才開啟閃爍動畫
+            let rowClass = (isLow && !isApplied) ? 'class="row-low-stock"' : '';
+            
+            // 動態產生狀態文字
+            let statusHtml = '';
+            if (isLow) {
+                if (isApplied) {
+                    statusHtml = '<strong style="color:var(--hud-purple);">⏳ 已申請補貨</strong>';
+                } else {
+                    statusHtml = '<strong style="color:var(--hud-warning);">⚠️ 補貨警報</strong>';
+                }
+            } else {
+                statusHtml = '<span style="color:var(--hud-success);">正常狀態</span>';
+            }
+
+            htmlP12 += `<tr ${rowClass}><td><strong style="color:var(--hud-cyan);">${name}</strong></td><td style="font-size:16px; font-weight:900;">${inv.qty}</td><td>${c.unit || ''}</td><td>${c.safety_stock || 0}</td><td>${c.supplier || ''}</td><td>${statusHtml}</td></tr>`;
         }
         if(document.querySelector('#tb_p12 tbody')) document.querySelector('#tb_p12 tbody').innerHTML = htmlP12;
 
@@ -1229,9 +1265,15 @@
             if(r.date === date) {
                 let powderData = dbData.powder[r.id] || {}; let invData = dbData.inventory[r.id] || { box: 0, loose: 0 };
                 let currentStockTotal = (Number(invData.box) * (Number(powderData.weight) || 25)) + Number(invData.loose);
-                let isLowStock = powderData.safety_enabled === "true" && currentStockTotal < (Number(powderData.safety_stock) || 0);
                 
-                html += `<tr ${isLowStock ? 'class="row-low-stock"' : ''}>
+                // 判斷是否低於安全水位
+                let isLowStock = powderData.safety_enabled === "true" && currentStockTotal < (Number(powderData.safety_stock) || 0);
+                // 判斷是否已被申請處理
+                let isApplied = dbData.applied_alerts && dbData.applied_alerts['powder_' + r.id];
+                // 如果低水位且尚未申請處理，才啟動警告閃爍
+                let rowClass = (isLowStock && !isApplied) ? 'class="row-low-stock"' : '';
+                
+                html += `<tr ${rowClass}>
                     <td><strong style="color:var(--hud-cyan);">${r.id}</strong></td>
                     <td>${powderData.code || '無資料'}</td><td>${powderData.color_system || '無資料'}</td>
                     <td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td>
