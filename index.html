@@ -579,7 +579,7 @@
 
 </div>
 
-<!-- 低水位警告確認彈出視窗遮罩 -->
+<!-- 低水位警告確認彈出視窗遮罩 (已修正按鈕觸發邏輯) -->
 <div id="alertOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 6, 13, 0.85); backdrop-filter: blur(8px); z-index: 10000; justify-content: center; align-items: center;">
     <div style="background: rgba(4, 9, 20, 0.95); border: 1px solid var(--hud-warning); padding: 30px; width: 90%; max-width: 420px; text-align: center; clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px); box-shadow: 0 0 30px rgba(255, 183, 0, 0.3);">
         <h3 style="color: var(--hud-warning); font-weight: 900; margin-bottom: 20px; font-size: 20px; letter-spacing: 2px;">⚠️ 低水位預警處置</h3>
@@ -618,7 +618,7 @@
     let userRole = 'viewer'; // 預設使用檢視者權限登入
     let editKeys = { purchase: null, usage: null, waste: null, con_registry: null, con_purchase: null, con_usage: null };
 
-    // 用於儲存當前正在處理的警告對象
+    // 用於儲存當前正在處理的警告對象 key
     let currentAlertItemKey = null;
 
     const today = new Date().toISOString().split('T')[0];
@@ -682,14 +682,13 @@
         document.getElementById('alertOverlay').style.display = 'flex';
     }
 
-    // 套用或取消低水位警告暫停功能
+    // 套用或取消低水位警告暫停功能 (已修復點擊無反應問題)
     function applyWarningAction(isApplied) {
         if(isApplied && currentAlertItemKey) {
-            // 將已申請狀態寫入 Firebase 以便全伺服器同步
             db.ref('/applied_alerts/' + currentAlertItemKey).set(true).then(() => {
                 document.getElementById('alertOverlay').style.display = 'none';
                 currentAlertItemKey = null;
-            });
+            }).catch(err => alert('❌ 狀態更新失敗: ' + err.message));
         } else {
             document.getElementById('alertOverlay').style.display = 'none';
             currentAlertItemKey = null;
@@ -711,7 +710,6 @@
                 if(total < (Number(p.safety_stock) || 0)) {
                     let key = 'powder_' + id;
                     activeKeys.add(key);
-                    // 如果這個項目尚未被標記為「已申請」，才顯示於對話框內
                     if(!appliedAlerts[key]) {
                         alerts.push({
                             key: key,
@@ -730,7 +728,6 @@
                 if(Number(inv.qty) < (Number(c.safety_stock) || 0)) {
                     let key = 'con_' + name;
                     activeKeys.add(key);
-                    // 如果這個項目尚未被標記為「已申請」，才顯示於對話框內
                     if(!appliedAlerts[key]) {
                         alerts.push({
                             key: key,
@@ -741,14 +738,13 @@
             }
         }
 
-        // 自動清理：如果已經補貨完成（數字大於水位，不再處於 activeKeys 中），從 Firebase 刪除這個已申請標記
+        // 自動清理：若庫存恢復正常，從 Firebase 刪除已申請標記
         let updates = {};
         for(let k in appliedAlerts) {
             if(!activeKeys.has(k)) {
                 updates[`/applied_alerts/${k}`] = null;
             }
         }
-        // 若有項目需要清理，提交更新 (這會自動觸發下一次的 on('value') 所以不用再呼叫其它 UI function)
         if(Object.keys(updates).length > 0) {
             db.ref().update(updates);
         }
@@ -773,7 +769,6 @@
 
     // 更新連動下拉選單
     function refreshAllUI() {
-        // 粉體下拉
         let optHtml = '<option value="">請點擊展開...</option>';
         for (let id in dbData.powder) { 
             let code = dbData.powder[id].code ? ` [${dbData.powder[id].code}]` : '';
@@ -787,7 +782,6 @@
             }
         });
 
-        // 耗材下拉
         let conOptHtml = '<option value="">請選擇耗材項目...</option>';
         for (let name in dbData.consumables) {
             conOptHtml += `<option value="${name}">${name}</option>`;
@@ -807,7 +801,6 @@
 
     // 數據網格全面渲染引擎
     function renderTables() {
-        // TB 1: 粉號
         let htmlP1 = '';
         for(let id in dbData.powder) {
             let d = dbData.powder[id];
@@ -815,7 +808,6 @@
         }
         document.querySelector('#tb_p1 tbody').innerHTML = htmlP1;
 
-        // TB 2: 粉體庫存
         let htmlP2 = '';
         for(let id in dbData.inventory) {
             let inv = dbData.inventory[id];
@@ -825,21 +817,18 @@
         }
         document.querySelector('#tb_p2 tbody').innerHTML = htmlP2;
 
-        // TB 3: 粉體入庫
         let htmlP3 = '';
         Object.entries(dbData.purchase || {}).reverse().forEach(([key, r]) => {
             htmlP3 += `<tr><td>${r.date}</td><td><strong style="color:var(--hud-success);">${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-purple); color:var(--hud-purple); margin-right:5px;" onclick="editP3('${key}')">修改</button><button class="action-btn" onclick="delData('purchase', '${key}')">刪除</button></td></tr>`;
         });
         document.querySelector('#tb_p3 tbody').innerHTML = htmlP3;
 
-        // TB 4: 粉體出庫
         let htmlP4 = '';
         Object.entries(dbData.usage || {}).reverse().forEach(([key, r]) => {
             htmlP4 += `<tr><td>${r.date}</td><td><strong style="color:var(--hud-warning);">${r.id}</strong></td><td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td><td style="font-weight:900; color:var(--hud-cyan); font-size:15px;">${r.usage_qty || 0} 已結算</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-purple); color:var(--hud-purple); margin-right:5px;" onclick="editP4('${key}')">修改</button><button class="action-btn" onclick="delData('usage', '${key}')">刪除</button></td></tr>`;
         });
         document.querySelector('#tb_p4 tbody').innerHTML = htmlP4;
 
-        // TB 7 & 8: 廢粉
         let htmlP7 = ''; let htmlP8 = '';
         Object.entries(dbData.waste || {}).reverse().forEach(([key, r]) => {
             htmlP7 += `<tr><td>${r.date}</td><td><strong style="color:var(--hud-purple);">${r.qty}</strong></td><td>${r.qty * 25} KG</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-cyan); color:var(--hud-cyan); margin-right:5px;" onclick="editP7('${key}')">修改</button><button class="action-btn" onclick="delData('waste', '${key}')">刪除</button></td></tr>`;
@@ -848,7 +837,6 @@
         document.querySelector('#tb_p7 tbody').innerHTML = htmlP7;
         if(document.querySelector('#tb_p8 tbody')) document.querySelector('#tb_p8 tbody').innerHTML = htmlP8;
 
-        // TB 9: 耗材清冊
         let htmlP9 = '';
         for(let name in dbData.consumables) {
             let d = dbData.consumables[name];
@@ -856,43 +844,29 @@
         }
         if(document.querySelector('#tb_p9 tbody')) document.querySelector('#tb_p9 tbody').innerHTML = htmlP9;
 
-        // TB 10: 耗材入庫歷史
         let htmlP10 = '';
         Object.entries(dbData.consumables_purchase || {}).reverse().forEach(([key, r]) => {
             htmlP10 += `<tr><td>${r.date}</td><td><strong style="color:var(--hud-success);">${r.id}</strong></td><td>${r.qty}</td><td>${r.unit || ''}</td><td>${r.supplier || ''}</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-purple); color:var(--hud-purple); margin-right:5px;" onclick="editP10('${key}')">修改</button><button class="action-btn" onclick="delData('consumables_purchase', '${key}')">刪除</button></td></tr>`;
         });
         if(document.querySelector('#tb_p10 tbody')) document.querySelector('#tb_p10 tbody').innerHTML = htmlP10;
 
-        // TB 11: 耗材領用歷史
         let htmlP11 = '';
         Object.entries(dbData.consumables_usage || {}).reverse().forEach(([key, r]) => {
             htmlP11 += `<tr><td>${r.date}</td><td><strong style="color:var(--hud-warning);">${r.id}</strong></td><td>${r.qty}</td><td>${r.unit || ''}</td><td>${r.supplier || ''}</td><td class="admin-only"><button class="action-btn" style="border-color:var(--hud-purple); color:var(--hud-purple); margin-right:5px;" onclick="editP11('${key}')">修改</button><button class="action-btn" onclick="delData('consumables_usage', '${key}')">刪除</button></td></tr>`;
         });
         if(document.querySelector('#tb_p11 tbody')) document.querySelector('#tb_p11 tbody').innerHTML = htmlP11;
 
-        // TB 12: 耗材即時動態監控
         let htmlP12 = '';
         for(let name in dbData.consumables) {
             let c = dbData.consumables[name];
             let inv = dbData.consumables_inventory[name] || { qty: 0 };
-            
-            // 判斷是否低於安全水位
             let isLow = c.safety_enabled === "true" && Number(inv.qty) < (Number(c.safety_stock) || 0);
-            
-            // 判斷是否已經有同仁按過「已申請」
             let isApplied = dbData.applied_alerts && dbData.applied_alerts['con_' + name];
-            
-            // 只有當低於水位 且 尚未被申請時，才開啟閃爍動畫
             let rowClass = (isLow && !isApplied) ? 'class="row-low-stock"' : '';
             
-            // 動態產生狀態文字
             let statusHtml = '';
             if (isLow) {
-                if (isApplied) {
-                    statusHtml = '<strong style="color:var(--hud-purple);">⏳ 已申請補貨</strong>';
-                } else {
-                    statusHtml = '<strong style="color:var(--hud-warning);">⚠️ 補貨警報</strong>';
-                }
+                statusHtml = isApplied ? '<strong style="color:var(--hud-purple);">⏳ 已申請補貨</strong>' : '<strong style="color:var(--hud-warning);">⚠️ 補貨警報</strong>';
             } else {
                 statusHtml = '<span style="color:var(--hud-success);">正常狀態</span>';
             }
@@ -904,7 +878,6 @@
         applyPermissions();
     }
 
-    // 耗材連動自動填表單功能
     function onConsumableChange(pagePrefix) {
         const id = document.getElementById(pagePrefix + '_id').value;
         if(!id || !dbData.consumables[id]) {
@@ -919,11 +892,10 @@
         
         if(pagePrefix === 'p11') {
             const inv = dbData.consumables_inventory[id] || { qty: 0 };
-            document.getElementById('p11_stock').value = `📊 當前尚存 ${inv.qty} ${c.unit || ''}`;
+            document.getElementById('p11_stock').value = `📊 當前剩餘 ${inv.qty} ${c.unit || ''}`;
         }
     }
 
-    // 新增/編輯耗材定義項目
     function saveP9() {
         const name = document.getElementById('p9_name').value.trim();
         const unit = document.getElementById('p9_unit').value.trim();
@@ -932,7 +904,7 @@
         const safety_enabled = document.getElementById('p9_safety_enabled').value;
 
         if(!name) return alert('錯誤：耗材品名不允許空白！');
-        if(/[.#$\[\]\/]/.test(name)) return alert('錯誤：耗材品名不可包含特殊符號 (如 . # $ [ ] /)');
+        if(/[.#$\[\]\/]/.test(name)) return alert('錯誤：耗材品名不可包含特殊符號');
         
         let updates = {};
         updates[`/consumables/${name}`] = { unit, supplier, safety_stock, safety_enabled };
@@ -959,7 +931,6 @@
         document.getElementById('p9_name').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 耗材進貨入庫處理
     function saveP10() {
         const date = document.getElementById('p10_date').value;
         const id = document.getElementById('p10_id').value;
@@ -1011,7 +982,6 @@
         document.getElementById('p10_date').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 耗材領用出庫處理
     function saveP11() {
         const date = document.getElementById('p11_date').value;
         const id = document.getElementById('p11_id').value;
@@ -1071,7 +1041,6 @@
         document.getElementById('p11_date').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 原粉體系統原本功能存檔邏輯
     function saveP1() {
         const id = document.getElementById('p1_id').value.trim(); 
         const code = document.getElementById('p1_code').value.trim(); 
@@ -1082,7 +1051,7 @@
         const safety_enabled = document.getElementById('p1_safety_enabled').value;
 
         if(!id) return alert('錯誤：系統粉號為必填參數！');
-        if(/[.#$\[\]\/]/.test(id)) return alert('錯誤：粉號不可包含特殊符號 (. # $ [ ] /)');
+        if(/[.#$\[\]\/]/.test(id)) return alert('錯誤：粉號不可包含特殊符號');
         
         let updates = {}; 
         updates[`/powder/${id}`] = { code, color_system, weight, supplier, safety_stock, safety_enabled };
@@ -1229,7 +1198,6 @@
         document.getElementById('p7_date').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 全功能刪除回算事件控制器
     function delData(node, key) {
         if(confirm('啟動刪除程序：確定抹除此筆紀錄？系統將自動重算平衡矩陣。')) {
             let updates = {};
@@ -1266,11 +1234,8 @@
                 let powderData = dbData.powder[r.id] || {}; let invData = dbData.inventory[r.id] || { box: 0, loose: 0 };
                 let currentStockTotal = (Number(invData.box) * (Number(powderData.weight) || 25)) + Number(invData.loose);
                 
-                // 判斷是否低於安全水位
                 let isLowStock = powderData.safety_enabled === "true" && currentStockTotal < (Number(powderData.safety_stock) || 0);
-                // 判斷是否已被申請處理
                 let isApplied = dbData.applied_alerts && dbData.applied_alerts['powder_' + r.id];
-                // 如果低水位且尚未申請處理，才啟動警告閃爍
                 let rowClass = (isLowStock && !isApplied) ? 'class="row-low-stock"' : '';
                 
                 html += `<tr ${rowClass}>
@@ -1317,7 +1282,6 @@
         }
     }
 
-    // CSV 備份導出引擎
     function exportCSV(node) {
         let csv = "\uFEFF"; let data = dbData[node] || {};
         let nameMap = { powder: '粉號清冊', inventory: '庫存盤點', purchase: '採購入庫', usage: '出庫用量', waste: '廢粉紀錄' };
@@ -1331,7 +1295,6 @@
         document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
-    // CSV 批次資料注入引擎
     function importCSV(node, inputId) {
         const file = document.getElementById(inputId).files[0]; if(!file) return alert("系統提示：請選定 CSV 資料封包");
         const reader = new FileReader();
