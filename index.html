@@ -112,7 +112,11 @@
             margin-bottom: 30px; font-size: 14px; letter-spacing: 2px; font-weight: bold;
         }
         .status-badge { color: var(--hud-success); text-shadow: 0 0 8px var(--hud-success); }
-        .role-badge { color: var(--hud-cyan); text-shadow: 0 0 8px var(--hud-cyan); }
+        .role-badge { 
+            cursor: pointer; /* 加上游標提示可點擊 */
+            transition: all 0.3s ease;
+        }
+        .role-badge:hover { opacity: 0.8; text-shadow: 0 0 10px #fff; }
         
         .main-title { 
             font-size: 30px; font-weight: 900; 
@@ -335,7 +339,7 @@
 <div class="container">
     <div class="header-bar">
         <div>伺服器狀態：<span class="status-badge" id="syncStatus">連線中...</span></div>
-        <div>存取層級：<span class="role-badge" id="roleDisplay"><span style="color:var(--text-muted); font-weight:900; letter-spacing:2px;">[ 檢視者 ]</span></span></div>
+        <div>存取層級：<span class="role-badge" id="roleDisplay" onclick="toggleRole()" title="點擊切換測試權限"><span style="color:var(--text-muted); font-weight:900; letter-spacing:2px;">[ 檢視者 ]</span></span></div>
     </div>
 
     <div id="homePage" class="page" style="display: block;">
@@ -579,7 +583,7 @@
 
 </div>
 
-<!-- 低水位警告確認彈出視窗遮罩 (已修正按鈕觸發邏輯) -->
+<!-- 低水位警告確認彈出視窗遮罩 -->
 <div id="alertOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 6, 13, 0.85); backdrop-filter: blur(8px); z-index: 10000; justify-content: center; align-items: center;">
     <div style="background: rgba(4, 9, 20, 0.95); border: 1px solid var(--hud-warning); padding: 30px; width: 90%; max-width: 420px; text-align: center; clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px); box-shadow: 0 0 30px rgba(255, 183, 0, 0.3);">
         <h3 style="color: var(--hud-warning); font-weight: 900; margin-bottom: 20px; font-size: 20px; letter-spacing: 2px;">⚠️ 低水位預警處置</h3>
@@ -615,7 +619,9 @@
         consumables: {}, consumables_inventory: {}, consumables_purchase: {}, consumables_usage: {},
         applied_alerts: {} 
     };
-    let userRole = 'viewer'; // 預設使用檢視者權限登入
+    
+    // 預設使用檢視者權限登入 (現在可以透過點擊標籤切換)
+    let userRole = 'viewer'; 
     let editKeys = { purchase: null, usage: null, waste: null, con_registry: null, con_purchase: null, con_usage: null };
 
     // 用於儲存當前正在處理的警告對象 key
@@ -630,6 +636,18 @@
     window.addEventListener('DOMContentLoaded', () => {
         applyPermissions();
     });
+
+    // 🛠️ 新增：權限切換功能 (方便您隨時在前端測試)
+    function toggleRole() {
+        userRole = (userRole === 'admin') ? 'viewer' : 'admin';
+        const roleDisplay = document.getElementById('roleDisplay');
+        if(userRole === 'admin') {
+            roleDisplay.innerHTML = '<span style="color:var(--hud-success); font-weight:900; letter-spacing:2px;">[ 管理員 ]</span>';
+        } else {
+            roleDisplay.innerHTML = '<span style="color:var(--text-muted); font-weight:900; letter-spacing:2px;">[ 檢視者 ]</span>';
+        }
+        applyPermissions();
+    }
 
     // 存取層級權限套用
     function applyPermissions() {
@@ -673,6 +691,12 @@
             statusEl.style.color = "var(--hud-success)";
             refreshAllUI();
         }
+    }, (error) => {
+        // 如果權限被拒，至少在 UI 上顯示斷線或錯誤，幫助除錯
+        const statusEl = document.getElementById('syncStatus');
+        statusEl.innerText = "[ 權限拒絕/斷線 ]";
+        statusEl.style.color = "var(--hud-danger)";
+        console.error("Firebase 連線錯誤: ", error);
     });
 
     // 低水位警告對話框彈出控制
@@ -682,13 +706,24 @@
         document.getElementById('alertOverlay').style.display = 'flex';
     }
 
-    // 套用或取消低水位警告暫停功能 (已修復點擊無反應問題)
+    // 套用或取消低水位警告暫停功能 (已修復並加上前端權限保護)
     function applyWarningAction(isApplied) {
         if(isApplied && currentAlertItemKey) {
+            // 🛠️ 確保只有管理員可以發送寫入請求，避免檢視者觸發 Firebase Permission Denied 報錯
+            if(userRole !== 'admin') {
+                alert('🚫 權限不足：僅「管理員」可變更警報狀態！\n(請點擊右上角 [檢視者] 標籤切換權限以供測試)');
+                document.getElementById('alertOverlay').style.display = 'none';
+                currentAlertItemKey = null;
+                return;
+            }
+
             db.ref('/applied_alerts/' + currentAlertItemKey).set(true).then(() => {
                 document.getElementById('alertOverlay').style.display = 'none';
                 currentAlertItemKey = null;
-            }).catch(err => alert('❌ 狀態更新失敗: ' + err.message));
+            }).catch(err => {
+                // 如果 Firebase Rules 還是擋住，提示他們去設定 Rules
+                alert('❌ 狀態更新失敗: ' + err.message + '\n\n【提示】請前往 Firebase Console -> Realtime Database -> Rules，將 .read 與 .write 設為 true！');
+            });
         } else {
             document.getElementById('alertOverlay').style.display = 'none';
             currentAlertItemKey = null;
@@ -739,14 +774,17 @@
         }
 
         // 自動清理：若庫存恢復正常，從 Firebase 刪除已申請標記
-        let updates = {};
-        for(let k in appliedAlerts) {
-            if(!activeKeys.has(k)) {
-                updates[`/applied_alerts/${k}`] = null;
+        // (這裡也加入管理員判斷，避免檢視者自動觸發背景清理導致報錯)
+        if (userRole === 'admin') {
+            let updates = {};
+            for(let k in appliedAlerts) {
+                if(!activeKeys.has(k)) {
+                    updates[`/applied_alerts/${k}`] = null;
+                }
             }
-        }
-        if(Object.keys(updates).length > 0) {
-            db.ref().update(updates);
+            if(Object.keys(updates).length > 0) {
+                db.ref().update(updates).catch(e => console.log("背景清理失敗 (權限拒絕): ", e));
+            }
         }
         
         // 渲染黃色首頁警告對話框
@@ -915,7 +953,7 @@
             document.getElementById('p9_name').readOnly = false;
             document.getElementById('btn_saveP9').innerText = "確認寫入耗材庫";
             alert('✅ 耗材規格變更寫入完成！');
-        }).catch(err => alert('❌ 寫入失敗: ' + err.message));
+        }).catch(err => alert('❌ 寫入失敗: ' + err.message + '\n\n【提示】請確認 Firebase Rules 權限已開放。'));
     }
 
     function editP9(name) {
