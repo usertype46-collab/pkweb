@@ -1,7 +1,6 @@
 import os
 import time
 import threading
-import json
 from flask import Flask, render_template, send_from_directory
 from flask_socketio import SocketIO, emit
 from supabase import create_client, Client
@@ -10,50 +9,54 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# ==========================================
-# 1. Supabase 初始化設定
-# ==========================================
+# --- Supabase 初始化 ---
 SUPABASE_URL = "https://cnkxsxhgdtuxknrzufhv.supabase.co"
 SUPABASE_KEY = "sb_publishable_QEoX_f9G_Gf9kaaDZpaH-g_ageY5WFK"
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-try:
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    supabase_connected = True
-    print("✅ Supabase 連線成功")
-except Exception as e:
-    supabase_connected = False
-    print(f"❌ Supabase 連線失敗: {e}")
-
-# 全域狀態 (維持記憶體快取以確保 Socket 效能)
 sys_state = {
     'line_speed': 1100,
     'cards': {},
-    'active_card_id': None
+    'active_card_id': None,
+    'track_path': ''
 }
-
-def sync_from_supabase():
-    if not supabase_connected: return
-    try:
-        # 同步卡片
-        cards_res = supabase.table('cards').select("*").execute()
-        sys_state['cards'] = {c['id']: c for c in cards_res.data}
-        
-        # 同步速度
-        speed_res = supabase.table('sys_settings').select("*").eq('key', 'line_speed').execute()
-        if speed_res.data:
-            sys_state['line_speed'] = int(speed_res.data[0]['value'])
-    except Exception as e:
-        print(f"Sync error: {e}")
-
-sync_from_supabase()
 
 active_card_lock = threading.Lock()
 current_active_card_template = None
 clone_counter = 0
 
-# ==========================================
-# 2. 前端共用語言包模組
-# ==========================================
+def load_state_from_supabase():
+    global sys_state
+    try:
+        res = supabase.table('powder_cards').select('*').execute()
+        cards = {}
+        for row in res.data:
+            cards[row['id']] = {
+                'id': row['id'],
+                'color': row['color'],
+                'colorCode': row['color_code'],
+                'part_no': row['part_no'],
+                'part_name': row['part_name'],
+                'model_no': row['model_no'],
+                'qty': row['qty'],
+                'status': row['status'],
+                'hang': row['hang'],
+                'empty': row['empty'],
+                'interval': row['interval'],
+                'hook': row['hook'],
+                'line_start_time': row['line_start_time'],
+                'finish_time': row['finish_time']
+            }
+        sys_state['cards'] = cards
+        
+        path_res = supabase.table('powder_settings').select('value').eq('key', 'track_path_d').execute()
+        if path_res.data:
+            sys_state['track_path'] = path_res.data[0]['value']
+    except Exception as e:
+        print("載入 Supabase 資料失敗:", e)
+
+load_state_from_supabase()
+
 I18N_SCRIPT = """
 <style>
     body { padding-top: 60px !important; }
@@ -62,7 +65,7 @@ I18N_SCRIPT = """
     .settings-btn { position: fixed; top: 10px; right: 170px; z-index: 1000; background: #e67e22; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 13px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.3s; }
     .settings-btn:hover { background: #d35400; }
 </style>
-<button class="settings-btn" id="settingsBtn" onclick="toggleSettings()">⚙️ 客製化設定 / Cài đặt</button>
+<button class="settings-btn" id="settingsBtn" onclick="toggleSettings()">⚙️ 設置 / Cài đặt</button>
 <button class="lang-btn" id="langBtn" onclick="toggleLang()">🌐 切換語言 / Ngôn ngữ</button>
 <script>
     const i18n = {
@@ -80,8 +83,9 @@ I18N_SCRIPT = """
             'lang_btn': '🇻🇳 切換為越文 (Việt)', 'part_no': '料號:', 'part_name': '品名:', 'qty': '數量:', 'color': '顏色:',
             'est_time': '預估佔線時間: ', 'hrs': ' 小時 ', 'done_time': '完成時間: ', 'alert_del': '⚠️ 確定要刪除這筆資料嗎？',
             'comp_lbl': '構件', 'full_line_status': '⚡ 滿線模式持續上料中: ', 'none_loading': '暫無 (等待上料)',
-            'settings_title': '⚙️ 軌道與卡片客製化設定', 'save_settings': '儲存並套用', 'reset_settings': '重設預設值',
-            'card_width': '卡片寬度 (px):', 'card_height': '卡片高度 (px):', 'card_font': '卡片字體大小 (px):'
+            'settings_title': '⚙️ 軌道與卡片客製化設定', 'save_settings': '儲存並同步', 'reset_settings': '重設預設值',
+            'card_width': '卡片最小寬度 (px):', 'card_height': '卡片高度 (px):', 'card_font': '卡片字體大小 (px):',
+            'track_path_lbl': 'SVG 軌道 Path 座標 (d):', 'visual_editor_lbl': '🎯 互動式節點拉動微調區'
         },
         'vi': {
             'sim_title': '🏭 Trình mô phỏng chuyền sơn', 'speed': 'Tốc độ chuyền: ', 'time_lbl': 'Thời gian 1 vòng: ', 'mins': ' Phút',
@@ -97,8 +101,9 @@ I18N_SCRIPT = """
             'lang_btn': '🇹🇼 Đổi ngôn ngữ (中文)', 'part_no': 'Mã LK:', 'part_name': 'Tên LK:', 'qty': 'SL:', 'color': 'Màu:',
             'est_time': 'TG dự kiến: ', 'hrs': ' Giờ ', 'done_time': 'Thời gian HT: ', 'alert_del': 'Xác nhận xóa dữ liệu này?',
             'comp_lbl': 'Cấu kiện', 'full_line_status': '⚡ Đang nạp hàng liên tục: ', 'none_loading': 'Chưa có',
-            'settings_title': '⚙️ Cài đặt tùy chỉnh đường đi & Thẻ', 'save_settings': 'Lưu & Áp dụng', 'reset_settings': 'Mặc định',
-            'card_width': 'Chiều rộng thẻ (px):', 'card_height': 'Chiều cao thẻ (px):', 'card_font': 'Kích thước chữ thẻ (px):'
+            'settings_title': '⚙️ Cài đặt tùy chỉnh đường đi & Thẻ', 'save_settings': 'Lưu & Đồng bộ', 'reset_settings': 'Mặc định',
+            'card_width': 'Chiều rộng thẻ tối thiểu (px):', 'card_height': 'Chiều cao thẻ (px):', 'card_font': 'Kích thước chữ thẻ (px):',
+            'track_path_lbl': 'Tọa độ Path SVG (d):', 'visual_editor_lbl': '🎯 Khu vực kéo thả điểm mốc'
         }
     };
     let currentLang = localStorage.getItem('appLang') || 'zh';
@@ -117,6 +122,8 @@ I18N_SCRIPT = """
         });
         const langBtn = document.getElementById('langBtn');
         if(langBtn) langBtn.innerHTML = t('lang_btn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        if(settingsBtn) settingsBtn.innerHTML = '⚙️ ' + (currentLang === 'zh' ? '設置' : 'Cài đặt');
     }
     function renderField(val) {
         if (typeof val === 'string' && val.startsWith('data:image')) {
@@ -128,445 +135,395 @@ I18N_SCRIPT = """
 </script>
 """
 
-# ==========================================
-# 3. HTML 樣板生成 (使用字串替換避免 f-string 解析問題)
-# ==========================================
 def create_templates():
     if not os.path.exists('templates'):
         os.makedirs('templates')
 
-    html_files = {}
+    html_files = {
+        'simulator.html': f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>粉體塗裝流水線模擬器</title>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+            <style>
+                body {{ font-family: '微軟正黑體', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }}
+                .dashboard {{ background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
+                .speed-ctrl button {{ font-size: 18px; padding: 5px 15px; margin: 0 10px; cursor: pointer; }}
+                .status-banner {{ background: #27ae60; color: white; padding: 10px; border-radius: 6px; font-weight: bold; margin-top: 10px; display: flex; align-items: center; justify-content: space-between; }}
+                
+                .factory-map {{ 
+                    position: relative; width: 100%; max-width: 768px; 
+                    aspect-ratio: 768 / 1024;
+                    background: url('/14436.png') no-repeat center center;
+                    background-size: cover;
+                    border-radius: 10px; border: 2px solid #ccc; margin: 0 auto;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    overflow: hidden;
+                }}
+                .factory-map svg {{ position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }}
+                
+                .chain-track {{
+                    stroke-dasharray: 10, 8;
+                    animation: moveChain 1.5s linear infinite;
+                    opacity: 0.85;
+                }}
+                @keyframes moveChain {{
+                    from {{ stroke-dashoffset: 18; }}
+                    to {{ stroke-dashoffset: 0; }}
+                }}
 
-    # --- 模擬器主畫面 (掛載 React+D3 與 Web Worker) ---
-    sim_html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>粉體塗裝流水線模擬器</title>
-        <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-        <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-        <script src="https://d3js.org/d3.v7.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
-        
-        <style>
-            body { font-family: '微軟正黑體', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-            .dashboard { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-            .speed-ctrl button { font-size: 18px; padding: 5px 15px; margin: 0 10px; cursor: pointer; }
-            .status-banner { background: #27ae60; color: white; padding: 10px; border-radius: 6px; font-weight: bold; margin-top: 10px; display: flex; align-items: center; justify-content: space-between; }
+                .mini-card {{ 
+                    position: absolute; width: auto; min-width: var(--card-min-w, 50px); height: var(--card-h, 26px); border-radius: 4px; 
+                    border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.5); transform: translate(-50%, -50%); cursor: pointer; 
+                    display: flex; align-items: center; justify-content: center; font-size: var(--card-font-sz, 12px); 
+                    color: white; text-shadow: 1px 1px 2px black; font-weight: bold; 
+                    transition: all 0.3s; z-index: 10; padding: 0 5px; white-space: nowrap;
+                }}
+                .mini-card .details {{ display: none; }}
+                
+                #overlay {{ display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9990; }}
+                .mini-card.expanded {{
+                    position: fixed !important; top: 50% !important; left: 50% !important;
+                    transform: translate(-50%, -50%) !important;
+                    width: 85vw; max-width: 350px; height: auto; border-radius: 12px; padding: 20px;
+                    z-index: 9999; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+                    cursor: default; display: flex; flex-direction: column; white-space: normal; background-color: #34495e !important;
+                }}
+                .mini-card.expanded .short-id {{ display: none; }}
+                .mini-card.expanded .details {{ display: block; font-size: 16px; line-height: 1.8; width: 100%; position: relative; color: white; }}
+                
+                .close-btn {{ 
+                    position: absolute; top: -10px; right: -10px; font-size: 24px; 
+                    cursor: pointer; font-weight: bold; background: rgba(0,0,0,0.7);
+                    border-radius: 50%; width: 32px; height: 32px; text-align: center; line-height: 28px; border: 2px solid white; color: white;
+                }}
+
+                /* Settings Modal */
+                #settingsModal {{ display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; }}
+                .settings-content {{ background: white; width: 95%; max-width: 700px; padding: 25px; border-radius: 10px; max-height: 90vh; overflow-y: auto; }}
+                .settings-content label {{ display: block; margin-top: 10px; font-weight: bold; font-size: 14px; }}
+                .settings-content input, .settings-content textarea {{ width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; }}
+                .settings-content textarea {{ height: 100px; }}
+                .node-handle-container {{ position: relative; width: 100%; height: 350px; background: #222; border-radius: 8px; margin-top: 10px; overflow: hidden; border: 2px solid #e74c3c; }}
+                .node-handle {{ position: absolute; width: 16px; height: 16px; background: #f1c40f; border: 2px solid #fff; border-radius: 50%; transform: translate(-50%, -50%); cursor: grab; z-index: 5; }}
+                .node-handle:active {{ cursor: grabbing; background: #e74c3c; }}
+                .settings-actions {{ margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; }}
+                .settings-actions button {{ padding: 10px 20px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; }}
+            </style>
+            {I18N_SCRIPT}
+        </head>
+        <body onclick="closeAllCards()">
+            <div id="overlay"></div>
             
-            .factory-map { 
-                position: relative; width: 100%; max-width: 768px; 
-                aspect-ratio: 768 / 1024;
-                background: url('/14436.png') no-repeat center center;
-                background-size: cover;
-                border-radius: 10px; border: 2px solid #ccc; margin: 0 auto;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-                overflow: hidden;
-            }
-            .factory-map svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: auto; }
-            
-            .chain-track {
-                stroke-dasharray: 10, 8;
-                animation: moveChain 1.5s linear infinite;
-                opacity: 0.85;
-            }
-            @keyframes moveChain { from { stroke-dashoffset: 18; } to { stroke-dashoffset: 0; } }
+            <div id="settingsModal" onclick="event.stopPropagation()">
+                <div class="settings-content">
+                    <h2 data-i18n="settings_title">⚙️ 軌道與卡片客製化設定</h2>
+                    <label data-i18n="card_width">卡片最小寬度 (px):</label>
+                    <input type="number" id="setCardMinW" value="50">
+                    <label data-i18n="card_height">卡片高度 (px):</label>
+                    <input type="number" id="setCardH" value="26">
+                    <label data-i18n="card_font">卡片字體大小 (px):</label>
+                    <input type="number" id="setCardFont" value="12">
+                    
+                    <label data-i18n="track_path_lbl">SVG 軌道 Path 座標 (d):</label>
+                    <textarea id="setTrackPath"></textarea>
 
-            .mini-card { 
-                position: absolute; 
-                width: var(--card-w, 50px); 
-                height: var(--card-h, 26px); 
-                border-radius: 4px; 
-                border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
-                transform: translate(-50%, -50%); cursor: pointer; 
-                display: flex; align-items: center; justify-content: center; 
-                font-size: var(--card-font-sz, 12px); 
-                color: white; text-shadow: 1px 1px 2px black; font-weight: bold; 
-                z-index: 10; padding: 0 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-                will-change: left, top; /* 提升動畫效能 */
-            }
-            .mini-card .details { display: none; }
-            
-            #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9990; }
-            .mini-card.expanded {
-                position: fixed !important; top: 50% !important; left: 50% !important;
-                transform: translate(-50%, -50%) !important;
-                width: 85vw; max-width: 350px; height: auto; border-radius: 12px; padding: 20px;
-                z-index: 9999; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-                cursor: default; display: flex; flex-direction: column; white-space: normal; background-color: #34495e !important;
-            }
-            .mini-card.expanded .short-id { display: none; }
-            .mini-card.expanded .details { display: block; font-size: 16px; line-height: 1.8; width: 100%; position: relative; color: white; }
-            
-            .close-btn { 
-                position: absolute; top: -10px; right: -10px; font-size: 24px; 
-                cursor: pointer; font-weight: bold; background: rgba(0,0,0,0.7);
-                border-radius: 50%; width: 32px; height: 32px; text-align: center; line-height: 28px; border: 2px solid white; color: white;
-            }
-
-            /* Settings Modal */
-            #settingsModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; }
-            .settings-content { background: white; width: 90%; max-width: 600px; padding: 25px; border-radius: 10px; max-height: 90vh; overflow-y: auto; }
-            
-            .d3-node { cursor: grab; }
-            .d3-node:active { cursor: grabbing; }
-        </style>
-        __I18N_SCRIPT__
-    </head>
-    <body onclick="closeAllCards()">
-        <div id="overlay"></div>
-        
-        <div id="settingsModal" onclick="event.stopPropagation()">
-            <div class="settings-content" id="react-settings-root">
-                </div>
-        </div>
-
-        <div class="dashboard">
-            <h2 data-i18n="sim_title">🏭 粉體塗裝流水線模擬器</h2>
-            <div class="speed-ctrl">
-                <span data-i18n="speed">流水線轉速: </span><span id="current-speed" style="font-weight:bold; color:red; font-size:20px;">1100</span>
-                <button onclick="changeSpeed(-100); event.stopPropagation();">-100</button>
-                <button onclick="changeSpeed(100); event.stopPropagation();">+100</button>
-                <br><small><span data-i18n="time_lbl">跑完全程所需時間: </span><span id="total-time" style="font-weight:bold;"></span><span data-i18n="mins"> 分鐘</span></small>
-            </div>
-            <div class="status-banner" id="active-banner">
-                <span><span data-i18n="full_line_status">⚡ 滿線模式持續上料中: </span><span id="active-card-name" style="text-decoration:underline;">暫無</span></span>
-            </div>
-        </div>
-        
-        <div class="factory-map" id="map">
-            <svg viewBox="0 0 1000 1333" preserveAspectRatio="none" id="main-svg">
-                <path id="track" d="" fill="none" stroke="#e74c3c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" class="chain-track"/>
-            </svg>
-            <div id="cards-container"></div>
-        </div>
-
-        <script type="text/babel">
-            const defaultPathD = "M 461 1180 L 461 280 L 91 280 L 91 98 L 931 98 L 931 185 L 580 186 L 580 271 L 930 271 L 930 352 L 580 352 L 580 432 L 930 432 L 930 510 L 580 510 L 580 470 L 930 1180 L 461 1180 Z";
-            
-            function SettingsEditor() {
-                const [cardW, setCardW] = React.useState(localStorage.getItem('cardW') || '60');
-                const [cardH, setCardH] = React.useState(localStorage.getItem('cardH') || '30');
-                const [cardFont, setCardFont] = React.useState(localStorage.getItem('cardFont') || '14');
-                const [pathStr, setPathStr] = React.useState(localStorage.getItem('trackPathD') || defaultPathD);
-                const [isEditingPath, setIsEditingPath] = React.useState(false);
-
-                // 解析 SVG Path
-                const parsePath = (d) => {
-                    const regex = /([MLZ])\s*(\d+)?\s*(\d+)?/g;
-                    let match;
-                    let pts = [];
-                    let id = 0;
-                    while ((match = regex.exec(d)) !== null) {
-                        pts.push({
-                            id: id++,
-                            type: match[1],
-                            x: match[2] ? parseFloat(match[2]) : null,
-                            y: match[3] ? parseFloat(match[3]) : null
-                        });
-                    }
-                    return pts;
-                };
-
-                const buildPath = (pts) => {
-                    return pts.map(p => p.type === 'Z' ? 'Z' : `${p.type} ${p.x} ${p.y}`).join(' ');
-                };
-
-                React.useEffect(() => {
-                    applyStyles(cardW, cardH, cardFont);
-                    document.getElementById('track').setAttribute('d', pathStr);
-                }, []);
-
-                React.useEffect(() => {
-                    const svg = d3.select("#main-svg");
-                    if (isEditingPath) {
-                        let points = parsePath(pathStr).filter(p => p.type !== 'Z');
-                        
-                        const drag = d3.drag()
-                            .on("drag", function(event, d) {
-                                d.x = event.x;
-                                d.y = event.y;
-                                d3.select(this).attr("cx", d.x).attr("cy", d.y);
-                                
-                                // 即時更新底層路徑
-                                const allPts = parsePath(pathStr);
-                                allPts[d.id].x = Math.round(d.x);
-                                allPts[d.id].y = Math.round(d.y);
-                                const newPath = buildPath(allPts);
-                                document.getElementById('track').setAttribute('d', newPath);
-                            })
-                            .on("end", function(event, d) {
-                                setPathStr(document.getElementById('track').getAttribute('d'));
-                            });
-
-                        const circles = svg.selectAll(".d3-node").data(points, d => d.id);
-                        
-                        circles.enter().append("circle")
-                            .attr("class", "d3-node")
-                            .attr("r", 12).attr("fill", "#3498db").attr("stroke", "#fff").attr("stroke-width", 2)
-                            .call(drag)
-                            .merge(circles)
-                            .attr("cx", d => d.x).attr("cy", d => d.y);
-                            
-                        circles.exit().remove();
-                    } else {
-                        svg.selectAll(".d3-node").remove();
-                    }
-                }, [isEditingPath, pathStr]);
-
-                const save = () => {
-                    localStorage.setItem('cardW', cardW);
-                    localStorage.setItem('cardH', cardH);
-                    localStorage.setItem('cardFont', cardFont);
-                    localStorage.setItem('trackPathD', pathStr);
-                    applyStyles(cardW, cardH, cardFont);
-                    setIsEditingPath(false);
-                    toggleSettings();
-                };
-
-                const reset = () => {
-                    setCardW('60'); setCardH('30'); setCardFont('14'); setPathStr(defaultPathD);
-                };
-
-                return (
-                    <div>
-                        <h2 data-i18n="settings_title">⚙️ 軌道與卡片客製化設定</h2>
-                        
-                        <div style={{display:'flex', gap:'10px', marginTop:'15px'}}>
-                            <div style={{flex:1}}>
-                                <label>卡片寬度 (px):</label>
-                                <input type="number" value={cardW} onChange={e=>setCardW(e.target.value)} style={{width:'100%', padding:'8px'}} />
-                            </div>
-                            <div style={{flex:1}}>
-                                <label>卡片高度 (px):</label>
-                                <input type="number" value={cardH} onChange={e=>setCardH(e.target.value)} style={{width:'100%', padding:'8px'}} />
-                            </div>
-                            <div style={{flex:1}}>
-                                <label>卡片字體大小 (px):</label>
-                                <input type="number" value={cardFont} onChange={e=>setCardFont(e.target.value)} style={{width:'100%', padding:'8px'}} />
-                            </div>
-                        </div>
-
-                        <div style={{marginTop: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px'}}>
-                            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                                <strong>SVG 軌道節點編輯器</strong>
-                                <button 
-                                    onClick={() => setIsEditingPath(!isEditingPath)}
-                                    style={{padding: '8px 15px', background: isEditingPath ? '#e74c3c' : '#3498db', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold'}}>
-                                    {isEditingPath ? "📍 關閉節點拖曳" : "📍 開啟節點拖曳"}
-                                </button>
-                            </div>
-                            {isEditingPath && <p style={{color: '#e67e22', fontSize:'13px', marginTop:'10px'}}>👉 提示: 請直接在畫面上的藍色圓點進行拖曳，放開後自動修正路徑。</p>}
-                            <textarea value={pathStr} readOnly style={{width: '100%', height: '80px', marginTop: '10px', fontSize: '11px', color:'#7f8c8d'}} />
-                        </div>
-                        
-                        <div style={{marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
-                            <button onClick={reset} style={{padding:'10px 20px', background:'#95a5a6', color:'white', border:'none', borderRadius:'5px', cursor:'pointer'}}>重設預設值</button>
-                            <button onClick={save} style={{padding:'10px 20px', background:'#27ae60', color:'white', border:'none', borderRadius:'5px', cursor:'pointer', fontWeight:'bold'}}>儲存並套用</button>
-                            <button onClick={toggleSettings} style={{padding:'10px 20px', background:'#c0392b', color:'white', border:'none', borderRadius:'5px', cursor:'pointer'}}>關閉</button>
-                        </div>
+                    <label data-i18n="visual_editor_lbl">🎯 互動式節點拉動微調區 (拖動黃色圓點可即時改變路徑)</label>
+                    <div class="node-handle-container" id="nodeContainer">
+                        <svg id="nodeSvg" viewBox="0 0 1000 1333" style="width:100%; height:100%; position:absolute; top:0; left:0; pointer-events:none;">
+                            <path id="previewPath" d="" fill="none" stroke="#f1c40f" stroke-width="4" stroke-dasharray="6,6"/>
+                        </svg>
                     </div>
-                );
-            }
+                    
+                    <div class="settings-actions">
+                        <button onclick="resetSettings()" style="background:#95a5a6; color:white;" data-i18n="reset_settings">重設預設值</button>
+                        <button onclick="saveSettings()" style="background:#27ae60; color:white;" data-i18n="save_settings">儲存並同步</button>
+                        <button onclick="toggleSettings()" style="background:#c0392b; color:white;" data-i18n="btn_close">關閉</button>
+                    </div>
+                </div>
+            </div>
 
-            const root = ReactDOM.createRoot(document.getElementById('react-settings-root'));
-            root.render(<SettingsEditor />);
-
-            function applyStyles(w, h, f) {
-                document.documentElement.style.setProperty('--card-w', w + 'px');
-                document.documentElement.style.setProperty('--card-h', h + 'px');
-                document.documentElement.style.setProperty('--card-font-sz', f + 'px');
-            }
-        </script>
-
-        <script>
-            const socket = io();
-            const track = document.getElementById('track');
-            const overlay = document.getElementById('overlay');
-            const mapContainer = document.getElementById('cards-container');
+            <div class="dashboard">
+                <h2 data-i18n="sim_title">🏭 粉體塗裝流水線模擬器</h2>
+                <div class="speed-ctrl">
+                    <span data-i18n="speed">流水線轉速: </span><span id="current-speed" style="font-weight:bold; color:red; font-size:20px;">1100</span>
+                    <button onclick="changeSpeed(-100); event.stopPropagation();">-100</button>
+                    <button onclick="changeSpeed(100); event.stopPropagation();">+100</button>
+                    <br><small><span data-i18n="time_lbl">跑完全程所需時間: </span><span id="total-time" style="font-weight:bold;"></span><span data-i18n="mins"> 分鐘</span></small>
+                </div>
+                <div class="status-banner" id="active-banner">
+                    <span><span data-i18n="full_line_status">⚡ 滿線模式持續上料中: </span><span id="active-card-name" style="text-decoration:underline;">暫無</span></span>
+                </div>
+            </div>
             
-            function toggleSettings() {
-                const modal = document.getElementById('settingsModal');
-                modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-            }
+            <div class="factory-map" id="map">
+                <svg viewBox="0 0 1000 1333" preserveAspectRatio="none">
+                    <path id="track" d="" fill="none" stroke="#e74c3c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" class="chain-track"/>
+                </svg>
+            </div>
 
-            let speedIndex = 11;
-            let activeCardId = null; 
-            let sys_state_cache = {cards:{}, active_card_id: null};
-            let trackLength = 0;
-            
-            socket.on('update_state', (state) => {
-                document.getElementById('current-speed').innerText = state.line_speed;
-                speedIndex = state.line_speed / 100;
-                document.getElementById('total-time').innerText = Math.round(1320 / speedIndex);
+            <script>
+                const socket = io();
+                const track = document.getElementById('track');
+                const overlay = document.getElementById('overlay');
                 
-                sys_state_cache = state;
-                updateActiveBanner();
-                syncDOMCards();
-                
-                // 通知 Web Worker 最新狀態
-                if (animWorker) {
-                    animWorker.postMessage({
-                        type: 'sync', 
-                        cards: state.cards, 
-                        speedIndex: speedIndex
-                    });
+                const defaultPathD = `
+                    M 461 1180
+                    L 461 280
+                    L 91 280
+                    L 91 98
+                    L 931 98
+                    L 931 185
+                    L 580 186
+                    L 580 271
+                    L 930 271
+                    L 930 352
+                    L 580 352
+                    L 580 432
+                    L 930 432
+                    L 930 510
+                    L 580 510
+                    L 580 470
+                    L 930 1180
+                    L 461 1180 Z
+                `.trim();
+
+                let currentPathCoords = [];
+
+                function parsePathToCoords(dStr) {{
+                    const coords = [];
+                    const regex = /[ML]\s*([0-9.]+)\s+([0-9.]+)/g;
+                    let match;
+                    while ((match = regex.exec(dStr)) !== null) {{
+                        coords.push({{ x: parseFloat(match[1]), y: parseFloat(match[2]) }});
+                    }}
+                    return coords;
+                }}
+
+                function coordsToPathD(coords) {{
+                    if (coords.length === 0) return '';
+                    let d = `M ${{coords[0].x}} ${{coords[0].y}} `;
+                    for (let i = 1; i < coords.length; i++) {{
+                        d += `L ${{coords[i].x}} ${{coords[i].y}} `;
+                    }}
+                    return d + 'Z';
+                }}
+
+                function loadSettings() {{
+                    const savedW = localStorage.getItem('cardMinW') || '50';
+                    const savedH = localStorage.getItem('cardH') || '26';
+                    const savedFont = localStorage.getItem('cardFont') || '12';
+
+                    document.documentElement.style.setProperty('--card-min-w', savedW + 'px');
+                    document.documentElement.style.setProperty('--card-h', savedH + 'px');
+                    document.documentElement.style.setProperty('--card-font-sz', savedFont + 'px');
+
+                    document.getElementById('setCardMinW').value = savedW;
+                    document.getElementById('setCardH').value = savedH;
+                    document.getElementById('setCardFont').value = savedFont;
                 }
-            });
 
-            function changeSpeed(val) { socket.emit('change_speed', val); }
-            
-            function toggleCard(id, event) { 
-                event.stopPropagation(); 
-                activeCardId = activeCardId === id ? null : id;
-                overlay.style.display = activeCardId ? 'block' : 'none';
-                syncDOMCards(); 
-            }
-            
-            function closeAllCards() { 
-                activeCardId = null; 
-                overlay.style.display = 'none';
-                syncDOMCards(); 
-            }
+                function initVisualEditor(dStr) {{
+                    currentPathCoords = parsePathToCoords(dStr);
+                    const container = document.getElementById('nodeContainer');
+                    container.querySelectorAll('.node-handle').forEach(el => el.remove());
 
-            function updateActiveBanner() {
-                const activeId = sys_state_cache.active_card_id;
-                const el = document.getElementById('active-card-name');
-                if (activeId && sys_state_cache.cards[activeId]) {
-                    const c = sys_state_cache.cards[activeId];
-                    let name = c.part_name && !c.part_name.startsWith('data:image') ? c.part_name : c.part_no;
-                    el.innerHTML = `${renderField(name)} (${c.color})`;
-                } else {
-                    el.innerHTML = t('none_loading');
-                }
-            }
+                    currentPathCoords.forEach((pt, index) => {{
+                        const handle = document.createElement('div');
+                        handle.className = 'node-handle';
+                        // 換算成 350px 高度容器的百分比座標
+                        handle.style.left = (pt.x / 1000 * 100) + '%';
+                        handle.style.top = (pt.y / 1333 * 100) + '%';
 
-            // --- 建立 Web Worker 動畫引擎 ---
-            const workerCode = `
-                let cards = {};
+                        let isDragging = false;
+                        handle.onmousedown = (e) => {{
+                            isDragging = true;
+                            e.stopPropagation();
+                        }};
+
+                        window.onmousemove = (e) => {{
+                            if (!isDragging) return;
+                            const rect = container.getBoundingClientRect();
+                            let nx = ((e.clientX - rect.left) / rect.width) * 1000;
+                            let ny = ((e.clientY - rect.top) / rect.height) * 1333;
+                            nx = Math.max(0, Math.min(1000, nx));
+                            ny = Math.max(0, Math.min(1333, ny));
+
+                            currentPathCoords[index] = {{ x: Math.round(nx), y: Math.round(ny) }};
+                            handle.style.left = (nx / 1000 * 100) + '%';
+                            handle.style.top = (ny / 1333 * 100) + '%';
+
+                            const newD = coordsToPathD(currentPathCoords);
+                            document.getElementById('setTrackPath').value = newD;
+                            document.getElementById('previewPath').setAttribute('d', newD);
+                        }};
+
+                        window.onmouseup = () => {{ isDragging = false; }};
+                        container.appendChild(handle);
+                    }});
+                    document.getElementById('previewPath').setAttribute('d', dStr);
+                }}
+
+                function toggleSettings() {{
+                    const modal = document.getElementById('settingsModal');
+                    if (modal.style.display === 'flex') {{
+                        modal.style.display = 'none';
+                    }} else {{
+                        modal.style.display = 'flex';
+                        initVisualEditor(document.getElementById('setTrackPath').value);
+                    }}
+                }}
+
+                function saveSettings() {{
+                    const w = document.getElementById('setCardMinW').value;
+                    const h = document.getElementById('setCardH').value;
+                    const f = document.getElementById('setCardFont').value;
+                    const p = document.getElementById('setTrackPath').value;
+
+                    localStorage.setItem('cardMinW', w);
+                    localStorage.setItem('cardH', h);
+                    localStorage.setItem('cardFont', f);
+                    localStorage.setItem('trackPathD', p);
+
+                    track.setAttribute('d', p);
+                    socket.emit('update_track_path', p);
+                    loadSettings();
+                    toggleSettings();
+                }}
+
+                function resetSettings() {{
+                    localStorage.removeItem('cardMinW');
+                    localStorage.removeItem('cardH');
+                    localStorage.removeItem('cardFont');
+                    document.getElementById('setTrackPath').value = defaultPathD;
+                    loadSettings();
+                    initVisualEditor(defaultPathD);
+                }}
+
+                let trackLength = 0;
                 let speedIndex = 11;
+                let activeCardId = null; 
+                let sys_state_cache = {{cards:{{}}, active_card_id: null, track_path: defaultPathD}};
                 
-                self.onmessage = function(e) {
-                    if(e.data.type === 'sync') {
-                        cards = e.data.cards;
-                        speedIndex = e.data.speedIndex;
-                    }
-                };
+                socket.on('update_state', (state) => {{
+                    document.getElementById('current-speed').innerText = state.line_speed;
+                    speedIndex = state.line_speed / 100;
+                    document.getElementById('total-time').innerText = Math.round(1320 / speedIndex);
+                    
+                    sys_state_cache = state;
+                    if (state.track_path) {{
+                        track.setAttribute('d', state.track_path);
+                        document.getElementById('setTrackPath').value = state.track_path;
+                    }}
+                    updateActiveBanner();
+                    renderLineCards(state.cards);
+                }});
 
-                // 60FPS 運算迴圈
-                setInterval(() => {
+                window.addEventListener('DOMContentLoaded', () => {{
+                    loadSettings();
+                    document.getElementById('setTrackPath').value = defaultPathD;
+                    track.setAttribute('d', defaultPathD);
+                }});
+
+                function changeSpeed(val) {{ socket.emit('change_speed', val); }}
+                
+                function toggleCard(id, event) {{ 
+                    event.stopPropagation(); 
+                    activeCardId = activeCardId === id ? null : id;
+                    overlay.style.display = activeCardId ? 'block' : 'none';
+                    renderLineCards(sys_state_cache.cards); 
+                }}
+                
+                function closeAllCards() {{ 
+                    activeCardId = null; 
+                    overlay.style.display = 'none';
+                    renderLineCards(sys_state_cache.cards); 
+                }}
+
+                function updateActiveBanner() {{
+                    const activeId = sys_state_cache.active_card_id;
+                    const el = document.getElementById('active-card-name');
+                    if (activeId && sys_state_cache.cards[activeId]) {{
+                        const c = sys_state_cache.cards[activeId];
+                        let name = c.part_name && !c.part_name.startsWith('data:image') ? c.part_name : c.part_no;
+                        el.innerHTML = `${{renderField(name)}} (${{c.color}})`;
+                    }} else {{
+                        el.innerHTML = t('none_loading');
+                    }}
+                }}
+
+                function renderDynamic() {{ 
+                    updateActiveBanner();
+                    renderLineCards(sys_state_cache.cards); 
+                }}
+
+                function renderLineCards(cards) {{
+                    trackLength = track.getTotalLength();
+                    const map = document.getElementById('map');
+                    document.querySelectorAll('.mini-card').forEach(e => e.remove());
+                    
                     const now = Date.now();
                     const fullTimeMs = (1320 / speedIndex) * 60000;
-                    let updates = {};
-                    let needAutoUnload = [];
-                    
-                    for(let id in cards) {
-                        let c = cards[id];
-                        if(c.status === 'on_line') {
-                            let progress = (now - c.line_start_time) / fullTimeMs;
-                            if (progress >= 1) {
+
+                    Object.values(cards).forEach(card => {{
+                        if(card.status === 'on_line') {{
+                            const elapsed = now - card.line_start_time;
+                            let progress = elapsed / fullTimeMs;
+                            
+                            if (progress >= 1) {{
                                 progress = 1;
-                                needAutoUnload.push(id);
-                            }
-                            updates[id] = progress;
-                        }
-                    }
-                    self.postMessage({ type: 'tick', updates: updates, needAutoUnload: needAutoUnload });
-                }, 16); // ~60fps
-            `;
-            
-            const blob = new Blob([workerCode], {type: 'application/javascript'});
-            const animWorker = new Worker(URL.createObjectURL(blob));
-            
-            animWorker.onmessage = function(e) {
-                if (e.data.type === 'tick') {
-                    // 主執行緒只負責透過 D3/DOM API 抓取路徑點並賦予座標 (Worker 無法存取 DOM)
-                    trackLength = track.getTotalLength();
-                    const updates = e.data.updates;
-                    
-                    for (let id in updates) {
-                        const progress = updates[id];
-                        const point = track.getPointAtLength(progress * trackLength);
-                        const cardEl = document.getElementById('card-' + id);
-                        
-                        if (cardEl && activeCardId !== id) {
-                            const xPercent = (point.x / 1000) * 100;
-                            const yPercent = (point.y / 1333) * 100;
-                            cardEl.style.left = xPercent + '%';
-                            cardEl.style.top = yPercent + '%';
-                        }
-                    }
+                                socket.emit('auto_move_to_unload', card.id); 
+                            }}
 
-                    // 處理跑完自動下料
-                    e.data.needAutoUnload.forEach(id => {
-                        socket.emit('auto_move_to_unload', id);
-                    });
-                }
-            };
-
-            // 建立與移除 DOM 元素 (避免每幀重新建立)
-            function syncDOMCards() {
-                const currentIds = new Set(Object.values(sys_state_cache.cards).filter(c => c.status === 'on_line').map(c => c.id));
-                
-                // 移除不在線上的卡片
-                document.querySelectorAll('.mini-card').forEach(el => {
-                    const id = el.id.replace('card-', '');
-                    if (!currentIds.has(id)) el.remove();
-                });
-
-                // 新增或更新卡片
-                Object.values(sys_state_cache.cards).forEach(card => {
-                    if (card.status === 'on_line') {
-                        let div = document.getElementById('card-' + card.id);
-                        if (!div) {
-                            div = document.createElement('div');
-                            div.id = 'card-' + card.id;
+                            const point = track.getPointAtLength(progress * trackLength);
+                            const div = document.createElement('div');
                             div.className = 'mini-card';
+                            
+                            if (activeCardId === card.id) {{
+                                div.classList.add('expanded');
+                                div.style.left = '50%';
+                                div.style.top = '50%';
+                            }} else {{
+                                const xPercent = (point.x / 1000) * 100;
+                                const yPercent = (point.y / 1333) * 100;
+                                div.style.left = xPercent + '%';
+                                div.style.top = yPercent + '%';
+                            }}
+                            
+                            div.style.backgroundColor = card.colorCode || '#333';
                             div.onclick = (e) => toggleCard(card.id, e);
-                            mapContainer.appendChild(div);
-                        }
+                            
+                            let shortLabel = t('comp_lbl');
+                            if (card.part_name && !card.part_name.startsWith('data:image') && card.part_name !== '未填寫') {{
+                                shortLabel = card.part_name;
+                            }} else if (card.part_no && !card.part_no.startsWith('data:image') && card.part_no !== '未填寫') {{
+                                shortLabel = card.part_no;
+                            }}
+                            
+                            div.innerHTML = `
+                                <span class="short-id">${{shortLabel}}</span>
+                                <div class="details">
+                                    <div class="close-btn" onclick="toggleCard('${{card.id}}', event)">×</div>
+                                    <b>${{t('part_no')}}</b> ${{renderField(card.part_no)}}<br>
+                                    <b>${{t('part_name')}}</b> ${{renderField(card.part_name)}}<br>
+                                    <b>機/櫃:</b> ${{renderField(card.model_no) || '未填寫'}}<br>
+                                    <b>${{t('qty')}}</b> ${{card.qty}}<br>
+                                    <b>${{t('color')}}</b> ${{card.color}}
+                                </div>
+                            `;
+                            map.appendChild(div);
+                        }}
+                    }});
+                }}
+                setInterval(() => {{ socket.emit('request_sync'); }}, 1000);
+            </script>
+        </body>
+        </html>
+        """,
 
-                        if (activeCardId === card.id) {
-                            div.classList.add('expanded');
-                            div.style.left = '50%';
-                            div.style.top = '50%';
-                        } else {
-                            div.classList.remove('expanded');
-                        }
-
-                        div.style.backgroundColor = card.colorCode || '#333';
-                        let shortLabel = t('comp_lbl');
-                        if (card.part_name && !card.part_name.startsWith('data:image') && card.part_name !== '未填寫') {
-                            shortLabel = card.part_name;
-                        } else if (card.part_no && !card.part_no.startsWith('data:image') && card.part_no !== '未填寫') {
-                            shortLabel = card.part_no;
-                        }
-                        
-                        div.innerHTML = `
-                            <span class="short-id">${shortLabel}</span>
-                            <div class="details">
-                                <div class="close-btn" onclick="toggleCard('${card.id}', event)">×</div>
-                                <b>${t('part_no')}</b> ${renderField(card.part_no)}<br>
-                                <b>${t('part_name')}</b> ${renderField(card.part_name)}<br>
-                                <b>機/櫃:</b> ${renderField(card.model_no) || '未填寫'}<br>
-                                <b>${t('qty')}</b> ${card.qty}<br>
-                                <b>${t('color')}</b> ${card.color}
-                            </div>
-                        `;
-                    }
-                });
-            }
-
-            setInterval(() => { socket.emit('request_sync'); }, 2000);
-        </script>
-    </body>
-    </html>
-    """
-
-    # --- 其他頁面保持簡潔替換 ---
-    wait_html = """
+        'waiting.html': f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -574,36 +531,58 @@ def create_templates():
             <title>現場待料區</title>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
             <style>
-                body { font-family: '微軟正黑體', sans-serif; background: #e9ecef; padding: 20px; margin: 0; padding-bottom: 150px;}
-                .form-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-                .input-group { display: flex; gap: 5px; margin: 5px 0; align-items: center; }
-                select, input, button { padding: 10px; width: 100%; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; }
-                .btn-scan { background: #6c757d; color: white; width: 80px; flex-shrink: 0; font-weight: bold; cursor: pointer; padding: 5px;}
-                .btn-add { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; margin-top:10px; }
-                .data-card { background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 10px solid #ccc; display: flex; justify-content: space-between; align-items: center;}
-                .btn-send { background: #007bff; color: white; width: auto; padding: 8px; font-weight:bold;}
-                .btn-del { background: #dc3545; color: white; width: auto; padding: 8px; font-weight:bold;}
-                .fixed-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 120px; background: #343a40; color: white; padding: 10px; overflow-y: auto; z-index: 50;}
+                body {{ font-family: '微軟正黑體', sans-serif; background: #e9ecef; padding: 20px; margin: 0; padding-bottom: 150px;}}
+                .form-card {{ background: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }}
+                .input-group {{ display: flex; gap: 5px; margin: 5px 0; align-items: center; }}
+                select, input, button {{ padding: 10px; width: 100%; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; }}
+                .btn-scan {{ background: #6c757d; color: white; width: 80px; flex-shrink: 0; font-weight: bold; cursor: pointer; padding: 5px;}}
+                .btn-add {{ background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; margin-top:10px; }}
+                .data-card {{ background: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; border-left: 10px solid #ccc; display: flex; justify-content: space-between; align-items: center;}}
+                .btn-send {{ background: #007bff; color: white; width: auto; padding: 8px; font-weight:bold;}}
+                .btn-del {{ background: #dc3545; color: white; width: auto; padding: 8px; font-weight:bold;}}
+                .fixed-bottom {{ position: fixed; bottom: 0; left: 0; right: 0; height: 120px; background: #343a40; color: white; padding: 10px; overflow-y: auto; z-index: 50;}}
                 
-                #scannerModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; flex-direction: column; align-items: center; justify-content: center; }
-                .video-container { position: relative; width: 90%; max-width: 500px; aspect-ratio: 4/3; overflow: hidden; border: 2px solid #fff; border-radius: 10px;}
-                video { width: 100%; height: 100%; object-fit: cover; }
-                .scan-box { position: absolute; top: 35%; left: 10%; width: 80%; height: 30%; border: 2px solid #00ff00; box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); pointer-events: none; }
-                .scan-controls { margin-top: 20px; display: flex; gap: 15px; }
-                .scan-controls button { width: auto; padding: 12px 25px; font-weight: bold; font-size: 16px; border: none;}
+                #scannerModal {{ display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999; flex-direction: column; align-items: center; justify-content: center; }}
+                .video-container {{ position: relative; width: 90%; max-width: 500px; aspect-ratio: 4/3; overflow: hidden; border: 2px solid #fff; border-radius: 10px;}}
+                video {{ width: 100%; height: 100%; object-fit: cover; }}
+                .scan-box {{ position: absolute; top: 35%; left: 10%; width: 80%; height: 30%; border: 2px solid #00ff00; box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); pointer-events: none; }}
+                .scan-controls {{ margin-top: 20px; display: flex; gap: 15px; }}
+                .scan-controls button {{ width: auto; padding: 12px 25px; font-weight: bold; font-size: 16px; border: none;}}
             </style>
-            __I18N_SCRIPT__
+            {I18N_SCRIPT}
         </head>
         <body>
             <h2 data-i18n="wait_title">📦 現場待料區</h2>
             <div class="form-card" id="inputForm">
                 <select id="colorSelect" onchange="previewColor()">
                     <option value="WE白色,#FFFFFF">WE白色</option>
+                    <option value="WES白砂,#F5F5F5">WES白砂</option>
                     <option value="BK黑平光,#333333">BK黑平光</option>
+                    <option value="EBK消光黑,#1A1A1A">EBK消光黑</option>
+                    <option value="BKH黑錘紋,#2C2C2C">BKH黑錘紋</option>
+                    <option value="BKS1黑砂,#111111">BKS1黑砂</option>
+                    <option value="BKS5黑砂,#222222">BKS5黑砂</option>
+                    <option value="BKSA黑砂閃銀,#3A3A3A">BKSA黑砂閃銀</option>
+                    <option value="BKSA1黑閃銀,#444444">BKSA1黑閃銀</option>
+                    <option value="PK粉紅色,#FFC0CB">PK粉紅色</option>
                     <option value="RD紅色,#FF0000">RD紅色</option>
+                    <option value="OE橘色,#FFA500">OE橘色</option>
+                    <option value="OE1橘色,#FF8C00">OE1橘色</option>
+                    <option value="OE2橘色,#FF7F50">OE2橘色</option>
+                    <option value="YWH黃錘紋,#DAA520">YWH黃錘紋</option>
+                    <option value="YW1黃亮光,#FFFF00">YW1黃亮光</option>
+                    <option value="GYW鵝黃色,#FFDF00">GYW鵝黃色</option>
                     <option value="GN綠色,#008000">GN綠色</option>
+                    <option value="FGN青綠色,#00FF7F">FGN青綠色</option>
                     <option value="BE藍色,#0000FF">BE藍色</option>
+                    <option value="BEG艷藍色,#1E90FF">BEG艷藍色</option>
+                    <option value="DBE深藍色,#00008B">DBE深藍色</option>
+                    <option value="PEL紫色,#800080">PEL紫色</option>
                     <option value="IG灰色,#808080">IG灰色</option>
+                    <option value="IGS灰砂紋,#A9A9A9">IGS灰砂紋</option>
+                    <option value="DGS藍砂紋,#536878">DGS藍砂紋</option>
+                    <option value="ATG深灰,#696969">ATG深灰</option>
+                    <option value="SAT2閃銀,#C0C0C0">SAT2閃銀</option>
                     <option value="GSAT黃金色,#FFD700">GSAT黃金色</option>
                 </select>
                 <div class="input-group" id="partNoGroup">
@@ -616,10 +595,12 @@ def create_templates():
                 </div>
                 <div class="input-group" id="modelNoGroup">
                     <input type="text" id="modelNo" placeholder="機種第幾櫃 (手動輸入 / Nhập model)">
+                    <button type="button" class="btn-scan" data-i18n="scan_btn" onclick="openScanner('modelNo')">📷 掃描</button>
                 </div>
                 <input type="number" id="qty" placeholder="數量 / Số lượng">
                 <button class="btn-add" data-i18n="add_btn" onclick="createCard()">➕ 新增待上線構件</button>
             </div>
+
             <hr>
             <h3 data-i18n="list_wait">待處理清單 (順序排列)</h3>
             <div id="waiting-list"></div>
@@ -628,19 +609,33 @@ def create_templates():
                 <div id="ali-list"></div>
             </div>
 
+            <div id="scannerModal">
+                <h3 id="scanTitle" data-i18n="ocr_title" style="color: white; margin-bottom:10px;">📸 拍照系統</h3>
+                <div class="video-container">
+                    <video id="videoElement" autoplay playsinline></video>
+                    <div class="scan-box"></div>
+                </div>
+                <p id="scanStatus" data-i18n="ocr_tip" style="color:#00ff00; margin-top:15px; font-weight:bold;">請將目標對準綠色框框內</p>
+                <div class="scan-controls">
+                    <button onclick="captureAndStore()" data-i18n="btn_pic" style="background:#28a745; color:white;">📸 拍照儲存</button>
+                    <button onclick="closeScanner()" data-i18n="btn_close" style="background:#dc3545; color:white;">關閉</button>
+                </div>
+                <canvas id="canvasElement" style="display:none;"></canvas>
+            </div>
+
             <script>
                 const socket = io();
-                let sys_state_cache = {cards:{}};
-                let scanData = { partNo: '', partName: '', modelNo: '' }; 
+                let sys_state_cache = {{cards:{{}}}};
+                let scanData = {{ partNo: '', partName: '', modelNo: '' }}; 
                 
-                function previewColor() {
+                function previewColor() {{
                     const val = document.getElementById('colorSelect').value.split(',');
                     document.getElementById('inputForm').style.backgroundColor = val[1];
-                }
+                }}
 
-                function createCard() {
+                function createCard() {{
                     const colorData = document.getElementById('colorSelect').value.split(',');
-                    const data = {
+                    const data = {{
                         id: Date.now().toString(),
                         color: colorData[0],
                         colorCode: colorData[1],
@@ -649,46 +644,155 @@ def create_templates():
                         model_no: scanData.modelNo || document.getElementById('modelNo').value || '', 
                         qty: document.getElementById('qty').value || 0,
                         status: 'waiting'
-                    };
+                    }};
                     socket.emit('add_card', data);
                     
+                    scanData = {{ partNo: '', partName: '', modelNo: '' }};
                     document.getElementById('partNo').value = '';
                     document.getElementById('partName').value = '';
+                    document.getElementById('modelNo').value = '';
                     document.getElementById('qty').value = '';
-                }
+                    if(document.getElementById('partNoPreview')) document.getElementById('partNoPreview').remove();
+                    if(document.getElementById('partNamePreview')) document.getElementById('partNamePreview').remove();
+                    if(document.getElementById('modelNoPreview')) document.getElementById('modelNoPreview').remove();
+                }}
 
-                function renderDynamic() {
+                function renderDynamic() {{
                     const waitList = document.getElementById('waiting-list');
                     const aliList = document.getElementById('ali-list');
                     waitList.innerHTML = ''; aliList.innerHTML = '';
 
-                    Object.values(sys_state_cache.cards).forEach(card => {
+                    Object.values(sys_state_cache.cards).forEach(card => {{
                         const div = document.createElement('div');
                         div.className = 'data-card';
                         div.style.borderColor = card.colorCode;
-                        let modelInfo = card.model_no ? ` [${renderField(card.model_no)}]` : '';
+                        
+                        let modelInfo = card.model_no ? ` [${{renderField(card.model_no)}}]` : '';
+                        
                         div.innerHTML = `
-                            <div><b>${renderField(card.part_no)}</b> (${renderField(card.part_name)})${modelInfo} - ${card.color} x ${card.qty}</div>
+                            <div><b>${{renderField(card.part_no)}}</b> (${{renderField(card.part_name)}})${{modelInfo}} - ${{card.color}} x ${{card.qty}}</div>
                             <div style="display:flex; gap:5px;">
-                                ${card.status === 'waiting' ? 
-                                    `<button class="btn-send" onclick="sendToAli('${card.id}')">${t('btn_send_ali')}</button>
-                                     <button class="btn-del" onclick="delCard('${card.id}')">${t('btn_del')}</button>` : ''}
+                                ${{card.status === 'waiting' ? 
+                                    `<button class="btn-send" onclick="sendToAli('${{card.id}}')">${{t('btn_send_ali')}}</button>
+                                     <button class="btn-del" onclick="delCard('${{card.id}}')">${{t('btn_del')}}</button>` 
+                                    : ''}}
                             </div>
                         `;
-                        if(card.status === 'waiting') { waitList.appendChild(div); }
-                        if(card.status === 'loading') { aliList.appendChild(div.cloneNode(true)); }
-                    });
-                }
+                        if(card.status === 'waiting') {{ waitList.appendChild(div); }}
+                        if(card.status === 'loading') {{ aliList.appendChild(div.cloneNode(true)); }}
+                    }});
+                }}
 
-                socket.on('update_state', (state) => { sys_state_cache = state; renderDynamic(); });
-                function sendToAli(id) { socket.emit('change_status', {id: id, status: 'loading'}); }
-                function delCard(id) { if(confirm(t('alert_del'))) socket.emit('delete_card', id); }
+                socket.on('update_state', (state) => {{
+                    sys_state_cache = state;
+                    renderDynamic();
+                }});
+
+                function sendToAli(id) {{ socket.emit('change_status', {{id: id, status: 'loading'}}); }}
+                function delCard(id) {{ if(confirm(t('alert_del'))) {{ socket.emit('delete_card', id); }} }}
+
+                let currentScanTarget = '';
+                let stream = null;
+                const video = document.getElementById('videoElement');
+                const canvas = document.getElementById('canvasElement');
+                const ctx = canvas.getContext('2d');
+
+                async function openScanner(target) {{
+                    currentScanTarget = target;
+                    document.getElementById('scannerModal').style.display = 'flex';
+                    document.getElementById('scanStatus').innerText = t('ocr_tip');
+                    
+                    try {{
+                        stream = await navigator.mediaDevices.getUserMedia({{
+                            video: {{ 
+                                facingMode: 'environment', 
+                                width: {{ ideal: 1280 }}, 
+                                height: {{ ideal: 720 }} 
+                            }}
+                        }});
+                        video.srcObject = stream;
+                    }} catch (err) {{
+                        document.getElementById('scanStatus').innerText = '無法存取相機 / Lỗi Camera';
+                    }}
+                }}
+
+                function closeScanner() {{
+                    document.getElementById('scannerModal').style.display = 'none';
+                    if(stream) {{ stream.getTracks().forEach(track => track.stop()); }}
+                }}
+
+                function captureAndStore() {{
+                    video.pause();
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    const vw = video.videoWidth;
+                    const vh = video.videoHeight;
+                    const cw = video.clientWidth;
+                    const ch = video.clientHeight;
+
+                    const intrinsicAspect = vw / vh;
+                    const renderedAspect = cw / ch;
+
+                    let scale, offsetX = 0, offsetY = 0;
+                    if (intrinsicAspect > renderedAspect) {{
+                        scale = ch / vh;
+                        offsetX = (cw - (vw * scale)) / 2;
+                    }} else {{
+                        scale = cw / vw;
+                        offsetY = (ch - (vh * scale)) / 2;
+                    }}
+
+                    const boxLeft = cw * 0.10;
+                    const boxTop = ch * 0.35;
+                    const boxWidth = cw * 0.80;
+                    const boxHeight = ch * 0.30;
+
+                    const cropX = (boxLeft - offsetX) / scale;
+                    const cropY = (boxTop - offsetY) / scale;
+                    const cropW = boxWidth / scale;
+                    const cropH = boxHeight / scale;
+                    
+                    const cropCanvas = document.createElement('canvas');
+                    const maxW = 400;
+                    const scaleFactor = cropW > maxW ? maxW / cropW : 1;
+                    cropCanvas.width = cropW * scaleFactor;
+                    cropCanvas.height = cropH * scaleFactor;
+                    const cropCtx = cropCanvas.getContext('2d');
+                    cropCtx.scale(scaleFactor, scaleFactor);
+                    cropCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+                    const base64Img = cropCanvas.toDataURL('image/jpeg', 0.85);
+                    scanData[currentScanTarget] = base64Img;
+                    
+                    const inputEl = document.getElementById(currentScanTarget);
+                    inputEl.value = '[🖼️ 已儲存照片]';
+                    
+                    let previewEl = document.getElementById(currentScanTarget + 'Preview');
+                    if(!previewEl) {{
+                        previewEl = document.createElement('img');
+                        previewEl.id = currentScanTarget + 'Preview';
+                        previewEl.style = "max-height: 40px; margin-left: 5px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer;";
+                        previewEl.title = "點擊刪除照片";
+                        previewEl.onclick = function() {{
+                            scanData[currentScanTarget] = '';
+                            this.remove();
+                            inputEl.value = '';
+                        }};
+                        document.getElementById(currentScanTarget + 'Group').insertBefore(previewEl, inputEl.nextSibling);
+                    }}
+                    previewEl.src = base64Img;
+
+                    closeScanner();
+                    video.play();
+                }}
             </script>
         </body>
         </html>
-    """
+        """,
 
-    load_html = """
+        'loading.html': f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -696,62 +800,87 @@ def create_templates():
             <title>待上料_阿利</title>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
             <style>
-                body { font-family: '微軟正黑體', sans-serif; background: #e2e8f0; padding: 20px; padding-bottom: 150px;}
-                .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 10px solid #ccc;}
-                .grid-form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
-                select, button { padding: 8px; width: 100%; box-sizing: border-box; }
-                .btn-line { background: #ff9800; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight:bold;}
-                .fixed-bottom { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; z-index:50;}
+                body {{ font-family: '微軟正黑體', sans-serif; background: #e2e8f0; padding: 20px; padding-bottom: 150px;}}
+                .card {{ background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 10px solid #ccc;}}
+                .grid-form {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }}
+                select, button {{ padding: 8px; width: 100%; box-sizing: border-box; }}
+                .btn-line {{ background: #ff9800; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight:bold;}}
+                .fixed-bottom {{ position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; z-index:50;}}
+                .time-calc {{ font-size: 14px; color: #d35400; font-weight: bold; margin-top: 10px; }}
             </style>
-            __I18N_SCRIPT__
+            {I18N_SCRIPT}
         </head>
         <body>
             <h2 data-i18n="ali_title">🏗️ 待上料_阿利</h2>
             <div id="loading-list"></div>
             <div class="fixed-bottom" data-i18n="line_sync">⬇️ [流水線_上線] 同步傳送區 ⬇️</div>
+
             <script>
                 const socket = io();
                 let currentSpeed = 1100;
-                let sys_state_cache = {cards:{}};
+                let sys_state_cache = {{cards:{{}}}};
 
-                function renderDynamic() {
+                function renderDynamic() {{
                     const list = document.getElementById('loading-list');
                     list.innerHTML = '';
-                    Object.values(sys_state_cache.cards).forEach(card => {
-                        if(card.status === 'loading') {
+                    Object.values(sys_state_cache.cards).forEach(card => {{
+                        if(card.status === 'loading') {{
                             const div = document.createElement('div');
-                            div.className = 'card'; div.style.borderColor = card.colorCode;
+                            div.className = 'card';
+                            div.style.borderColor = card.colorCode;
                             div.innerHTML = `
-                                <strong>${t('part_no')} ${renderField(card.part_no)} | ${t('qty')} ${card.qty} | ${t('color')} ${card.color}</strong>
+                                <strong>${{t('part_no')}} ${{renderField(card.part_no)}} | ${{t('part_name')}} ${{renderField(card.part_name)}} | ${{card.model_no ? '機/櫃: ' + renderField(card.model_no) + ' | ' : ''}}${{t('qty')}} ${{card.qty}} | ${{t('color')}} ${{card.color}}</strong>
                                 <div class="grid-form">
-                                    <label>${t('lbl_hang')} <select id="hang_${card.id}"><option value="1">1</option><option value="2">2</option></select></label>
-                                    <label>${t('lbl_empty')} <select id="empty_${card.id}">${genOptions(10)}</select></label>
-                                    <label>${t('lbl_space')} <select id="interval_${card.id}">${genOptions(10)}</select></label>
-                                    <label>${t('lbl_hook')} <select id="hook_${card.id}">${genOptions(10)}</select></label>
+                                    <label>${{t('lbl_hang')}} <select id="hang_${{card.id}}" onchange="calcTime('${{card.id}}', ${{card.qty}})"><option value="1">1</option><option value="2">2</option></select></label>
+                                    <label>${{t('lbl_empty')}} <select id="empty_${{card.id}}" onchange="calcTime('${{card.id}}', ${{card.qty}})">${{genOptions(10)}}</select></label>
+                                    <label>${{t('lbl_space')}} <select id="interval_${{card.id}}" onchange="calcTime('${{card.id}}', ${{card.qty}})">${{genOptions(10)}}</select></label>
+                                    <label>${{t('lbl_hook')}} <select id="hook_${{card.id}}">${{genOptions(10)}}</select></label>
                                 </div>
-                                <button class="btn-line" onclick="sendToLine('${card.id}')">${t('btn_to_line')}</button>
+                                <div class="time-calc" id="time_${{card.id}}">${{t('calcing')}}</div>
+                                <button class="btn-line" onclick="sendToLine('${{card.id}}')">${{t('btn_to_line')}}</button>
                             `;
                             list.appendChild(div);
-                        }
-                    });
-                }
-                socket.on('update_state', (state) => { currentSpeed = state.line_speed; sys_state_cache = state; renderDynamic(); });
-                function genOptions(max) { let h = ''; for(let i=0; i<=max; i++) h += `<option value="${i}">${i}</option>`; return h; }
-                function sendToLine(id) {
-                    socket.emit('send_to_line', { 
-                        id: id, 
-                        hang: parseInt(document.getElementById('hang_'+id).value)||1, 
-                        empty: parseInt(document.getElementById('empty_'+id).value)||0, 
-                        interval: parseInt(document.getElementById('interval_'+id).value)||0, 
-                        hook: parseInt(document.getElementById('hook_'+id).value)||0 
-                    }); 
-                }
+                            setTimeout(() => calcTime(card.id, card.qty), 100);
+                        }}
+                    }});
+                }}
+
+                socket.on('update_state', (state) => {{
+                    currentSpeed = state.line_speed;
+                    sys_state_cache = state;
+                    renderDynamic();
+                }});
+
+                function genOptions(max) {{
+                    let html = '';
+                    for(let i=0; i<=max; i++) html += `<option value="${{i}}">${{i}}</option>`;
+                    return html;
+                }}
+
+                function calcTime(id, qty) {{
+                    const hang = parseFloat(document.getElementById('hang_' + id).value) || 0;
+                    const empty = parseFloat(document.getElementById('empty_' + id).value) || 0;
+                    const interval = parseFloat(document.getElementById('interval_' + id).value) || 0;
+                    const speedIndex = currentSpeed / 100;
+                    const totalMins = Math.round(((hang + empty + interval) * qty) / speedIndex);
+                    const h = Math.floor(totalMins / 60);
+                    const m = totalMins % 60;
+                    document.getElementById('time_' + id).innerText = `${{t('est_time')}} ${{h}} ${{t('hrs')}} ${{m}} ${{t('mins')}}`;
+                }}
+
+                function sendToLine(id) {{
+                    const hang = parseInt(document.getElementById('hang_' + id).value) || 1;
+                    const empty = parseInt(document.getElementById('empty_' + id).value) || 0;
+                    const interval = parseInt(document.getElementById('interval_' + id).value) || 0;
+                    const hook = parseInt(document.getElementById('hook_' + id).value) || 0;
+                    socket.emit('send_to_line', {{ id: id, hang: hang, empty: empty, interval: interval, hook: hook }}); 
+                }}
             </script>
         </body>
         </html>
-    """
+        """,
 
-    unload_html = """
+        'unloading.html': f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -759,54 +888,102 @@ def create_templates():
             <title>下料_完成</title>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
             <style>
-                body { font-family: '微軟正黑體', sans-serif; background: #fdf2e9; padding: 20px;}
-                .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 10px solid #ccc; display: flex; justify-content: space-between; align-items: center;}
-                .btn-done { background: #27ae60; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight:bold;}
-                .done-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; background: white;}
-                .done-table th, .done-table td { border: 1px solid #dee2e6; padding: 12px 8px; }
-                .done-table th { background: #34495e; color: white;}
+                body {{ font-family: '微軟正黑體', sans-serif; background: #fdf2e9; padding: 20px;}}
+                .card {{ background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 10px solid #ccc; display: flex; justify-content: space-between; align-items: center;}}
+                .btn-done {{ background: #27ae60; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight:bold;}}
+                .done-table-container {{ overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }}
+                .done-table {{ width: 100%; border-collapse: collapse; min-width: 600px; text-align: center; font-size: 14px;}}
+                .done-table th, .done-table td {{ border: 1px solid #dee2e6; padding: 12px 8px; }}
+                .done-table th {{ background: #34495e; color: white; font-weight: bold; white-space: nowrap;}}
+                .done-table tr:nth-child(even) {{ background: #f8f9fa; }}
+                .empty-record {{ text-align: center; color: #7f8c8d; padding: 20px; font-weight: bold; }}
             </style>
-            __I18N_SCRIPT__
+            {I18N_SCRIPT}
         </head>
         <body>
             <h2 data-i18n="unload_title">✅ 下料與完成紀錄區</h2>
-            <h3 data-i18n="unload_wait">待下料區</h3>
+            <h3 data-i18n="unload_wait">待下料區 (模擬器跑完自動傳送至此)</h3>
             <div id="unload-list"></div>
             <hr>
             <h3 data-i18n="done_list">歷史完成紀錄</h3>
-            <table class="done-table">
-                <thead><tr><th>料號</th><th>品名</th><th>數量</th><th>顏色</th><th>完成時間</th></tr></thead>
-                <tbody id="done-list"></tbody>
-            </table>
+            <div id="done-list" class="done-table-container"></div>
+
             <script>
                 const socket = io();
-                socket.on('update_state', (state) => {
-                    document.getElementById('unload-list').innerHTML = ''; 
-                    document.getElementById('done-list').innerHTML = '';
-                    Object.values(state.cards).forEach(card => {
-                        if(card.status === 'unloading') {
+                let sys_state_cache = {{cards:{{}}}};
+
+                function renderDynamic() {{
+                    const unloadList = document.getElementById('unload-list');
+                    const doneList = document.getElementById('done-list');
+                    unloadList.innerHTML = ''; 
+                    
+                    let tableHTML = `
+                    <table class="done-table">
+                        <thead>
+                            <tr>
+                                <th>1. 料號 (Mã LK)</th>
+                                <th>2. 品名 (Tên LK)</th>
+                                <th>3. 機種第幾櫃 (Model)</th>
+                                <th>數量 (SL)</th>
+                                <th>顏色 (Màu)</th>
+                                <th>完成時間 (Thời gian)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    `;
+                    let hasCompleted = false;
+
+                    Object.values(sys_state_cache.cards).forEach(card => {{
+                        if(card.status === 'unloading') {{
                             const div = document.createElement('div');
-                            div.className = 'card'; div.style.borderColor = card.colorCode;
-                            div.innerHTML = `<div><b>${renderField(card.part_no)}</b> - ${card.color} x ${card.qty}</div><button class="btn-done" onclick="finishCard('${card.id}')">${t('btn_done')}</button>`;
-                            document.getElementById('unload-list').appendChild(div);
-                        } else if(card.status === 'completed') {
-                            document.getElementById('done-list').innerHTML += `<tr><td>${renderField(card.part_no)}</td><td>${renderField(card.part_name)}</td><td>${card.qty}</td><td>${card.color}</td><td>${card.finish_time}</td></tr>`;
-                        }
-                    });
-                });
-                function finishCard(id) { socket.emit('finish_card', id); }
+                            div.className = 'card';
+                            div.style.borderColor = card.colorCode;
+                            div.innerHTML = `
+                                <div><b>${{renderField(card.part_no)}}</b> - ${{card.color}} x ${{card.qty}}</div>
+                                <button class="btn-done" onclick="finishCard('${{card.id}}')">${{t('btn_done')}}</button>
+                            `;
+                            unloadList.appendChild(div);
+                        }} else if(card.status === 'completed') {{
+                            hasCompleted = true;
+                            tableHTML += `
+                                <tr>
+                                    <td>${{renderField(card.part_no)}}</td>
+                                    <td>${{renderField(card.part_name)}}</td>
+                                    <td style="font-weight:bold; color:#d35400;">${{renderField(card.model_no) || '-'}}</td>
+                                    <td>${{card.qty}}</td>
+                                    <td>
+                                        <span style="display:inline-block;width:14px;height:14px;background:${{card.colorCode}};border:1px solid #333;border-radius:3px;vertical-align:middle;margin-right:5px;"></span>
+                                        ${{card.color}}
+                                    </td>
+                                    <td style="font-size:12px; color:#555;">${{card.finish_time}}</td>
+                                </tr>
+                            `;
+                        }}
+                    }});
+                    tableHTML += `</tbody></table>`;
+                    
+                    if(hasCompleted) {{
+                        doneList.innerHTML = tableHTML;
+                    }} else {{
+                        doneList.innerHTML = '<div class="empty-record">尚無完成紀錄 / Chưa có dữ liệu</div>';
+                    }}
+                }}
+
+                socket.on('update_state', (state) => {{
+                    sys_state_cache = state;
+                    renderDynamic();
+                }});
+
+                function finishCard(id) {{ socket.emit('finish_card', id); }}
             </script>
         </body>
         </html>
-    """
-
-    html_files['simulator.html'] = sim_html.replace('__I18N_SCRIPT__', I18N_SCRIPT)
-    html_files['waiting.html'] = wait_html.replace('__I18N_SCRIPT__', I18N_SCRIPT)
-    html_files['loading.html'] = load_html.replace('__I18N_SCRIPT__', I18N_SCRIPT)
-    html_files['unloading.html'] = unload_html.replace('__I18N_SCRIPT__', I18N_SCRIPT)
+        """
+    }
 
     for filename, content in html_files.items():
-        with open(os.path.join('templates', filename), 'w', encoding='utf-8') as f:
+        filepath = os.path.join('templates', filename)
+        with open(filepath, 'w', encoding='utf-8') as f:
             f.write(content)
 
 @app.route('/')
@@ -819,17 +996,11 @@ def load(): return render_template('loading.html')
 def unload(): return render_template('unloading.html')
 
 @app.route('/14436.png')
-def serve_image(): return send_from_directory('.', '14436.png')
+def serve_image():
+    return send_from_directory('.', '14436.png')
 
 def broadcast_state():
     socketio.emit('update_state', sys_state)
-
-def upsert_card_to_db(card_data):
-    if supabase_connected:
-        try:
-            supabase.table('cards').upsert(card_data).execute()
-        except Exception as e:
-            print(f"DB Error: {e}")
 
 @socketio.on('connect')
 def handle_connect():
@@ -841,26 +1012,47 @@ def handle_sync():
 
 @socketio.on('change_speed')
 def handle_speed(val):
-    sys_state['line_speed'] = max(900, min(1400, sys_state['line_speed'] + val))
-    if supabase_connected:
-        try:
-            supabase.table('sys_settings').upsert({'key': 'line_speed', 'value': str(sys_state['line_speed'])}).execute()
-        except: pass
+    sys_state['line_speed'] += val
+    if sys_state['line_speed'] < 900: sys_state['line_speed'] = 900
+    if sys_state['line_speed'] > 1400: sys_state['line_speed'] = 1400
+    broadcast_state()
+
+@socketio.on('update_track_path')
+def handle_update_track(path_d):
+    sys_state['track_path'] = path_d
+    try:
+        supabase.table('powder_settings').upsert({'key': 'track_path_d', 'value': path_d}).execute()
+    except Exception as e:
+        print("同步軌道至 Supabase 失敗:", e)
     broadcast_state()
 
 @socketio.on('add_card')
 def add_card(data):
     sys_state['cards'][data['id']] = data
-    upsert_card_to_db(data)
+    try:
+        supabase.table('powder_cards').upsert({
+            'id': data['id'],
+            'color': data['color'],
+            'color_code': data['colorCode'],
+            'part_no': data['part_no'],
+            'part_name': data['part_name'],
+            'model_no': data['model_no'],
+            'qty': int(data['qty'] or 0),
+            'status': data['status'],
+            'hang': 1, 'empty': 0, 'interval': 0, 'hook': 0
+        }).execute()
+    except Exception as e:
+        print("新增卡片至 Supabase 失敗:", e)
     broadcast_state()
 
 @socketio.on('delete_card')
 def delete_card(card_id):
     if card_id in sys_state['cards']:
         del sys_state['cards'][card_id]
-        if supabase_connected:
-            try: supabase.table('cards').delete().eq('id', card_id).execute()
-            except: pass
+        try:
+            supabase.table('powder_cards').delete().eq('id', card_id).execute()
+        except Exception as e:
+            print("刪除 Supabase 資料失敗:", e)
         broadcast_state()
 
 @socketio.on('change_status')
@@ -868,34 +1060,57 @@ def change_status(data):
     card_id = data['id']
     if card_id in sys_state['cards']:
         sys_state['cards'][card_id]['status'] = data['status']
-        upsert_card_to_db(sys_state['cards'][card_id])
+        try:
+            supabase.table('powder_cards').update({'status': data['status']}).eq('id', card_id).execute()
+        except Exception as e:
+            print("更新狀態至 Supabase 失敗:", e)
         broadcast_state()
 
 @socketio.on('send_to_line')
 def send_to_line(data):
     global current_active_card_template
-    card_id = data.get('id')
+    if isinstance(data, dict):
+        card_id = data.get('id')
+        hang = data.get('hang', 1)
+        empty = data.get('empty', 0)
+        interval = data.get('interval', 0)
+        hook = data.get('hook', 0)
+    else:
+        card_id = str(data)
+        hang, empty, interval, hook = 1, 0, 0, 0
+
     if card_id in sys_state['cards']:
         card = sys_state['cards'][card_id]
-        card.update({
-            'status': 'on_line',
-            'line_start_time': int(time.time() * 1000),
-            'hang': data.get('hang', 1),
-            'empty': data.get('empty', 0),
-            'interval': data.get('interval', 0),
-            'hook': data.get('hook', 0)
-        })
+        card['status'] = 'on_line'
+        card['line_start_time'] = int(time.time() * 1000)
+        card['hang'] = hang
+        card['empty'] = empty
+        card['interval'] = interval
+        card['hook'] = hook
+
         sys_state['active_card_id'] = card_id
-        upsert_card_to_db(card)
         with active_card_lock:
             current_active_card_template = card.copy()
+            
+        try:
+            supabase.table('powder_cards').update({
+                'status': 'on_line',
+                'hang': hang, 'empty': empty, 'interval': interval, 'hook': hook,
+                'line_start_time': card['line_start_time']
+            }).eq('id', card_id).execute()
+        except Exception as e:
+            print("上線資料同步 Supabase 失敗:", e)
+
         broadcast_state()
 
 @socketio.on('auto_move_to_unload')
 def auto_unload(card_id):
     if card_id in sys_state['cards'] and sys_state['cards'][card_id]['status'] == 'on_line':
         sys_state['cards'][card_id]['status'] = 'unloading'
-        upsert_card_to_db(sys_state['cards'][card_id])
+        try:
+            supabase.table('powder_cards').update({'status': 'unloading'}).eq('id', card_id).execute()
+        except Exception:
+            pass
         broadcast_state()
 
 @socketio.on('finish_card')
@@ -903,8 +1118,15 @@ def finish_card(card_id):
     if card_id in sys_state['cards']:
         sys_state['cards'][card_id]['status'] = 'completed'
         tw_time = time.gmtime(time.time() + 8 * 3600)
-        sys_state['cards'][card_id]['finish_time'] = time.strftime("%Y-%m-%d %H:%M:%S", tw_time)
-        upsert_card_to_db(sys_state['cards'][card_id])
+        ftime = time.strftime("%Y-%m-%d %H:%M:%S", tw_time)
+        sys_state['cards'][card_id]['finish_time'] = ftime
+        try:
+            supabase.table('powder_cards').update({
+                'status': 'completed',
+                'finish_time': ftime
+            }).eq('id', card_id).execute()
+        except Exception:
+            pass
         broadcast_state()
 
 def continuous_line_inserter():
@@ -915,8 +1137,13 @@ def continuous_line_inserter():
             with active_card_lock:
                 card_template = current_active_card_template.copy()
             
-            speed_index = max(1.0, sys_state.get('line_speed', 1100) / 100.0)
-            total_hooks = max(1, card_template.get('hang', 1) + card_template.get('empty', 0) + card_template.get('interval', 0))
+            speed = sys_state.get('line_speed', 1100)
+            speed_index = max(1.0, speed / 100.0)
+            
+            hang = card_template.get('hang', 1)
+            empty = card_template.get('empty', 0)
+            interval = card_template.get('interval', 0)
+            total_hooks = max(1, hang + empty + interval)
             
             base_line_time_min = 1320.0 / speed_index
             visual_gap_sec = base_line_time_min * 60.0 * 0.012
@@ -943,17 +1170,12 @@ def continuous_line_inserter():
                 clone_card['is_clone'] = True
                 
                 sys_state['cards'][clone_id] = clone_card
-                upsert_card_to_db(clone_card)
                 broadcast_state()
 
 inserter_thread = threading.Thread(target=continuous_line_inserter, daemon=True)
 inserter_thread.start()
 
 if __name__ == '__main__':
-    import shutil
-    if os.path.exists('templates'):
-        shutil.rmtree('templates')
-    
     create_templates()
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
