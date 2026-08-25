@@ -28,7 +28,7 @@
         }
 
         /* 強制大寫套用區 (確保單位 KG/UNIT 絕對大寫) */
-        input, select, button, th, td, .btn, .role-badge, .status-badge, .total-unit, .stat-unit {
+        input, select, button, th, td, .btn, .role-badge, .status-badge, .total-unit, .stat-unit, .fab-btn {
             text-transform: uppercase;
         }
 
@@ -72,7 +72,7 @@
             background-size: 100% 8px;
             animation: scanline 6s linear infinite;
             pointer-events: none;
-            z-index: 9999;
+            z-index: 9998;
         }
         @keyframes scanline {
             0% { background-position: 0 -100vh; }
@@ -212,6 +212,38 @@
         .btn-warning { background: rgba(255, 183, 0, 0.15); border-color: var(--hud-warning); color: var(--hud-warning); }
         .btn-warning:hover { background: var(--hud-warning); color: #000; box-shadow: 0 0 20px var(--hud-warning); }
 
+        /* 金黃色右下角懸浮按鈕 (FAB) */
+        .fab-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            background: rgba(255, 183, 0, 0.15);
+            border: 2px solid var(--hud-warning);
+            color: var(--hud-warning);
+            padding: 14px 24px;
+            font-weight: 900;
+            font-size: 15px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            box-shadow: 0 0 25px rgba(255, 183, 0, 0.4), inset 0 0 15px rgba(255, 183, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .fab-btn:hover {
+            background: var(--hud-warning);
+            color: #000;
+            box-shadow: 0 0 35px var(--hud-warning);
+            transform: translateY(-3px) scale(1.03);
+        }
+        .fab-btn:active {
+            transform: translateY(0) scale(0.97);
+        }
+
         .page { display: none; animation: hudBootUp 0.4s ease forwards; }
         .page-title { 
             font-size: 22px; font-weight: 800; margin-bottom: 30px; 
@@ -336,6 +368,11 @@
 </head>
 <body>
 
+<!-- 常態顯示右下角金黃色全息懸浮按鈕 -->
+<div class="fab-btn" onclick="goPage(5)" title="點擊直接進入歷史用量查詢">
+    <span>📜 歷史用量紀錄查詢</span>
+</div>
+
 <div class="container">
     <div class="header-bar">
         <div>伺服器狀態：<span class="status-badge" id="syncStatus">連線中...</span></div>
@@ -455,10 +492,36 @@
         <div class="data-container"><table class="data-table" id="tb_p4"><thead><tr><th>日期</th><th>粉號</th><th>領箱數</th><th>領散粉</th><th>回庫</th><th>實際用量</th><th class="admin-only">執行指令</th></tr></thead><tbody></tbody></table></div>
     </div>
 
+    <!-- 頁面 5：導入粉號下拉式選單並支援查詢全庫歷史紀錄 -->
     <div id="page5" class="page">
         <div class="page-title"><span>📅 用量歷史查詢</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
-        <div class="card-form"><div class="form-group"><label>選擇分析日期：</label><select id="p5_date" onchange="renderP5()"></select></div></div>
-        <div class="data-container"><table class="data-table" id="tb_p5"><thead><tr><th>粉號</th><th>代號</th><th>色系</th><th>領箱數</th><th>領散粉</th><th>回庫</th><th>總消耗量</th></tr></thead><tbody></tbody></table></div>
+        <div class="card-form">
+            <div class="form-group">
+                <label style="color: var(--hud-warning);">篩選目標粉號：</label>
+                <select id="p5_id" style="border-color: var(--hud-warning); color: var(--hud-warning);" onchange="renderP5()"></select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label>選擇分析日期：</label>
+                <select id="p5_date" onchange="renderP5()"></select>
+            </div>
+        </div>
+        <div class="data-container">
+            <table class="data-table" id="tb_p5">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>粉號</th>
+                        <th>代號</th>
+                        <th>色系</th>
+                        <th>領箱數</th>
+                        <th>領散粉</th>
+                        <th>回庫</th>
+                        <th>總消耗量</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
     
     <div id="page6" class="page">
@@ -667,7 +730,7 @@
         document.querySelectorAll('.page').forEach(el => el.style.display='none'); 
         document.getElementById('page'+p).style.display='block'; 
         if(p===4) { fetchCurrentStock(); calcP4Usage(); }
-        if(p===5) updateDateDropdown();
+        if(p===5) { updateDateDropdown(); renderP5(); }
         if(p===6) renderP6(); 
         if(p===8) calculateWaste();
         if(p===10) onConsumableChange('p10');
@@ -692,7 +755,6 @@
             refreshAllUI();
         }
     }, (error) => {
-        // 如果權限被拒，至少在 UI 上顯示斷線或錯誤，幫助除錯
         const statusEl = document.getElementById('syncStatus');
         statusEl.innerText = "[ 權限拒絕/斷線 ]";
         statusEl.style.color = "var(--hud-danger)";
@@ -706,10 +768,9 @@
         document.getElementById('alertOverlay').style.display = 'flex';
     }
 
-    // 套用或取消低水位警告暫停功能 (已修復並加上前端權限保護)
+    // 套用或取消低水位警告暫停功能
     function applyWarningAction(isApplied) {
         if(isApplied && currentAlertItemKey) {
-            // 🛠️ 確保只有管理員可以發送寫入請求，避免檢視者觸發 Firebase Permission Denied 報錯
             if(userRole !== 'admin') {
                 alert('🚫 權限不足：僅「管理員」可變更警報狀態！\n(請點擊右上角 [檢視者] 標籤切換權限以供測試)');
                 document.getElementById('alertOverlay').style.display = 'none';
@@ -721,7 +782,6 @@
                 document.getElementById('alertOverlay').style.display = 'none';
                 currentAlertItemKey = null;
             }).catch(err => {
-                // 如果 Firebase Rules 還是擋住，提示他們去設定 Rules
                 alert('❌ 狀態更新失敗: ' + err.message + '\n\n【提示】請前往 Firebase Console -> Realtime Database -> Rules，將 .read 與 .write 設為 true！');
             });
         } else {
@@ -773,8 +833,6 @@
             }
         }
 
-        // 自動清理：若庫存恢復正常，從 Firebase 刪除已申請標記
-        // (這裡也加入管理員判斷，避免檢視者自動觸發背景清理導致報錯)
         if (userRole === 'admin') {
             let updates = {};
             for(let k in appliedAlerts) {
@@ -787,7 +845,6 @@
             }
         }
         
-        // 渲染黃色首頁警告對話框
         const card = document.getElementById('lowStockCard');
         const container = document.getElementById('lowStockContainer');
 
@@ -820,6 +877,19 @@
             }
         });
 
+        // 頁面 5：粉號篩選下拉式選單更新
+        let p5OptHtml = '<option value="">🔍 所有粉號 (顯示全資料庫紀錄)</option>';
+        for (let id in dbData.powder) {
+            let code = dbData.powder[id].code ? ` [${dbData.powder[id].code}]` : '';
+            p5OptHtml += `<option value="${id}">${id}${code}</option>`;
+        }
+        const p5IdEl = document.getElementById('p5_id');
+        if(p5IdEl) {
+            let currentVal = p5IdEl.value;
+            p5IdEl.innerHTML = p5OptHtml;
+            p5IdEl.value = currentVal;
+        }
+
         let conOptHtml = '<option value="">請選擇耗材項目...</option>';
         for (let name in dbData.consumables) {
             conOptHtml += `<option value="${name}">${name}</option>`;
@@ -832,7 +902,9 @@
             }
         });
 
+        updateDateDropdown();
         renderTables();
+        if(document.getElementById('page5').style.display === 'block') renderP5();
         if(document.getElementById('page6').style.display === 'block') renderP6();
         checkLowStock();
     }
@@ -1259,31 +1331,52 @@
     }
 
     function updateDateDropdown() {
-        let dates = new Set(); Object.values(dbData.usage).forEach(r => dates.add(r.date));
-        let html = '<option value="">請指定時間軸參數...</option>';
+        let dates = new Set(); 
+        Object.values(dbData.usage || {}).forEach(r => { if(r.date) dates.add(r.date); });
+        let html = '<option value="">📅 所有日期 (不限時間區段)</option>';
         [...dates].sort().reverse().forEach(d => html += `<option value="${d}">${d}</option>`);
-        document.getElementById('p5_date').innerHTML = html;
+        const p5DateEl = document.getElementById('p5_date');
+        if(p5DateEl) {
+            let currentVal = p5DateEl.value;
+            p5DateEl.innerHTML = html;
+            p5DateEl.value = currentVal;
+        }
     }
 
+    // 頁面 5：支援指定粉號或日期，跨時空查詢資料庫所有相關紀錄
     function renderP5() {
-        const date = document.getElementById('p5_date').value; let html = '';
-        Object.values(dbData.usage).forEach(r => { 
-            if(r.date === date) {
-                let powderData = dbData.powder[r.id] || {}; let invData = dbData.inventory[r.id] || { box: 0, loose: 0 };
-                let currentStockTotal = (Number(invData.box) * (Number(powderData.weight) || 25)) + Number(invData.loose);
-                
-                let isLowStock = powderData.safety_enabled === "true" && currentStockTotal < (Number(powderData.safety_stock) || 0);
-                let isApplied = dbData.applied_alerts && dbData.applied_alerts['powder_' + r.id];
-                let rowClass = (isLowStock && !isApplied) ? 'class="row-low-stock"' : '';
-                
-                html += `<tr ${rowClass}>
-                    <td><strong style="color:var(--hud-cyan);">${r.id}</strong></td>
-                    <td>${powderData.code || '無資料'}</td><td>${powderData.color_system || '無資料'}</td>
-                    <td>${r.box}</td><td>${r.loose}</td><td>${r.return_qty || 0}</td>
-                    <td style="font-weight:900; color:var(--hud-warning);">${r.usage_qty || 0} KG</td>
-                </tr>`; 
-            }
+        const targetId = document.getElementById('p5_id') ? document.getElementById('p5_id').value : '';
+        const targetDate = document.getElementById('p5_date') ? document.getElementById('p5_date').value : '';
+        let html = '';
+
+        Object.values(dbData.usage || {}).reverse().forEach(r => {
+            if(targetId && r.id !== targetId) return;
+            if(targetDate && r.date !== targetDate) return;
+
+            let powderData = dbData.powder[r.id] || {}; 
+            let invData = dbData.inventory[r.id] || { box: 0, loose: 0 };
+            let currentStockTotal = (Number(invData.box) * (Number(powderData.weight) || 25)) + Number(invData.loose);
+            
+            let isLowStock = powderData.safety_enabled === "true" && currentStockTotal < (Number(powderData.safety_stock) || 0);
+            let isApplied = dbData.applied_alerts && dbData.applied_alerts['powder_' + r.id];
+            let rowClass = (isLowStock && !isApplied) ? 'class="row-low-stock"' : '';
+            
+            html += `<tr ${rowClass}>
+                <td>${r.date || '無日期'}</td>
+                <td><strong style="color:var(--hud-cyan);">${r.id}</strong></td>
+                <td>${powderData.code || '無資料'}</td>
+                <td>${powderData.color_system || '無資料'}</td>
+                <td>${r.box}</td>
+                <td>${r.loose}</td>
+                <td>${r.return_qty || 0}</td>
+                <td style="font-weight:900; color:var(--hud-warning);">${r.usage_qty || 0} KG</td>
+            </tr>`; 
         });
+
+        if(!html) {
+            html = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding: 20px;">⚠️ 查無符合條件之歷史用量紀錄</td></tr>';
+        }
+
         document.querySelector('#tb_p5 tbody').innerHTML = html;
     }
 
