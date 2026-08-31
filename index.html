@@ -212,36 +212,54 @@
         .btn-warning { background: rgba(255, 183, 0, 0.15); border-color: var(--hud-warning); color: var(--hud-warning); }
         .btn-warning:hover { background: var(--hud-warning); color: #000; box-shadow: 0 0 20px var(--hud-warning); }
 
-        /* 金黃色右下角懸浮按鈕 (FAB) */
+        /* 懸浮按鈕 (FAB) 共用與變數設計 */
         .fab-btn {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
             z-index: 9999;
-            background: rgba(255, 183, 0, 0.15);
-            border: 2px solid var(--hud-warning);
-            color: var(--hud-warning);
             padding: 14px 24px;
             font-weight: 900;
             font-size: 15px;
             letter-spacing: 2px;
             cursor: pointer;
             clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
-            box-shadow: 0 0 25px rgba(255, 183, 0, 0.4), inset 0 0 15px rgba(255, 183, 0, 0.2);
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .fab-btn:hover {
+        .fab-btn:active { transform: translateY(0) scale(0.97); }
+
+        /* 金黃色：歷史用量查詢 */
+        .fab-warning {
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255, 183, 0, 0.15);
+            border: 2px solid var(--hud-warning);
+            color: var(--hud-warning);
+            box-shadow: 0 0 25px rgba(255, 183, 0, 0.4), inset 0 0 15px rgba(255, 183, 0, 0.2);
+        }
+        .fab-warning:hover {
             background: var(--hud-warning);
             color: #000;
             box-shadow: 0 0 35px var(--hud-warning);
             transform: translateY(-3px) scale(1.03);
         }
-        .fab-btn:active {
-            transform: translateY(0) scale(0.97);
+
+        /* 霓虹藍：庫存總表分類 */
+        .fab-cyan {
+            bottom: 95px; /* 疊加在黃色按鈕上方 */
+            right: 30px;
+            background: rgba(0, 243, 255, 0.15);
+            border: 2px solid var(--hud-cyan);
+            color: var(--hud-cyan);
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.4), inset 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+        .fab-cyan:hover {
+            background: var(--hud-cyan);
+            color: #000;
+            box-shadow: 0 0 35px var(--hud-cyan);
+            transform: translateY(-3px) scale(1.03);
         }
 
         .page { display: none; animation: hudBootUp 0.4s ease forwards; }
@@ -368,8 +386,13 @@
 </head>
 <body>
 
+<!-- 新增：庫存總表懸浮按鈕 -->
+<div class="fab-btn fab-cyan" onclick="goPage(13)" title="點擊直接進入庫存總表">
+    <span>📦 庫存總表分類</span>
+</div>
+
 <!-- 常態顯示右下角金黃色全息懸浮按鈕 -->
-<div class="fab-btn" onclick="goPage(5)" title="點擊直接進入歷史用量查詢">
+<div class="fab-btn fab-warning" onclick="goPage(5)" title="點擊直接進入歷史用量查詢">
     <span>📜 歷史用量紀錄查詢</span>
 </div>
 
@@ -644,6 +667,30 @@
         </div>
     </div>
 
+    <!-- 新增 頁面 13：庫存總表 (分類呈現) -->
+    <div id="page13" class="page">
+        <div class="page-title">
+            <span>📦 庫存總表</span>
+            <button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button>
+        </div>
+        
+        <div class="section-divider" style="color: var(--hud-success); border-color: rgba(0, 255, 136, 0.3); text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);">🟢 目前尚有</div>
+        <div class="data-container">
+            <table class="data-table" id="tb_p13_available">
+                <thead><tr><th>粉號</th><th>代號</th><th>箱數</th><th>散粉</th><th>總重 (KG)</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="section-divider" style="color: var(--hud-danger); border-color: rgba(255, 0, 85, 0.3); text-shadow: 0 0 8px rgba(255, 0, 85, 0.5);">🔴 目前無粉</div>
+        <div class="data-container">
+            <table class="data-table" id="tb_p13_empty">
+                <thead><tr><th>粉號</th><th>代號</th><th>箱數</th><th>散粉</th><th>總重 (KG)</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 <!-- 低水位警告確認彈出視窗遮罩 -->
@@ -735,6 +782,7 @@
         if(p===8) calculateWaste();
         if(p===10) onConsumableChange('p10');
         if(p===11) onConsumableChange('p11');
+        if(p===13) renderP13(); // 新增頁面 13 觸發
     }
     function goHome() { 
         document.querySelectorAll('.page').forEach(el => el.style.display='none'); 
@@ -906,7 +954,45 @@
         renderTables();
         if(document.getElementById('page5').style.display === 'block') renderP5();
         if(document.getElementById('page6').style.display === 'block') renderP6();
+        if(document.getElementById('page13').style.display === 'block') renderP13();
         checkLowStock();
+    }
+
+    // 新增：庫存總表 (分類：目前尚有 / 目前無粉) 渲染引擎
+    function renderP13() {
+        let availableHtml = '';
+        let emptyHtml = '';
+        
+        for(let id in dbData.powder) {
+            let p = dbData.powder[id];
+            let inv = dbData.inventory[id] || { box: 0, loose: 0 };
+            let weight = Number(p.weight) || 25;
+            let total = (Number(inv.box) * weight) + Number(inv.loose);
+            
+            if (total > 0) {
+                availableHtml += `<tr>
+                    <td><strong style="color:var(--hud-cyan);">${id}</strong></td>
+                    <td>${p.code || '無資料'}</td>
+                    <td>${inv.box}</td>
+                    <td>${inv.loose}</td>
+                    <td style="font-weight:900; color:#fff;">${total} KG</td>
+                </tr>`;
+            } else {
+                emptyHtml += `<tr>
+                    <td><strong style="color:var(--hud-danger);">${id}</strong></td>
+                    <td>${p.code || '無資料'}</td>
+                    <td style="color:var(--hud-danger);">${inv.box}</td>
+                    <td style="color:var(--hud-danger);">${inv.loose}</td>
+                    <td style="font-weight:900; color:var(--hud-danger);">${total} KG</td>
+                </tr>`;
+            }
+        }
+        
+        if(!availableHtml) availableHtml = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">目前無尚存粉體</td></tr>';
+        if(!emptyHtml) emptyHtml = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">目前無短缺粉體</td></tr>';
+        
+        document.querySelector('#tb_p13_available tbody').innerHTML = availableHtml;
+        document.querySelector('#tb_p13_empty tbody').innerHTML = emptyHtml;
     }
 
     // 數據網格全面渲染引擎
