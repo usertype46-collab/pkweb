@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>烤漆部粉體與耗材管理系統 版本 5.5</title>
+    <!-- 引入 SheetJS 支援 XLSX 檔案匯出 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         /* ================= 未來星艦全息儀表板設計變數 ================= */
         :root {
@@ -515,7 +517,7 @@
         <div class="data-container"><table class="data-table" id="tb_p4"><thead><tr><th>日期</th><th>粉號</th><th>領箱數</th><th>領散粉</th><th>回庫</th><th>實際用量</th><th class="admin-only">執行指令</th></tr></thead><tbody></tbody></table></div>
     </div>
 
-    <!-- 頁面 5：導入粉號下拉式選單並支援查詢全庫歷史紀錄 -->
+    <!-- 頁面 5：導入粉號下拉式選單並支援查詢全庫歷史紀錄與 XLSX 匯出 -->
     <div id="page5" class="page">
         <div class="page-title"><span>📅 用量歷史查詢</span><button class="btn btn-secondary" style="width:auto; padding: 10px 20px;" onclick="goHome()">返回首頁</button></div>
         <div class="card-form">
@@ -523,10 +525,11 @@
                 <label style="color: var(--hud-warning);">篩選目標粉號：</label>
                 <select id="p5_id" style="border-color: var(--hud-warning); color: var(--hud-warning);" onchange="renderP5()"></select>
             </div>
-            <div class="form-group" style="margin-bottom:0;">
+            <div class="form-group" style="margin-bottom:20px;">
                 <label>選擇分析日期：</label>
                 <select id="p5_date" onchange="renderP5()"></select>
             </div>
+            <button class="btn btn-primary" onclick="exportP5XLSX()">📥 匯出歷史用量記錄 (.XLSX)</button>
         </div>
         <div class="data-container">
             <table class="data-table" id="tb_p5">
@@ -667,7 +670,7 @@
         </div>
     </div>
 
-    <!-- 新增 頁面 13：庫存總表 (分類呈現) -->
+    <!-- 頁面 13：庫存總表 (分類呈現) -->
     <div id="page13" class="page">
         <div class="page-title">
             <span>📦 庫存總表</span>
@@ -747,7 +750,7 @@
         applyPermissions();
     });
 
-    // 🛠️ 新增：權限切換功能 (方便您隨時在前端測試)
+    // 🛠️ 權限切換功能
     function toggleRole() {
         userRole = (userRole === 'admin') ? 'viewer' : 'admin';
         const roleDisplay = document.getElementById('roleDisplay');
@@ -782,7 +785,7 @@
         if(p===8) calculateWaste();
         if(p===10) onConsumableChange('p10');
         if(p===11) onConsumableChange('p11');
-        if(p===13) renderP13(); // 新增頁面 13 觸發
+        if(p===13) renderP13();
     }
     function goHome() { 
         document.querySelectorAll('.page').forEach(el => el.style.display='none'); 
@@ -793,7 +796,6 @@
     db.ref('/').on('value', (snapshot) => {
         if(snapshot.exists()) {
             dbData = snapshot.val();
-            // 防止全新無資料時節點遺失錯誤
             ['powder','inventory','purchase','usage','waste','consumables','consumables_inventory','consumables_purchase','consumables_usage','applied_alerts'].forEach(k => { 
                 if(!dbData[k]) dbData[k] = {}; 
             });
@@ -838,7 +840,7 @@
         }
     }
 
-    // 安全水位預警探針 (顯示於首頁黃色對話框)
+    // 安全水位預警探針
     function checkLowStock() {
         let alerts = [];
         let activeKeys = new Set();
@@ -958,7 +960,7 @@
         checkLowStock();
     }
 
-    // 新增：庫存總表 (分類：目前尚有 / 目前無粉) 渲染引擎
+    // 庫存總表渲染引擎
     function renderP13() {
         let availableHtml = '';
         let emptyHtml = '';
@@ -1429,7 +1431,7 @@
         }
     }
 
-    // 頁面 5：支援指定粉號或日期，跨時空查詢資料庫所有相關紀錄
+    // 頁面 5：支援指定粉號或日期查詢，並提供對應的 XLSX 匯出功能
     function renderP5() {
         const targetId = document.getElementById('p5_id') ? document.getElementById('p5_id').value : '';
         const targetDate = document.getElementById('p5_date') ? document.getElementById('p5_date').value : '';
@@ -1464,6 +1466,49 @@
         }
 
         document.querySelector('#tb_p5 tbody').innerHTML = html;
+    }
+
+    // 新增：歷史用量紀錄 XLSX 匯出函式
+    function exportP5XLSX() {
+        const targetId = document.getElementById('p5_id') ? document.getElementById('p5_id').value : '';
+        const targetDate = document.getElementById('p5_date') ? document.getElementById('p5_date').value : '';
+        
+        let rows = [];
+        // 表頭
+        rows.push(["日期", "粉號", "代號", "色系", "領箱數", "領散粉", "回庫", "總消耗量 (KG)"]);
+
+        Object.values(dbData.usage || {}).forEach(r => {
+            if(targetId && r.id !== targetId) return;
+            if(targetDate && r.date !== targetDate) return;
+
+            let powderData = dbData.powder[r.id] || {}; 
+            rows.push([
+                r.date || '',
+                r.id || '',
+                powderData.code || '',
+                powderData.color_system || '',
+                Number(r.box) || 0,
+                Number(r.loose) || 0,
+                Number(r.return_qty) || 0,
+                Number(r.usage_qty) || 0
+            ]);
+        });
+
+        if(rows.length <= 1) {
+            alert('⚠️ 目前沒有符合篩選條件的歷史用量紀錄可供匯出！');
+            return;
+        }
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "歷史用量紀錄");
+
+        let filename = "烤漆部_歷史用量紀錄";
+        if(targetId) filename += `_${targetId}`;
+        if(targetDate) filename += `_${targetDate}`;
+        filename += ".xlsx";
+
+        XLSX.writeFile(wb, filename);
     }
 
     function renderP6() {
